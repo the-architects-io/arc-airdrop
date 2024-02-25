@@ -1,5 +1,5 @@
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
 
 import { ClusterProvider } from "@/hooks/cluster";
 import { ContextProvider } from "@/providers/context-provider";
@@ -8,7 +8,18 @@ import classNames from "classnames";
 import Toaster from "@/features/toasts/toaster";
 import { Metadata } from "next";
 
-const inter = Inter({ subsets: ["latin"] });
+const font = IBM_Plex_Mono({
+  weight: "400",
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+const fontHeavy = IBM_Plex_Mono({
+  weight: "600",
+  variable: "--font-ibm-plex-mono-heavy",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const createPageMetadata = (): Metadata => ({
   title: "The Architects",
@@ -24,7 +35,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={classNames([inter.className, "relative"])}>
+      <body
+        className={classNames(
+          font.variable,
+          fontHeavy.variable,
+          "font-mono text-gray-400 bg-gray-100"
+        )}
+      >
         <ClusterProvider>
           <ContextProvider>
             {children}

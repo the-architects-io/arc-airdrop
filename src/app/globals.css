@@ -2,32 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+.wallet-adapter-button {
+  @apply lowercase font-mono shadow-sm text-white bg-cyan-400 hover:bg-cyan-600 focus:outline-none focus:ring-cyan-500 transition-all duration-200 hover:shadow-xl font-normal !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.wallet-adapter-modal-wrapper {
+  @apply bg-gray-100 !important;
 }
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.wallet-adapter-modal-title {
+  @apply text-gray-400 font-mono lowercase !important;
 }

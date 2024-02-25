@@ -1,7 +1,5 @@
 // https://codepen.io/MaxStalker/details/DJzybq
 
-import Image from "next/image";
-
 const Spinner = ({ height = 24, width = 24, color = "currentColor" }) => (
   <svg
     className="animate-spin"
