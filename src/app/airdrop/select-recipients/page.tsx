@@ -40,7 +40,7 @@ export default function SelectRecipientsPage() {
       const contentWrapperId = contentWrapperRef?.current?.id;
       if (!contentWrapperId) return;
       fadeIn(`#${contentWrapperId}`);
-    }, 1000);
+    }, 200);
   }, [contentWrapperRef, isLoading]);
 
   if (isLoading) {
