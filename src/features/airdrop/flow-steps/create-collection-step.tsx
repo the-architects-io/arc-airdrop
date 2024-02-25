@@ -58,6 +58,7 @@ export const CreateCollectionStep = () => {
                 min={0}
                 max={100}
                 placeholder="e.g. 5%"
+                description="this will be the royalty received by creator(s) on secondary sales"
                 onChange={(e) => {
                   formik.handleChange(e);
                   if (Number(e.target.value) > 100) {
