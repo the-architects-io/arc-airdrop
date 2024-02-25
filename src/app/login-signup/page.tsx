@@ -6,6 +6,7 @@ import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import Spinner from "@/features/UI/spinner";
+import { LoadingPanel } from "@/features/loading-panel";
 import {
   useAuthenticationStatus,
   useSignInEmailPassword,
@@ -80,13 +81,7 @@ export default function LoginSignupPage() {
   }, [isAuthenticated, router, wallet, isLoadingAuth]);
 
   if (isLoadingAuth || isLoading) {
-    return (
-      <ContentWrapper className="cursor-pointer">
-        <ContentWrapperYAxisCenteredContent>
-          <></>
-        </ContentWrapperYAxisCenteredContent>
-      </ContentWrapper>
-    );
+    return <LoadingPanel />;
   }
 
   return (

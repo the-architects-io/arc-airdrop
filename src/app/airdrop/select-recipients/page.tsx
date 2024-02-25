@@ -1,11 +1,10 @@
 "use client";
 import { fadeIn } from "@/animations";
-import { fadeInDuration, fadeOutDuration } from "@/constants/constants";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
+import { LoadingPanel } from "@/features/loading-panel";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { animate } from "motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -31,6 +30,10 @@ export default function SelectRecipientsPage() {
       setIsLoading(false);
     }, 500);
   }, [wallet, router, user]);
+
+  if (isLoading) {
+    return <LoadingPanel />;
+  }
 
   return (
     <ContentWrapper className="panel-fade-in-out opacity-0">

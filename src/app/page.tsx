@@ -15,18 +15,9 @@ export const airdropFlowSteps = {
 
 export default function Page() {
   const wallet = useWallet();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(airdropFlowSteps.Welcome);
   const router = useRouter();
   const user = useUserData();
-
-  useEffect(() => {
-    if (isLoading) {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-    }
-  }, [isLoading]);
 
   const handleGoToNextStep = async () => {
     switch (currentStep) {
