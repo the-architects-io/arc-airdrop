@@ -21,7 +21,7 @@ export const FormInputWithLabel = ({
   return (
     <label
       htmlFor={props.name}
-      className={classNames(["flex flex-col w-full", className])}
+      className={classNames(["flex flex-col w-full text-2xl", className])}
     >
       {label}
       <FormInput
@@ -39,7 +39,7 @@ export const FormInputWithLabel = ({
       />
       {children}
       {description && (
-        <p className="text-sm text-gray-400 my-4 italic">{description}</p>
+        <p className="text-sm text-gray-400 mt-2 italic">{description}</p>
       )}
     </label>
   );
