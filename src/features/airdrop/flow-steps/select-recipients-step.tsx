@@ -90,9 +90,7 @@ export const SelectRecipientsStep = () => {
 
   return (
     <>
-      <div className="text-3xl mt-16 mb-8 font-heavy">
-        choose your recipients
-      </div>
+      <div className="text-3xl mb-8 font-heavy">choose your recipients</div>
 
       <div className="mb-8 font-heavy flex items-center">
         <span className="text-red-400 text-3xl mr-3">{recipientCount} </span>

@@ -48,7 +48,7 @@ export default function CreateCollectionPage() {
 
   return (
     <ContentWrapper
-      className="panel-fade-in-out opacity-0"
+      className="panel-fade-in-out opacity-0 justify-start"
       ref={contentWrapperRef}
       id="create-collection-panel"
     >

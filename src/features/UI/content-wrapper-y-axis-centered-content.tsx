@@ -14,8 +14,10 @@ export const ContentWrapperYAxisCenteredContent = ({
   <div
     onClick={onClick}
     className={classNames([
-      "flex flex-col items-center h-app justify-center min-h-screen",
-      className,
+      "flex flex-col items-center h-app min-h-screen",
+      className?.split(" ").includes("justify-start")
+        ? "justify-start"
+        : "justify-center",
     ])}
   >
     {children}
