@@ -6,6 +6,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   description?: string;
   className?: string;
   inputClassName?: string;
+  disabled?: boolean;
 }
 
 export const FormInputWithLabel = ({
@@ -16,6 +17,7 @@ export const FormInputWithLabel = ({
   description,
   className,
   inputClassName,
+  disabled,
   ...props
 }: Props) => {
   return (
@@ -34,6 +36,7 @@ export const FormInputWithLabel = ({
           e.stopPropagation();
           onChange?.(e);
         }}
+        disabled={disabled}
         value={value}
         {...props}
       />

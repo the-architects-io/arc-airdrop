@@ -1,17 +1,20 @@
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useFormik } from "formik";
 import Image from "next/image";
 import { useState } from "react";
 
 export const CreateCollectionStep = () => {
+  const { publicKey } = useWallet();
   const formik = useFormik({
     initialValues: {
       collectionName: undefined,
       symbol: "",
       sellerFeeBasisPoints: "",
       description: "",
+      creatorWallet: publicKey?.toString() || "",
     },
     onSubmit: async ({ collectionName, symbol }) => {},
   });
@@ -41,14 +44,22 @@ export const CreateCollectionStep = () => {
               placeholder="e.g. my collection"
               value={formik.values.collectionName}
               onChange={formik.handleChange}
-              description="this will be the name of your collection on-chain"
+              description="the name of your collection on-chain"
             />
             <FormInputWithLabel
               label="symbol"
               name="symbol"
               value={formik.values.symbol}
               onChange={formik.handleChange}
-              description="this will be the symbol of your collection on-chain"
+              description="the symbol of your collection on-chain"
+            />
+            <FormInputWithLabel
+              label="creator wallet"
+              name="creatorWallet"
+              value={formik.values.creatorWallet}
+              onChange={formik.handleChange}
+              disabled={true}
+              description="the wallet address of the collection creator"
             />
             <div className="flex relative">
               <FormInputWithLabel
@@ -58,7 +69,7 @@ export const CreateCollectionStep = () => {
                 min={0}
                 max={100}
                 placeholder="e.g. 5%"
-                description="this will be the royalty received by creator(s) on secondary sales"
+                description="the royalties received by creator(s) on secondary sales"
                 onChange={(e) => {
                   formik.handleChange(e);
                   if (Number(e.target.value) > 100) {
@@ -67,7 +78,7 @@ export const CreateCollectionStep = () => {
                 }}
                 value={formik.values.sellerFeeBasisPoints}
               />
-              <div className="text-3xl text-gray-100 bottom-1 right-8 absolute mb-0.5">
+              <div className="text-3xl text-gray-100 top-10 right-8 absolute mt-0.5">
                 %
               </div>
             </div>
