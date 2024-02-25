@@ -16,10 +16,10 @@ export default function ConnectWalletPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.id) {
-      router.push("/login-signup");
-      return;
-    }
+    // if (!user?.id) {
+    //   router.push("/login-signup");
+    //   return;
+    // }
     if (!wallet?.publicKey) {
       setIsLoading(false);
       return;

@@ -1,5 +1,6 @@
 "use client";
 
+import { fadeIn, fadeOut } from "@/animations";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import { SubmitButton } from "@/features/UI/buttons/submit-button";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
@@ -21,6 +22,7 @@ import { useEffect, useState } from "react";
 
 export default function LoginSignupPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const user = useUserData();
   const { signOut } = useSignOut();
@@ -53,39 +55,54 @@ export default function LoginSignupPage() {
       password: "",
     },
     onSubmit: async ({ email, password }) => {
+      setIsLoggingIn(true);
       let res;
-
       try {
         res = await signInEmailPassword(email, password);
       } catch (err) {
         console.log(err);
       }
-
       formik.setValues({ email: "", password: "" });
     },
   });
 
   useEffect(() => {
-    if (isLoadingAuth || !isAuthenticated) {
+    if (!isAuthenticated && !isLoggingIn) {
       setIsLoading(false);
+      setTimeout(() => {
+        fadeIn(".panel-fade-in-out");
+      }, 100);
       return;
     }
 
-    if (!wallet?.publicKey) {
+    if (!wallet?.publicKey && !isLoggingIn) {
       router.push("/connect-wallet");
       setIsLoading(false);
+      setTimeout(() => {
+        fadeIn(".panel-fade-in-out");
+      }, 100);
       return;
     }
 
-    router.push("/airdrop/select-recipients");
-  }, [isAuthenticated, router, wallet, isLoadingAuth]);
+    if (isLoggingIn) {
+      debugger;
+      setIsLoggingIn(false);
+      fadeOut(".panel-fade-in-out");
+      setTimeout(() => {
+        router.push("/airdrop/select-recipients");
+      }, 400);
+      return;
+    } else {
+      router.push("/airdrop/select-recipients");
+    }
+  }, [isAuthenticated, router, wallet, isLoadingAuth, isLoggingIn]);
 
   if (isLoadingAuth || isLoading) {
     return <LoadingPanel />;
   }
 
   return (
-    <ContentWrapper className="cursor-pointer max-w-md">
+    <ContentWrapper className="cursor-pointer max-w-md panel-fade-in-out opacity-0 transition-all">
       <ContentWrapperYAxisCenteredContent>
         <div className="text-3xl mb-4">
           {mode === "login" ? "login" : "sign up"}

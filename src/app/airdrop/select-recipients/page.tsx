@@ -25,10 +25,10 @@ export default function SelectRecipientsPage() {
       router.push("/connect-wallet");
       return;
     }
-    fadeIn(".panel-fade-in-out");
+    setIsLoading(false);
     setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+      fadeIn(".panel-fade-in-out");
+    }, 100);
   }, [wallet, router, user]);
 
   if (isLoading) {

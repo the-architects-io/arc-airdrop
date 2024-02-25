@@ -7,6 +7,7 @@ import { ContextProvider } from "@/providers/context-provider";
 import classNames from "classnames";
 import Toaster from "@/features/toasts/toaster";
 import { Metadata } from "next";
+import UserMenu from "@/features/user-menu";
 
 const font = IBM_Plex_Mono({
   weight: "400",
@@ -45,8 +46,8 @@ export default function RootLayout({
         <ClusterProvider>
           <ContextProvider>
             {children}
-
             <Toaster />
+            <UserMenu />
           </ContextProvider>
         </ClusterProvider>
       </body>
