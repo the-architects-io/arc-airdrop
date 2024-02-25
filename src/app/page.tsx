@@ -2,22 +2,20 @@
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { WelcomeStep } from "@/features/airdrop/flow-steps/welcome-step";
+import {
+  airdropFlowSteps,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const airdropFlowSteps = {
-  Welcome: "welcome",
-  LoginSignup: "login-signup",
-  ConnectWallet: "connect-wallet",
-};
-
 export default function Page() {
   const wallet = useWallet();
-  const [currentStep, setCurrentStep] = useState(airdropFlowSteps.Welcome);
   const router = useRouter();
   const user = useUserData();
+  const { currentStep, setCurrentStep } = useAirdropFlowStep();
 
   const handleGoToNextStep = async () => {
     switch (currentStep) {

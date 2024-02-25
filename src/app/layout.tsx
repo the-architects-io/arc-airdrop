@@ -8,6 +8,8 @@ import classNames from "classnames";
 import Toaster from "@/features/toasts/toaster";
 import { Metadata } from "next";
 import UserMenu from "@/features/user-menu";
+import { FlowProgressIndicator } from "@/features/flow-progress-indicator";
+import { FlowProgressIndicatorWrapper } from "@/features/flow-progress-indicator-wrapper";
 
 const font = IBM_Plex_Mono({
   weight: "400",
@@ -45,9 +47,10 @@ export default function RootLayout({
       >
         <ClusterProvider>
           <ContextProvider>
-            {children}
+            <div className="mb-32">{children}</div>
             <Toaster />
             <UserMenu />
+            <FlowProgressIndicatorWrapper />
           </ContextProvider>
         </ClusterProvider>
       </body>

@@ -3,6 +3,7 @@ import classNames from "classnames";
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
+  ref?: React.RefObject<HTMLDivElement>;
 }
 
 export const ContentWrapper = ({ children, className }: Props) => {

@@ -31,6 +31,7 @@ import { NhostClient, NhostProvider } from "@nhost/nextjs";
 import { NhostApolloProvider } from "@nhost/react-apollo";
 import { getRpcEndpoint } from "@/utils/rpc";
 import { useCluster } from "@/hooks/cluster";
+import { AirdropFlowStepProvider } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
 const theme = createTheme({
@@ -127,18 +128,20 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     // <NhostProvider nhost={nhost} initial={pageProps.nhostSession}>
-    <NhostProvider nhost={nhost}>
-      <NhostApolloProvider nhost={nhost}>
-        <StyledEngineProvider injectFirst>
-          <ThemeProvider theme={theme}>
-            <SnackbarProvider>
-              <AutoConnectProvider>
-                <WalletContextProvider>{children}</WalletContextProvider>
-              </AutoConnectProvider>
-            </SnackbarProvider>
-          </ThemeProvider>
-        </StyledEngineProvider>
-      </NhostApolloProvider>
-    </NhostProvider>
+    <AirdropFlowStepProvider>
+      <NhostProvider nhost={nhost}>
+        <NhostApolloProvider nhost={nhost}>
+          <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+              <SnackbarProvider>
+                <AutoConnectProvider>
+                  <WalletContextProvider>{children}</WalletContextProvider>
+                </AutoConnectProvider>
+              </SnackbarProvider>
+            </ThemeProvider>
+          </StyledEngineProvider>
+        </NhostApolloProvider>
+      </NhostProvider>
+    </AirdropFlowStepProvider>
   );
 };

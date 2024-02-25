@@ -7,6 +7,11 @@ type AnimationOptions = {
 };
 
 export const fadeIn = (elementSelector: string, options?: AnimationOptions) => {
+  const element = document.querySelector(elementSelector);
+  if (!element) {
+    console.error(`Element not found: ${elementSelector}`);
+    return;
+  }
   animate(
     elementSelector,
     { opacity: [0, 1] },
@@ -18,6 +23,11 @@ export const fadeOut = (
   elementSelector: string,
   options?: AnimationOptions
 ) => {
+  const element = document.querySelector(elementSelector);
+  if (!element) {
+    console.error(`Element not found: ${elementSelector}`);
+    return;
+  }
   animate(
     elementSelector,
     { opacity: [1, 0] },

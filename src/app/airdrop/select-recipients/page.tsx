@@ -2,19 +2,24 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
+import { SelectRecipientsStep } from "@/features/airdrop/flow-steps/select-recipients-step";
 import { LoadingPanel } from "@/features/loading-panel";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function SelectRecipientsPage() {
   const user = useUserData();
   const wallet = useWallet();
   const router = useRouter();
+  const { currentStep, setCurrentStep, airdropFlowSteps } =
+    useAirdropFlowStep();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [recipientCount, setRecipientCount] = useState(15000);
+
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user?.id) {
@@ -25,24 +30,29 @@ export default function SelectRecipientsPage() {
       router.push("/connect-wallet");
       return;
     }
+    setCurrentStep(airdropFlowSteps.SelectRecipients);
     setIsLoading(false);
+    const panelEl = document.querySelector(".panel-fade-in-out");
+    while (!panelEl) {
+      return;
+    }
     setTimeout(() => {
       fadeIn(".panel-fade-in-out");
-    }, 100);
-  }, [wallet, router, user]);
+    }, 400);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet, user, contentWrapperRef]);
 
   if (isLoading) {
     return <LoadingPanel />;
   }
 
   return (
-    <ContentWrapper className="panel-fade-in-out opacity-0">
+    <ContentWrapper
+      className="panel-fade-in-out opacity-0"
+      ref={contentWrapperRef}
+    >
       <ContentWrapperYAxisCenteredContent>
-        <div className="text-3xl mb-8 font-heavy">choose your recipients</div>
-        <div className="mb-4 font-heavy">
-          <span className="text-red-400">{recipientCount} </span>
-          recipients selected
-        </div>
+        <SelectRecipientsStep />
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );

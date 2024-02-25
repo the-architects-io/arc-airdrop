@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { airdropFlowSteps } from "@/app/page";
 import { fadeIn, fadeOut } from "@/animations";
+import { airdropFlowSteps } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 
 export const WelcomeStep = ({ currentStep }: { currentStep: string }) => {
   useEffect(() => {
