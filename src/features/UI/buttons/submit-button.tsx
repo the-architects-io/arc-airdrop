@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { PrimaryButton } from "@/features/UI/buttons/primary-button";
 import Spinner from "@/features/UI/spinner";
+import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 
 interface Props extends React.HTMLAttributes<HTMLButtonElement> {
   isSubmitting: boolean;
@@ -20,7 +21,7 @@ export const SubmitButton = ({
   onClick,
 }: Props) => {
   return (
-    <PrimaryButton
+    <SecondaryButton
       onClick={(e) => {
         e.preventDefault();
         onClick && onClick();
@@ -43,6 +44,6 @@ export const SubmitButton = ({
       ) : (
         <>{children ? children : buttonText || "save"}</>
       )}
-    </PrimaryButton>
+    </SecondaryButton>
   );
 };

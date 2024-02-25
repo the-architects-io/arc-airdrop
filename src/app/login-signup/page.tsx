@@ -19,12 +19,13 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function LoginSignupPage() {
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [didStartAnimation, setDidStartAnimation] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const user = useUserData();
   const { signOut } = useSignOut();
@@ -68,7 +69,25 @@ export default function LoginSignupPage() {
     },
   });
 
+  const loginPanelRef = useRef<HTMLDivElement>(null);
+
+  const fadeOutPanel = useCallback(() => {
+    if (didStartAnimation) return;
+    const id = loginPanelRef?.current?.id;
+    console.log("fading out", id);
+    if (!id) return;
+    fadeOut(`#${id}`);
+    setDidStartAnimation(true);
+    setTimeout(() => {
+      router.push("/airdrop/select-recipients");
+    }, 600);
+  }, [router, didStartAnimation]);
+
   useEffect(() => {
+    if (isLoggingIn) {
+      fadeOutPanel();
+      return;
+    }
     setCurrentStep(airdropFlowSteps.LoginSignup);
     if (!isAuthenticated && !isLoggingIn) {
       setIsLoading(false);
@@ -81,23 +100,15 @@ export default function LoginSignupPage() {
     if (!wallet?.publicKey && !isLoggingIn) {
       router.push("/connect-wallet");
       setIsLoading(false);
+      const id = loginPanelRef?.current?.id;
+      if (!id) return;
       setTimeout(() => {
-        fadeIn(".panel-fade-in-out");
+        fadeIn(id);
       }, 100);
       return;
     }
 
-    if (isLoggingIn) {
-      debugger;
-      setIsLoggingIn(false);
-      fadeOut(".panel-fade-in-out");
-      setTimeout(() => {
-        router.push("/airdrop/select-recipients");
-      }, 400);
-      return;
-    } else {
-      router.push("/airdrop/select-recipients");
-    }
+    router.push("/airdrop/select-recipients");
   }, [
     isAuthenticated,
     router,
@@ -106,6 +117,7 @@ export default function LoginSignupPage() {
     isLoggingIn,
     setCurrentStep,
     airdropFlowSteps.LoginSignup,
+    fadeOutPanel,
   ]);
 
   if (isLoadingAuth || isLoading) {
@@ -113,7 +125,11 @@ export default function LoginSignupPage() {
   }
 
   return (
-    <ContentWrapper className="cursor-pointer max-w-md panel-fade-in-out opacity-0 transition-all">
+    <ContentWrapper
+      className="cursor-pointer max-w-md panel-fade-in-out opacity-0 transition-all"
+      ref={loginPanelRef}
+      id="login-panel"
+    >
       <ContentWrapperYAxisCenteredContent>
         <div className="text-3xl mb-4">
           {mode === "login" ? "login" : "sign up"}
@@ -137,13 +153,13 @@ export default function LoginSignupPage() {
               isSubmitting={formik.isSubmitting || signInIsLoading}
               onClick={formik.handleSubmit}
             >
-              next
+              {mode === "login" ? "login" : "sign up"}
             </SubmitButton>
           </div>
           <div className="w-full flex justify-center">
             <div
               onClick={() => setMode(mode === "login" ? "signup" : "login")}
-              className="text-cyan-500 cursor-pointer underline hover:bg-cyan-500 hover:text-gray-100 p-1 transition-all duration-300 ease-in-out"
+              className="text-gray-400 cursor-pointer underline hover:bg-gray-500 hover:text-gray-100 p-1 transition-all duration-300 ease-in-out"
             >
               {mode === "login"
                 ? "no account? sign up!"

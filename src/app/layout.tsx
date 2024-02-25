@@ -47,7 +47,7 @@ export default function RootLayout({
       >
         <ClusterProvider>
           <ContextProvider>
-            <div className="mb-32">{children}</div>
+            {children}
             <Toaster />
             <UserMenu />
             <FlowProgressIndicatorWrapper />

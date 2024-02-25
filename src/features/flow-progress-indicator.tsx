@@ -41,7 +41,6 @@ export const FlowProgressIndicator = () => {
       id="progress-indicator"
       className="fixed w-full h-20 min-w-screen max-w-screen bottom-0 bg-gray-100 opacity-0"
     >
-      <div className="absolute">{currentStep}</div>
       <div className="flex items-center justify-between h-full mx-auto max-w-6xl">
         <SecondaryButton className="flex space-x-1" onClick={goToPreviousStep}>
           <ChevronLeftIcon className="w-6 h-6" />
@@ -49,19 +48,48 @@ export const FlowProgressIndicator = () => {
         </SecondaryButton>
         <div
           className={classNames(
-            "border-2 w-1/6 h-4 rounded-lg",
+            "border-2 w-1/6 h-4 rounded-full",
             currentStep === airdropFlowSteps.SelectRecipients
               ? "border-cyan-400 bg-gray-400"
               : "border-cyan-400 bg-cyan-400"
           )}
-        ></div>
-        <div className="bg-gray-400 w-1/6 h-4 rounded-lg"></div>
-        <div className="bg-gray-400 w-1/6 h-4 rounded-lg"></div>
-        <div className="bg-gray-400 w-1/6 h-4 rounded-lg"></div>
-        <PrimaryButton className="flex space-x-1" onClick={goToNextStep}>
+        />
+        <div
+          className={classNames("border-2 w-1/6 h-4 rounded-full", {
+            "border-cyan-400 bg-gray-400":
+              currentStep === airdropFlowSteps.CreateCollection,
+            "border-gray-400 bg-gray-400":
+              currentStep === airdropFlowSteps.SelectRecipients,
+            "border-cyan-400 bg-cyan-400":
+              currentStep === airdropFlowSteps.CreateNfts ||
+              currentStep === airdropFlowSteps.Review,
+          })}
+        />
+        <div
+          className={classNames("border-2 w-1/6 h-4 rounded-full", {
+            "border-cyan-400 bg-gray-400":
+              currentStep === airdropFlowSteps.CreateNfts,
+            "border-gray-400 bg-gray-400":
+              currentStep === airdropFlowSteps.SelectRecipients ||
+              currentStep === airdropFlowSteps.CreateCollection,
+            "border-cyan-400 bg-cyan-400":
+              currentStep === airdropFlowSteps.Review,
+          })}
+        />
+        <div
+          className={classNames("border-2 w-1/6 h-4 rounded-full", {
+            "border-cyan-400 bg-gray-400":
+              currentStep === airdropFlowSteps.Review,
+            "border-gray-400 bg-gray-400":
+              currentStep === airdropFlowSteps.SelectRecipients ||
+              currentStep === airdropFlowSteps.CreateNfts ||
+              currentStep === airdropFlowSteps.CreateCollection,
+          })}
+        />
+        <SecondaryButton className="flex space-x-1" onClick={goToNextStep}>
           <div>next</div>
           <ChevronLeftIcon className="w-6 h-6 transform rotate-180" />
-        </PrimaryButton>
+        </SecondaryButton>
       </div>
     </div>
   );

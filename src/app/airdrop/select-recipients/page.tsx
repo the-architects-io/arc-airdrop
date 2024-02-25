@@ -8,7 +8,7 @@ import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step"
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 
 export default function SelectRecipientsPage() {
   const user = useUserData();
@@ -30,17 +30,18 @@ export default function SelectRecipientsPage() {
       router.push("/connect-wallet");
       return;
     }
+
     setCurrentStep(airdropFlowSteps.SelectRecipients);
     setIsLoading(false);
-    const panelEl = document.querySelector(".panel-fade-in-out");
-    while (!panelEl) {
-      return;
-    }
+  }, [wallet, user, setCurrentStep, airdropFlowSteps.SelectRecipients, router]);
+
+  useEffect(() => {
     setTimeout(() => {
-      fadeIn(".panel-fade-in-out");
-    }, 400);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet, user, contentWrapperRef]);
+      const contentWrapperId = contentWrapperRef?.current?.id;
+      if (!contentWrapperId) return;
+      fadeIn(`#${contentWrapperId}`);
+    }, 1000);
+  }, [contentWrapperRef, isLoading]);
 
   if (isLoading) {
     return <LoadingPanel />;
@@ -50,6 +51,7 @@ export default function SelectRecipientsPage() {
     <ContentWrapper
       className="panel-fade-in-out opacity-0"
       ref={contentWrapperRef}
+      id="select-recipients-panel"
     >
       <ContentWrapperYAxisCenteredContent>
         <SelectRecipientsStep />

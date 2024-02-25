@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { useContext, createContext, useState, ReactNode } from "react";
 
 export const airdropFlowSteps = {
@@ -6,7 +7,7 @@ export const airdropFlowSteps = {
   ConnectWallet: "connect-wallet",
   SelectRecipients: "select-recipients",
   CreateCollection: "create-collection",
-  CreateNfts: "create-nfts",
+  CreateNfts: "create-cnfts",
   Review: "review",
 };
 
@@ -42,6 +43,7 @@ export type AirdropFlowStepContext = {
 
 export function useAirdropFlowStep() {
   const { currentStep, setCurrentStep } = useContext(AirdropFlowStepContext);
+  const router = useRouter();
 
   return {
     currentStep,
@@ -49,12 +51,15 @@ export function useAirdropFlowStep() {
     goToNextStep: () => {
       switch (currentStep) {
         case airdropFlowSteps.SelectRecipients:
+          router.push("/airdrop/create-collection");
           setCurrentStep(airdropFlowSteps.CreateCollection);
           break;
         case airdropFlowSteps.CreateCollection:
+          router.push("/airdrop/create-cnfts");
           setCurrentStep(airdropFlowSteps.CreateNfts);
           break;
         case airdropFlowSteps.CreateNfts:
+          router.push("/airdrop/review");
           setCurrentStep(airdropFlowSteps.Review);
           break;
       }
@@ -62,12 +67,15 @@ export function useAirdropFlowStep() {
     goToPreviousStep: () => {
       switch (currentStep) {
         case airdropFlowSteps.CreateCollection:
+          router.push("/airdrop/select-recipients");
           setCurrentStep(airdropFlowSteps.SelectRecipients);
           break;
         case airdropFlowSteps.CreateNfts:
+          router.push("/airdrop/create-collection");
           setCurrentStep(airdropFlowSteps.CreateCollection);
           break;
         case airdropFlowSteps.Review:
+          router.push("/airdrop/create-cnfts");
           setCurrentStep(airdropFlowSteps.CreateNfts);
           break;
       }

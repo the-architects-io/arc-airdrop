@@ -48,4 +48,4 @@ export const NEXT_PUBLIC_ARCHITECTS_COLLECTION_WALLET_ADDRESS =
   process.env.NEXT_PUBLIC_ARCHITECTS_COLLECTION_WALLET_ADDRESS;
 
 export const fadeInDuration = 1.6;
-export const fadeOutDuration = 0.7;
+export const fadeOutDuration = 1.2;

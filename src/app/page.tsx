@@ -9,7 +9,6 @@ import {
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Page() {
   const wallet = useWallet();

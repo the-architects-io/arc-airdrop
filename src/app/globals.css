@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .wallet-adapter-button {
-  @apply lowercase font-mono shadow-sm text-white bg-cyan-400 hover:bg-cyan-600 focus:outline-none focus:ring-cyan-500 transition-all duration-200 hover:shadow-xl font-normal !important;
+  @apply lowercase font-mono shadow-sm text-white bg-gray-400 hover:bg-gray-600 focus:outline-none focus:ring-gray-500 transition-all duration-200 hover:shadow-xl font-normal !important;
 }
 
 .wallet-adapter-modal-wrapper {
