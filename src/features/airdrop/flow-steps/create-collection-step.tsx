@@ -83,6 +83,7 @@ export const CreateCollectionStep = () => {
               </div>
             </div>
             <FormTextareaWithLabel
+              className="text-2xl"
               label="description"
               name="description"
               value={formik.values.description}

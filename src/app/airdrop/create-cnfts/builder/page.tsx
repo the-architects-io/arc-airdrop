@@ -2,7 +2,6 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
-import { CreateCnftsStep } from "@/features/airdrop/flow-steps/create-cnfts-step";
 import { LoadingPanel } from "@/features/loading-panel";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
@@ -10,7 +9,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-export default function CreateCnftsPage() {
+export default function BuildCnftPage() {
   const user = useUserData();
   const wallet = useWallet();
   const router = useRouter();
@@ -50,10 +49,10 @@ export default function CreateCnftsPage() {
     <ContentWrapper
       className="panel-fade-in-out opacity-0"
       ref={contentWrapperRef}
-      id="create-cnfts-panel"
+      id="build-cnft-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        <CreateCnftsStep />
+        Build cNFT Panel
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );
