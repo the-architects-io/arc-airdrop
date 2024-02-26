@@ -1,5 +1,7 @@
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
+import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
+import { StepTitle } from "@/features/UI/typography/step-title";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFormik } from "formik";
@@ -21,8 +23,8 @@ export const CreateCollectionStep = () => {
 
   return (
     <>
-      <div className="text-3xl mb-4 font-heavy">create on-chain collection</div>
-      <div className="mb-8">this will represent your collection on-chain</div>
+      <StepTitle>create on-chain collection</StepTitle>
+      <StepSubtitle>this will represent your collection on-chain</StepSubtitle>
       <div className="flex flex-wrap w-full mb-28">
         <div className="w-full md:w-1/2 flex flex-col px-4">
           <div className="text-2xl mb-1">collection image</div>

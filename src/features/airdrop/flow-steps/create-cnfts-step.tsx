@@ -1,5 +1,7 @@
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
+import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
+import { StepTitle } from "@/features/UI/typography/step-title";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +14,8 @@ export const CreateCnftsStep = () => {
 
   return (
     <>
-      <div className="text-3xl my-8 font-heavy">create compressed nfts</div>
+      <StepTitle>create compressed nfts</StepTitle>
+      <StepSubtitle>0 / 15,000 cnfts created</StepSubtitle>
       <div className="flex flex-wrap gap-y-4 w-full h-full justify-center pb-28">
         <div className="w-full sm:w-1/2 lg:w-1/3 flex flex-col items-center justify-center mb-4">
           <button

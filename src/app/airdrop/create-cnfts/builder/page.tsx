@@ -2,6 +2,7 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
+import { BuildCnftStep } from "@/features/airdrop/flow-steps/build-cnft-step";
 import { LoadingPanel } from "@/features/loading-panel";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
@@ -52,7 +53,7 @@ export default function BuildCnftPage() {
       id="build-cnft-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        Build cNFT Panel
+        <BuildCnftStep />
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );

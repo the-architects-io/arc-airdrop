@@ -1,3 +1,5 @@
+import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
+import { StepTitle } from "@/features/UI/typography/step-title";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useState } from "react";
@@ -90,12 +92,13 @@ export const SelectRecipientsStep = () => {
 
   return (
     <>
-      <div className="text-3xl mb-8 font-heavy">choose your recipients</div>
-
-      <div className="mb-8 font-heavy flex items-center">
-        <span className="text-red-400 text-3xl mr-3">{recipientCount} </span>
-        <div>recipients selected</div>
-      </div>
+      <StepTitle>choose your recipients</StepTitle>
+      <StepSubtitle>
+        <div className="flex items-center">
+          <span className="text-red-400 text-3xl mr-3">{recipientCount} </span>
+          <div>recipients selected</div>
+        </div>
+      </StepSubtitle>
       <div className="flex flex-wrap gap-y-4">
         <div className="w-1/2 sm:w-1/3 lg:w-1/4 flex flex-col items-center justify-center mb-4">
           <div className="w-48 h-48 bg-gray-400 text-gray-100 flex flex-col justify-center items-center text-center text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer hover:scale-[1.05] rounded-md">
