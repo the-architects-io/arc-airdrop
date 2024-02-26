@@ -1,7 +1,6 @@
 "use client";
 import { Menu, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useSignOut, useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Link from "next/link";
@@ -24,7 +23,7 @@ export default function UserMenu() {
     <div className="top-4 right-4 absolute">
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button className="rounded-full text-gray-600 px-4 py-2 text-sm ">
+          <Menu.Button className="rounded-full text-gray-600 px-4 py-2 text-sm shadow-deep">
             <UserIcon className="h-6 w-6 text-gray-400 group-hover:text-gray-600" />
           </Menu.Button>
         </div>

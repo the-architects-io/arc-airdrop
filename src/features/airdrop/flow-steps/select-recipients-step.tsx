@@ -101,7 +101,7 @@ export const SelectRecipientsStep = () => {
       </StepSubtitle>
       <div className="flex flex-wrap gap-y-4">
         <div className="w-1/2 sm:w-1/3 lg:w-1/4 flex flex-col items-center justify-center mb-4">
-          <div className="w-48 h-48 bg-gray-400 text-gray-100 flex flex-col justify-center items-center text-center text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer hover:scale-[1.05] rounded-md">
+          <div className="w-48 h-48 bg-gray-400 text-gray-100 flex flex-col justify-center items-center text-center text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer hover:scale-[1.05] rounded-md shadow-very-deep hover:shadow-very-deep-float">
             <div className="mb-2">upload your own hashlist</div>
             <PlusCircleIcon className="w-12 h-12" />
           </div>
@@ -111,7 +111,7 @@ export const SelectRecipientsStep = () => {
             key={index}
             className="w-1/2 sm:w-1/3 lg:w-1/4 flex flex-col items-center justify-center mb-4"
           >
-            <div className="w-48 h-48 relative cursor-pointer hover:scale-[1.05] transition-transform duration-300 ease-in-out">
+            <div className="w-48 h-48 relative cursor-pointer hover:scale-[1.05] transition-all duration-300 ease-in-out shadow-very-deep hover:shadow-very-deep-float rounded-md">
               <Image
                 className="rounded-md"
                 src={collection.image}

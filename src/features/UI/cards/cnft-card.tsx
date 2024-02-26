@@ -1,17 +1,25 @@
+import { fadeOut } from "@/animations";
+import { fadeOutTimeoutDuration } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
-import { PlusCircleIcon } from "@heroicons/react/20/solid";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 
 export const CnftCard = () => {
   const router = useRouter();
+  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
   const handleAddNewCnft = () => {
-    router.push("/airdrop/create-cnfts/builder");
+    fadeOut("#create-cnfts-panel");
+    setTimeout(() => {
+      router.push("/airdrop/create-cnfts/builder");
+      setCurrentStep(airdropFlowSteps.CreateCollection);
+    }, fadeOutTimeoutDuration);
   };
 
   return (
-    <div className="w-full sm:w-1/2 lg:w-1/3 flex flex-col items-center justify-center mb-4">
+    <div className="w-full sm:w-1/2 lg:w-1/3 flex flex-col items-center justify-center mb-4 shadow-very-deep rounded-b-md hover:rounded-t-md">
       <button
         onClick={handleAddNewCnft}
         className="relative w-full bg-gray-400 rounded-t-md"

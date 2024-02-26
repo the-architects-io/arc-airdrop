@@ -5,8 +5,6 @@ import { StepTitle } from "@/features/UI/typography/step-title";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFormik } from "formik";
-import Image from "next/image";
-import { useState } from "react";
 
 export const CreateCollectionStep = () => {
   const { publicKey } = useWallet();
@@ -29,7 +27,7 @@ export const CreateCollectionStep = () => {
         <div className="w-full md:w-1/2 flex flex-col px-4">
           <div className="text-2xl mb-1">collection image</div>
           <div
-            className="relative w-full bg-gray-400 rounded-md"
+            className="relative w-full bg-gray-400 rounded-md shadow-deep"
             style={{ paddingBottom: "100%" }}
           >
             <div className="absolute flex flex-col justify-center items-center text-gray-100 text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer h-full w-full hover:rounded-md">

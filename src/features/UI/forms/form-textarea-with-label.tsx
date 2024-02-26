@@ -28,7 +28,7 @@ export const FormTextareaWithLabel = ({
         placeholder={props.placeholder}
         disabled={disabled}
         className={classNames(
-          "w-full px-4 py-2 text-gray-100 bg-gray-400 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 ",
+          "w-full px-4 py-2 text-gray-100 bg-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 shadow-deep",
           props.className
         )}
         onChange={onChange}

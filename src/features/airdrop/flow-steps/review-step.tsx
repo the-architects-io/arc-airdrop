@@ -29,15 +29,19 @@ export const ReviewStep = () => {
   return (
     <>
       <StepTitle>review</StepTitle>
-      <div className="flex flex-wrap w-full mb-28">
-        <div className="w-full md:w-1/3 flex flex-col px-4 space-y-8 py-8">
-          <StepHeading>
-            <span className="text-red-500">15,000 </span>
-            cnfts created
-          </StepHeading>
-          <StepHeading>8,125 unique recipients</StepHeading>
-          <StepHeading>5 cnft variations</StepHeading>
-          <StepHeading>total cost: 0.2265 SOL</StepHeading>
+      <div className="flex flex-wrap w-full mb-28 relative">
+        <div className="w-full md:w-1/3 flex flex-col px-4 ">
+          <div className="sticky top-40 space-y-8">
+            <StepHeading>
+              <span className="text-red-500">15,000 </span>
+              cnfts created
+            </StepHeading>
+            <StepHeading>8,125 unique recipients</StepHeading>
+            <StepHeading>5 cnft variations</StepHeading>
+            <StepHeading>
+              <span className="text-black">total cost: 0.2265 SOL</span>
+            </StepHeading>
+          </div>
         </div>
         <div className="flex flex-wrap gap-y-4 w-full md:w-2/3">
           {cnfts.map((cnft, index) => (

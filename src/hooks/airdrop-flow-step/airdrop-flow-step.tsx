@@ -1,3 +1,5 @@
+import { fadeOut } from "@/animations";
+import { fadeOutTimeoutDuration } from "@/constants/constants";
 import { useRouter } from "next/navigation";
 import { useContext, createContext, useState, ReactNode } from "react";
 
@@ -51,32 +53,51 @@ export function useAirdropFlowStep() {
     goToNextStep: () => {
       switch (currentStep) {
         case airdropFlowSteps.SelectRecipients:
-          router.push("/airdrop/create-collection");
-          setCurrentStep(airdropFlowSteps.CreateCollection);
+          fadeOut("#select-recipients-panel");
+          setTimeout(() => {
+            router.push("/airdrop/create-collection");
+            setCurrentStep(airdropFlowSteps.CreateCollection);
+          }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.CreateCollection:
-          router.push("/airdrop/create-cnfts");
-          setCurrentStep(airdropFlowSteps.CreateNfts);
+          fadeOut("#create-collection-panel");
+          setTimeout(() => {
+            router.push("/airdrop/create-cnfts");
+            setCurrentStep(airdropFlowSteps.CreateNfts);
+          }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.CreateNfts:
-          router.push("/airdrop/review");
-          setCurrentStep(airdropFlowSteps.Review);
+          fadeOut("#create-cnfts-panel");
+          setTimeout(() => {
+            router.push("/airdrop/review");
+            setCurrentStep(airdropFlowSteps.Review);
+          }, fadeOutTimeoutDuration);
           break;
       }
     },
     goToPreviousStep: () => {
       switch (currentStep) {
         case airdropFlowSteps.CreateCollection:
-          router.push("/airdrop/select-recipients");
-          setCurrentStep(airdropFlowSteps.SelectRecipients);
+          fadeOut("#create-collection-panel");
+          setTimeout(() => {
+            router.push("/airdrop/select-recipients");
+            setCurrentStep(airdropFlowSteps.SelectRecipients);
+          }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.CreateNfts:
-          router.push("/airdrop/create-collection");
-          setCurrentStep(airdropFlowSteps.CreateCollection);
+          fadeOut("#create-cnfts-panel");
+          fadeOut("#build-cnft-panel");
+          setTimeout(() => {
+            router.push("/airdrop/create-collection");
+            setCurrentStep(airdropFlowSteps.CreateCollection);
+          }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.Review:
-          router.push("/airdrop/create-cnfts");
-          setCurrentStep(airdropFlowSteps.CreateNfts);
+          fadeOut("#review-panel");
+          setTimeout(() => {
+            router.push("/airdrop/create-cnfts");
+            setCurrentStep(airdropFlowSteps.CreateNfts);
+          }, fadeOutTimeoutDuration);
           break;
       }
     },
