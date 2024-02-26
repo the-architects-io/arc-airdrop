@@ -61,7 +61,7 @@ export const CreateCollectionStep = () => {
               value={formik.values.creatorWallet}
               onChange={formik.handleChange}
               disabled={true}
-              description="the wallet address of the collection creator. connect a different wallet to change this value."
+              description="the wallet address of the collection creator"
             />
             <div className="flex relative">
               <FormInputWithLabel

@@ -1,6 +1,6 @@
 import classNames from "classnames";
 
-export const StepTitle = ({
+export const StepHeading = ({
   children,
   className,
 }: {
@@ -8,12 +8,7 @@ export const StepTitle = ({
   className?: string;
 }): JSX.Element => {
   return (
-    <div
-      className={classNames([
-        "text-3xl my-8 font-heavy text-center",
-        className,
-      ])}
-    >
+    <div className={classNames(["text-2xl", className])}>
       <div>{children}</div>
     </div>
   );
