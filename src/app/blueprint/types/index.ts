@@ -398,12 +398,14 @@ export type TraitInstance = {
 };
 
 export type MappedErrorResponse = {
-  error: {
-    message: string;
-    errorMessage: string;
-    status: number;
-    statusText: string;
-  };
+  error:
+    | {
+        message: string;
+        errorMessage: string;
+        status: number;
+        statusText: string;
+      }
+    | string;
   status: number;
 };
 
@@ -571,7 +573,7 @@ export type AddAirdropResponse = {
 
 export type CreateAirdropInput = {
   collectionId: string;
-  ownerId: string;
+  ownerId?: string;
   name?: string;
   collectionNftId?: string;
   startTime?: string;

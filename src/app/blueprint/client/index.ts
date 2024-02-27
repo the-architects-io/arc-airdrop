@@ -100,6 +100,7 @@ async function makeApiRequest<TResponse, TParams extends Record<string, any>>(
 
   console.log({
     action,
+    url,
     params,
     options,
     isFormData,

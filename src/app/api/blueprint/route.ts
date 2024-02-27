@@ -89,7 +89,9 @@ const mapErrorToResponse = (error: any): MappedErrorResponse => {
 
   return {
     status: status || 500,
-    error: { message, errorMessage, status, statusText },
+    error: "",
+    // error: JSON.stringify(error, null, 2),
+    // error: { message, errorMessage, status, statusText },
   };
 };
 
@@ -107,6 +109,14 @@ async function makeBlueprintApiRequest(
   }
 
   const url = BlueprintApiActionUrls[action];
+
+  console.log(`makeBlueprintApiRequest ${action}`, {
+    action,
+    data,
+    url,
+    apiKey,
+    isFormData,
+  });
 
   try {
     let headers = {};

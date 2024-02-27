@@ -23,7 +23,7 @@ export const JsonUpload = ({
   setJsonFileBeingUploaded,
 }: {
   driveAddress: string;
-  fileName: string;
+  fileName?: string;
   children?: string | JSX.Element | JSX.Element[];
   uploadyInstance: UploadyContextType | null;
   isFileValid: boolean | null;
@@ -73,13 +73,17 @@ export const JsonUpload = ({
           setJsonFileBeingUploaded={setJsonFileBeingUploaded}
         >
           <>
-            {isSuccessful === true && (
-              <div className="text-green-500 flex items-center gap-x-2 uppercase bg-transparent">
-                <CheckBadgeIcon className="w-5 h-5" />
-                <div>Success</div>
+            {isInProgress === true && (
+              <div className="text-gray-100 flex justify-center items-center gap-x-2 bg-gray-400 h-48 w-48 rounded-md">
+                <Spinner />
               </div>
             )}
-            {isSuccessful === null && (
+            {isSuccessful === true && (
+              <div className="text-gray-100 flex flex-col justify-center items-center gap-y-4 uppercase bg-gray-400 h-48 w-48 rounded-md border-8 border-cyan-400">
+                <CheckBadgeIcon className="w-20 h-20" />
+              </div>
+            )}
+            {isSuccessful === null && !isInProgress && (
               <div className="underline">
                 {!!children ? children : "Add JSONs"}
               </div>
