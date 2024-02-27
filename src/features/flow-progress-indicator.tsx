@@ -48,52 +48,43 @@ export const FlowProgressIndicator = () => {
         </SecondaryButton>
         <div
           className={classNames(
-            "border-2 w-1/6 h-4 rounded-full shadow-very-deep",
+            "border-2 w-1/6 h-4 rounded-full shadow-lg",
             currentStep === airdropFlowSteps.SelectRecipients
               ? "border-cyan-400 bg-gray-400"
               : "border-cyan-400 bg-cyan-400"
           )}
         />
         <div
-          className={classNames(
-            "border-2 w-1/6 h-4 rounded-full shadow-very-deep",
-            {
-              "border-cyan-400 bg-gray-400":
-                currentStep === airdropFlowSteps.CreateCollection,
-              "border-gray-400 bg-gray-400":
-                currentStep === airdropFlowSteps.SelectRecipients,
-              "border-cyan-400 bg-cyan-400":
-                currentStep === airdropFlowSteps.CreateNfts ||
-                currentStep === airdropFlowSteps.Review,
-            }
-          )}
+          className={classNames("border-2 w-1/6 h-4 rounded-full shadow-lg", {
+            "border-cyan-400 bg-gray-400":
+              currentStep === airdropFlowSteps.CreateCollection,
+            "border-gray-400 bg-gray-400":
+              currentStep === airdropFlowSteps.SelectRecipients,
+            "border-cyan-400 bg-cyan-400":
+              currentStep === airdropFlowSteps.CreateNfts ||
+              currentStep === airdropFlowSteps.Review,
+          })}
         />
         <div
-          className={classNames(
-            "border-2 w-1/6 h-4 rounded-full shadow-very-deep",
-            {
-              "border-cyan-400 bg-gray-400":
-                currentStep === airdropFlowSteps.CreateNfts,
-              "border-gray-400 bg-gray-400":
-                currentStep === airdropFlowSteps.SelectRecipients ||
-                currentStep === airdropFlowSteps.CreateCollection,
-              "border-cyan-400 bg-cyan-400":
-                currentStep === airdropFlowSteps.Review,
-            }
-          )}
+          className={classNames("border-2 w-1/6 h-4 rounded-full shadow-lg", {
+            "border-cyan-400 bg-gray-400":
+              currentStep === airdropFlowSteps.CreateNfts,
+            "border-gray-400 bg-gray-400":
+              currentStep === airdropFlowSteps.SelectRecipients ||
+              currentStep === airdropFlowSteps.CreateCollection,
+            "border-cyan-400 bg-cyan-400":
+              currentStep === airdropFlowSteps.Review,
+          })}
         />
         <div
-          className={classNames(
-            "border-2 w-1/6 h-4 rounded-full shadow-very-deep",
-            {
-              "border-cyan-400 bg-gray-400":
-                currentStep === airdropFlowSteps.Review,
-              "border-gray-400 bg-gray-400":
-                currentStep === airdropFlowSteps.SelectRecipients ||
-                currentStep === airdropFlowSteps.CreateNfts ||
-                currentStep === airdropFlowSteps.CreateCollection,
-            }
-          )}
+          className={classNames("border-2 w-1/6 h-4 rounded-full shadow-lg", {
+            "border-cyan-400 bg-gray-400":
+              currentStep === airdropFlowSteps.Review,
+            "border-gray-400 bg-gray-400":
+              currentStep === airdropFlowSteps.SelectRecipients ||
+              currentStep === airdropFlowSteps.CreateNfts ||
+              currentStep === airdropFlowSteps.CreateCollection,
+          })}
         />
         <SecondaryButton className="flex space-x-1" onClick={goToNextStep}>
           <div>next</div>

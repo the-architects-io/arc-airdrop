@@ -5,7 +5,6 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // add big custom shadow
       boxShadow: {
         'deep': '11px 15px 26px -8px rgba(0,0,0,0.3)',
         'deep-float': '19px 23px 29px -8px rgba(0,0,0,0.3)',
