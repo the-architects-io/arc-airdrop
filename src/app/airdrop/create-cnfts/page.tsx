@@ -8,7 +8,7 @@ import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CreateCnftsStep } from "@/features/airdrop/flow-steps/create-cnfts-step";
+import { CreateCnftsStep } from "@/features/airdrop/flow-steps/create-cnft-step-bak";
 
 export default function CreateCnftsPage() {
   const user = useUserData();
