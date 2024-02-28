@@ -85,13 +85,11 @@ export const JsonUpload = ({
                 <CheckBadgeIcon className="w-20 h-20" />
               </div>
             )}
-            {(isSuccessful === null || isSuccessful === true) &&
-              !isInProgress &&
-              !shouldShowComplete && (
-                <div className="underline">
-                  {!!children ? children : "Add JSONs"}
-                </div>
-              )}
+            {isSuccessful === null && !isInProgress && !shouldShowComplete && (
+              <div className="underline">
+                {!!children ? children : "Add JSONs"}
+              </div>
+            )}
           </>
         </JsonUploadField>
       </Uploady>

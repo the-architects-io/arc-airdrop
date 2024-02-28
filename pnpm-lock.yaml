@@ -59,6 +59,9 @@ dependencies:
   '@rpldy/upload-button':
     specifier: ^1.8.0
     version: 1.8.0(react@18.2.0)
+  '@rpldy/upload-preview':
+    specifier: ^1.8.0
+    version: 1.8.0(react@18.2.0)
   '@rpldy/uploady':
     specifier: ^1.8.0
     version: 1.8.0(react-dom@18.2.0)(react@18.2.0)
@@ -4572,6 +4575,16 @@ packages:
     peerDependencies:
       react: '>=16.8'
     dependencies:
+      '@rpldy/shared-ui': 1.8.0(react@18.2.0)
+      react: 18.2.0
+    dev: false
+
+  /@rpldy/upload-preview@1.8.0(react@18.2.0):
+    resolution: {integrity: sha512-naHdsaEwgcedO+58qdllVqsZfU+iaZNK060JaNAv4E5P7PWUBnnJArVq+oI8IhuHuQk+bkck6cPMwhxxkGBHvg==}
+    peerDependencies:
+      react: '>=16.8'
+    dependencies:
+      '@rpldy/shared': 1.8.0
       '@rpldy/shared-ui': 1.8.0(react@18.2.0)
       react: 18.2.0
     dev: false
