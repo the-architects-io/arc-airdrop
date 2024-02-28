@@ -23,8 +23,8 @@ export const PreviewComponent = ({
       <Image
         src={url}
         alt="Collection Image"
-        width={500}
-        height={500}
+        width={600}
+        height={600}
         className="rounded-md"
       />
       {isInProgress ? (

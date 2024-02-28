@@ -79,7 +79,7 @@ export const SingleImageUploadField = ({
   });
 
   return (
-    <div className="pb-8 flex flex-col items-center w-full">
+    <div className="flex flex-col items-center w-full">
       <UploadPreview
         previewMethodsRef={imagePreviewMethodsRef}
         onPreviewsChanged={(previews) => {

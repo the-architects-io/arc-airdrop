@@ -107,10 +107,7 @@ export const DndCard: FC<CardProps> = ({
       ref={ref}
       style={{ opacity }}
       data-handler-id={handlerId}
-      className={classNames([
-        "flex w-full border border-gray-300 rounded-lg p-4 my-2",
-        className,
-      ])}
+      className={classNames(["flex w-full rounded-lg my-2", className])}
     >
       {!!children && children}
     </div>
