@@ -22,6 +22,7 @@ import { createBlueprintClient } from "@/app/blueprint/client";
 import { getRpcEndpoint } from "@/utils/rpc";
 import { useCluster } from "@/hooks/cluster";
 import { useUserData } from "@nhost/nextjs";
+import { UploadyContextType } from "@rpldy/uploady";
 
 type SnapshotOption = {
   updatedAt: string;
@@ -52,7 +53,8 @@ export const SelectRecipientsStep = () => {
   const [selectedSnapshotOptions, setSelectedSnapshotOptions] = useState<
     SnapshotOption[] | null
   >(null);
-  const [jsonUploadyInstance, setJsonUploadyInstance] = useState<any>(null);
+  const [jsonUploadyInstance, setJsonUploadyInstance] =
+    useState<UploadyContextType | null>(null);
   const [jsonBeingUploaded, setJsonBeingUploaded] = useState<any>(null);
   const [jsonFileBeingUploaded, setJsonFileBeingUploaded] = useState<any>(null);
   const [isValidHashlist, setIsValidHashlist] = useState<boolean | null>(null);
@@ -62,6 +64,7 @@ export const SelectRecipientsStep = () => {
   const airdropIdRef = useRef<string | null>(null);
   const blueprint = createBlueprintClient({ cluster });
   const [didStartUploadingJson, setDidStartUploadingJson] = useState(false);
+  const [didStartUploadFlow, setDidStartUploadFlow] = useState(false);
 
   const recipientCountRef = useRef(null);
 
@@ -74,7 +77,6 @@ export const SelectRecipientsStep = () => {
   } = useQuery(GET_SNAPSHOT_OPTIONS);
 
   const fetchHolderSnapshot = async (snapshotOption: SnapshotOption) => {
-    setIsFetchingSnapshot(true);
     const { data }: { data: HolderSnapshotResponse } = await axios.post(
       `${ARCHITECTS_API_URL}/snapshot/holders`,
       {
@@ -86,7 +88,14 @@ export const SelectRecipientsStep = () => {
   };
 
   const handleSelectSnapshotOption = async (snapshotOption: SnapshotOption) => {
-    if (!snapshotOption?.id) return;
+    if (!snapshotOption?.id || !user?.id) {
+      console.error("missing required data", {
+        snapshotOption,
+        user,
+      });
+      return;
+    }
+
     const { id } = snapshotOption;
     const selectedIds = selectedSnapshotOptions?.map(({ id }) => id);
     if (selectedSnapshotOptions && selectedIds?.includes(id)) {
@@ -99,6 +108,27 @@ export const SelectRecipientsStep = () => {
       if (!option?.count) return;
       setRecipientCount(recipientCount - option.count);
     } else {
+      setIsFetchingSnapshot(true);
+
+      let collectionId;
+      if (!collectionId) {
+        const { collection } = await blueprint.collections.createCollection({
+          ownerId: user.id,
+        });
+        setCollectionId(collection.id);
+        collectionId = collection.id;
+      }
+      if (!airdropId) {
+        const { airdrop } = await blueprint.airdrops.createAirdrop({
+          collectionId,
+        });
+        setAirdropId(airdrop.id);
+        airdropIdRef.current = airdrop.id;
+      }
+      console.log({ airdropIdRef: airdropIdRef.current });
+
+      if (!airdropIdRef?.current) return;
+
       setSelectedSnapshotOptions(
         selectedSnapshotOptions
           ? [...selectedSnapshotOptions, snapshotOption]
@@ -117,6 +147,11 @@ export const SelectRecipientsStep = () => {
           ? [...selectedSnapshotOptions, snapshotOptionWithHashlist]
           : [snapshotOptionWithHashlist]
       );
+      const { success: addRecipientsSuccess, addedReipientsCount } =
+        await blueprint.airdrops.addAirdropRecipients({
+          airdropId: airdropIdRef.current,
+          recipients: JSON.stringify(hashlist),
+        });
     }
   };
 
@@ -131,18 +166,17 @@ export const SelectRecipientsStep = () => {
         return;
       }
 
-      showToast({
-        primaryMessage: "JSON Uploaded",
-      });
-
       const { data } = await axios.get(url);
       if (!data.length) {
         showToast({
           primaryMessage: "There was a problem",
           secondaryMessage: "No JSON returned from the server",
         });
+        setDidStartUploadFlow(false);
         return;
       }
+
+      setDidStartUploadFlow(false);
 
       const recipients = await data;
       console.log({
@@ -167,7 +201,6 @@ export const SelectRecipientsStep = () => {
       const { innerHTML } = recipientCountRef.current;
       if (!innerHTML) return;
       animate(
-        // (progress) => h1.innerHTML = Math.round(progress * 100),
         (progress) => {
           // @ts-ignore
           recipientCountRef.current.innerHTML = Math.round(
@@ -217,7 +250,8 @@ export const SelectRecipientsStep = () => {
   );
 
   const uploadJsonFile = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || !jsonUploadyInstance) return;
+    setDidStartUploadFlow(true);
     if (!collectionId) {
       const { collection } = await blueprint.collections.createCollection({
         ownerId: user.id,
@@ -294,7 +328,14 @@ export const SelectRecipientsStep = () => {
 
   return (
     <>
-      {isFetchingSnapshot && <Overlay showLoader message="fetching snapshot" />}
+      {(isFetchingSnapshot || didStartUploadFlow) && (
+        <Overlay
+          showLoader
+          message={
+            isFetchingSnapshot ? "getting snapshot" : "uploading hashlist"
+          }
+        />
+      )}
       <StepTitle>choose your recipients</StepTitle>
       <StepSubtitle>
         <div className="flex items-center">
@@ -305,7 +346,14 @@ export const SelectRecipientsStep = () => {
         </div>
       </StepSubtitle>
       <div className="flex flex-wrap gap-y-4 mb-28">
-        <div className="w-1/2 sm:w-1/3 lg:w-1/4 flex flex-col items-center justify-center mb-4">
+        <div
+          className={classNames([
+            "w-1/2 sm:w-1/3 lg:w-1/4 flex flex-col items-center justify-center mb-4",
+            {
+              "pointer-events-none": !!customHashlist,
+            },
+          ])}
+        >
           <JsonUpload
             isFileValid={isValidHashlist}
             uploadyInstance={jsonUploadyInstance}
