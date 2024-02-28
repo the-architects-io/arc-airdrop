@@ -1,12 +1,14 @@
 import { fadeIn } from "@/animations";
-import { PrimaryButton } from "@/features/UI/buttons/primary-button";
+import { useSaving } from "@/app/blueprint/hooks/saving";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
+import Spinner from "@/features/UI/spinner";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
 import { use, useEffect, useRef, useState } from "react";
 
 export const FlowProgressIndicator = () => {
+  const { isSaving } = useSaving();
   const { currentStep, goToNextStep, goToPreviousStep, airdropFlowSteps } =
     useAirdropFlowStep();
 
@@ -86,8 +88,12 @@ export const FlowProgressIndicator = () => {
               currentStep === airdropFlowSteps.CreateCollection,
           })}
         />
-        <SecondaryButton className="flex space-x-1" onClick={goToNextStep}>
-          <div>next</div>
+        <SecondaryButton
+          className="flex space-x-1"
+          onClick={goToNextStep}
+          disabled={isSaving}
+        >
+          {isSaving ? <Spinner /> : "next"}
           <ChevronLeftIcon className="w-6 h-6 transform rotate-180" />
         </SecondaryButton>
       </div>

@@ -8,10 +8,9 @@ import classNames from "classnames";
 import Toaster from "@/features/toasts/toaster";
 import { Metadata } from "next";
 import UserMenu from "@/features/user-menu";
-import { FlowProgressIndicator } from "@/features/flow-progress-indicator";
 import { FlowProgressIndicatorWrapper } from "@/features/flow-progress-indicator-wrapper";
 import { StartOverButton } from "@/features/UI/buttons/start-over-button";
-import { DialogComponent } from "@/features/UI/dialog";
+import { SavingProvider } from "@/app/blueprint/hooks/saving/provider";
 
 const font = IBM_Plex_Mono({
   weight: "400",
@@ -49,11 +48,13 @@ export default function RootLayout({
       >
         <ClusterProvider>
           <ContextProvider>
-            {children}
-            <Toaster />
-            <StartOverButton />
-            <UserMenu />
-            <FlowProgressIndicatorWrapper />
+            <SavingProvider>
+              {children}
+              <Toaster />
+              <StartOverButton />
+              <UserMenu />
+              <FlowProgressIndicatorWrapper />
+            </SavingProvider>
           </ContextProvider>
         </ClusterProvider>
       </body>

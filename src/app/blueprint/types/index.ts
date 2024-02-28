@@ -755,8 +755,8 @@ export type Creator = {
   sortOrder: number;
   address: string;
   share: number;
-  wallet: Wallet;
-  collection: Collection;
+  wallet?: Wallet;
+  collection?: Collection;
 };
 
 export type UpdateCollectionInput = {

@@ -22,6 +22,7 @@ import { createBlueprintClient } from "@/app/blueprint/client";
 import { useCluster } from "@/hooks/cluster";
 import { useUserData } from "@nhost/nextjs";
 import { UploadyContextType } from "@rpldy/uploady";
+import { useSaving } from "@/app/blueprint/hooks/saving";
 
 type SnapshotOption = {
   updatedAt: string;
@@ -45,6 +46,7 @@ type HolderSnapshotResponse = {
 
 export const SelectRecipientsStep = () => {
   const user = useUserData();
+  const { setIsSaving } = useSaving();
   const { cluster } = useCluster();
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [recipientCount, setRecipientCount] = useState(0);
@@ -108,6 +110,7 @@ export const SelectRecipientsStep = () => {
       if (!option?.count) return;
       setRecipientCount(recipientCount - option.count);
     } else {
+      setIsSaving(true);
       setIsFetchingSnapshot(true);
 
       let collectionId;
@@ -152,6 +155,7 @@ export const SelectRecipientsStep = () => {
           airdropId: airdropIdRef.current,
           recipients: JSON.stringify(hashlist),
         });
+      setIsSaving(false);
     }
   };
 
@@ -177,6 +181,7 @@ export const SelectRecipientsStep = () => {
       }
 
       setDidStartUploadFlow(false);
+      setIsSaving(false);
 
       const recipients = await data;
       console.log({
@@ -194,7 +199,7 @@ export const SelectRecipientsStep = () => {
       setCustomHashlist(data);
       setCustomHashlistCount(data.length);
     },
-    [recipientCount, blueprint.airdrops]
+    [setIsSaving, blueprint.airdrops, recipientCount]
   );
 
   useEffect(() => {
@@ -253,6 +258,7 @@ export const SelectRecipientsStep = () => {
   const uploadJsonFile = useCallback(async () => {
     if (!user?.id || !jsonUploadyInstance) return;
     setDidStartUploadFlow(true);
+    setIsSaving(true);
     if (!collectionId) {
       const { collection } = await blueprint.collections.createCollection({
         ownerId: user.id,
@@ -295,16 +301,17 @@ export const SelectRecipientsStep = () => {
       }
     }
   }, [
-    handleClearFile,
-    airdropId,
-    attemptNumber,
-    blueprint.airdrops,
-    blueprint.collections,
-    collectionId,
-    didStartUploadingJson,
-    jsonFileBeingUploaded,
-    jsonUploadyInstance,
     user?.id,
+    jsonUploadyInstance,
+    setIsSaving,
+    collectionId,
+    airdropId,
+    jsonFileBeingUploaded,
+    didStartUploadingJson,
+    blueprint.collections,
+    blueprint.airdrops,
+    attemptNumber,
+    handleClearFile,
   ]);
 
   useEffect(() => {

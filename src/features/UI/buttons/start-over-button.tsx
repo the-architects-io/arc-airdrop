@@ -1,11 +1,12 @@
 "use client";
 
-import { DialogComponent } from "@/features/UI/dialog";
+import { useSaving } from "@/app/blueprint/hooks/saving";
+import Spinner from "@/features/UI/spinner";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import { useUserData } from "@nhost/nextjs";
-import { useState } from "react";
 
 export const StartOverButton = () => {
+  const { isSaving } = useSaving();
   const user = useUserData();
 
   const clearLocalStorage = () => {
@@ -22,7 +23,6 @@ export const StartOverButton = () => {
   };
 
   const handleConfirmStartOver = () => {
-    // show confirm dialog
     const text =
       "Are you sure you want to start over? Your progress will be lost.";
     if (confirm(text)) {
@@ -30,6 +30,13 @@ export const StartOverButton = () => {
     }
   };
   if (!user) return <></>;
+
+  if (isSaving)
+    return (
+      <div className="text-cyan-400 font-bold absolute top-6 left-6 z-50">
+        <Spinner height={32} width={32} />
+      </div>
+    );
 
   return (
     <>

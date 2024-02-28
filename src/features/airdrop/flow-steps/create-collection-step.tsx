@@ -1,3 +1,5 @@
+import { createBlueprintClient } from "@/app/blueprint/client";
+import { Creator } from "@/app/blueprint/types";
 import { ASSET_SHDW_DRIVE_ADDRESS } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
@@ -5,6 +7,7 @@ import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import { SingleImageUpload } from "@/features/upload/single-image/single-image-upload";
 import { SingleImageUploadResponse } from "@/features/upload/single-image/single-image-upload-field-wrapper";
+import { useCluster } from "@/hooks/cluster";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFormik } from "formik";
@@ -20,16 +23,65 @@ export const CreateCollectionStep = () => {
   );
   const [collectionImage, setCollectionImage] =
     useState<SingleImageUploadResponse | null>(null);
+  const [isSavingCollection, setIsSavingCollection] = useState(false);
+  const { cluster } = useCluster();
 
   const formik = useFormik({
     initialValues: {
-      collectionName: undefined,
+      collectionName: "",
       symbol: "",
-      sellerFeeBasisPoints: "",
       description: "",
+      sellerFeeBasisPoints: 0,
+      iamge: "",
       creatorWallet: publicKey?.toString() || "",
     },
-    onSubmit: async ({ collectionName, symbol }) => {},
+    onSubmit: async ({
+      collectionName,
+      symbol,
+      description,
+      sellerFeeBasisPoints,
+      creatorWallet,
+    }) => {
+      if (
+        !publicKey ||
+        !collectionImage ||
+        !collectionId ||
+        !creatorWallet?.length
+      ) {
+        console.error("Missing required fields", {
+          publicKey,
+          collectionImage,
+          collectionId,
+          creatorWallet,
+        });
+        return;
+      }
+
+      setIsSavingCollection(true);
+
+      const blueprint = createBlueprintClient({
+        cluster,
+      });
+
+      const { success } = await blueprint.collections.updateCollection({
+        imageSizeInBytes: collectionImage.sizeInBytes,
+        imageUrl: collectionImage.url,
+        id: collectionId,
+        name: collectionName,
+        symbol,
+        description,
+        sellerFeeBasisPoints: sellerFeeBasisPoints * 100,
+        creators: [
+          { address: creatorWallet, share: 100, sortOrder: 0, id: 0 },
+        ] as Creator[],
+        isReadyToMint: true,
+      });
+
+      if (!success) {
+        console.error("Failed to save collection");
+        return;
+      }
+    },
   });
 
   return (
