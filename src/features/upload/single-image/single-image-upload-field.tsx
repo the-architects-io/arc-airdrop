@@ -1,3 +1,4 @@
+import { useSaving } from "@/app/blueprint/hooks/saving";
 import Spinner from "@/features/UI/spinner";
 import { PreviewComponent } from "@/features/upload/single-image/preview-component";
 import {
@@ -33,6 +34,7 @@ export const SingleImageUploadField = ({
   setIsInProgress: (isInProgress: boolean) => void;
 }) => {
   const uploady = useUploady();
+  const { isSaving, setIsSaving } = useSaving();
 
   const imagePreviewMethodsRef = useRef<PreviewMethods>(null);
   const [selectedCollectionImagePreview, setSelectedCollectionImagePreview] =
@@ -50,6 +52,8 @@ export const SingleImageUploadField = ({
       alert("Invalid file type");
       return;
     }
+
+    setIsSaving(true);
 
     const fullFileName = `${fileName}.${extension}`;
 
@@ -70,6 +74,7 @@ export const SingleImageUploadField = ({
 
   useBatchFinishListener((batch: Batch) => {
     setIsInProgress(false);
+    setIsSaving(false);
     setIsSuccessful(batch.completed === 100);
   });
 

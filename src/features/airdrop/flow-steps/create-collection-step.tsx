@@ -1,5 +1,6 @@
 import { createBlueprintClient } from "@/app/blueprint/client";
-import { Creator } from "@/app/blueprint/types";
+import { useSaving } from "@/app/blueprint/hooks/saving";
+import { Collection, Creator } from "@/app/blueprint/types";
 import { ASSET_SHDW_DRIVE_ADDRESS } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
@@ -8,23 +9,33 @@ import { StepTitle } from "@/features/UI/typography/step-title";
 import { SingleImageUpload } from "@/features/upload/single-image/single-image-upload";
 import { SingleImageUploadResponse } from "@/features/upload/single-image/single-image-upload-field-wrapper";
 import { useCluster } from "@/hooks/cluster";
+import { debounce } from "@/utils/debounce";
+import { useLazyQuery } from "@apollo/client";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import { useFormik } from "formik";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export const CreateCollectionStep = () => {
   const { publicKey } = useWallet();
-  const [airdropId, setAirdropId] = useState<string>(
-    "3bc510ff-f095-4a0d-9d3a-e7c5e77160bb"
-  );
-  const [collectionId, setCollectionId] = useState<string>(
-    "6d93bba7-5947-42bf-95da-7a9f2184acd9"
-  );
+  const { isSaving, setIsSaving } = useSaving();
+  const [airdropId, setAirdropId] = useState<string | null>(null);
+  const [collectionId, setCollectionId] = useState<string | null>(null);
   const [collectionImage, setCollectionImage] =
     useState<SingleImageUploadResponse | null>(null);
-  const [isSavingCollection, setIsSavingCollection] = useState(false);
   const { cluster } = useCluster();
+  const [existingCollectionImageUrl, setExistingCollectionImageUrl] = useState<
+    string | null
+  >(null);
+
+  const [getCollection, { loading }] = useLazyQuery(GET_COLLECTION_BY_ID, {
+    fetchPolicy: "network-only",
+    onCompleted: (data) => {
+      console.log({ data });
+    },
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -32,7 +43,7 @@ export const CreateCollectionStep = () => {
       symbol: "",
       description: "",
       sellerFeeBasisPoints: 0,
-      iamge: "",
+      image: "",
       creatorWallet: publicKey?.toString() || "",
     },
     onSubmit: async ({
@@ -42,12 +53,7 @@ export const CreateCollectionStep = () => {
       sellerFeeBasisPoints,
       creatorWallet,
     }) => {
-      if (
-        !publicKey ||
-        !collectionImage ||
-        !collectionId ||
-        !creatorWallet?.length
-      ) {
+      if (!publicKey || !collectionId || !creatorWallet?.length) {
         console.error("Missing required fields", {
           publicKey,
           collectionImage,
@@ -57,25 +63,45 @@ export const CreateCollectionStep = () => {
         return;
       }
 
-      setIsSavingCollection(true);
+      if (isSaving) return;
+      setIsSaving(true);
 
       const blueprint = createBlueprintClient({
         cluster,
       });
 
-      const { success } = await blueprint.collections.updateCollection({
-        imageSizeInBytes: collectionImage.sizeInBytes,
-        imageUrl: collectionImage.url,
+      let collection = {
         id: collectionId,
         name: collectionName,
         symbol,
         description,
         sellerFeeBasisPoints: sellerFeeBasisPoints * 100,
-        creators: [
-          { address: creatorWallet, share: 100, sortOrder: 0, id: 0 },
-        ] as Creator[],
         isReadyToMint: true,
+      } as Collection;
+
+      if (collectionImage && collectionImage.sizeInBytes) {
+        collection.imageSizeInBytes = collectionImage.sizeInBytes;
+        collection.imageUrl = collectionImage.url;
+      }
+
+      const { data } = await getCollection({
+        variables: { id: collectionId },
       });
+      const { collections_by_pk: existingCollection } = data;
+
+      if (
+        existingCollection?.creators?.[0]?.wallet?.address !== creatorWallet
+      ) {
+        collection.creators = [
+          { address: creatorWallet, share: 100, sortOrder: 0, id: 0 },
+        ];
+      }
+
+      const { success } = await blueprint.collections.updateCollection(
+        collection
+      );
+
+      setIsSaving(false);
 
       if (!success) {
         console.error("Failed to save collection");
@@ -84,28 +110,115 @@ export const CreateCollectionStep = () => {
     },
   });
 
+  useEffect(() => {
+    if (!collectionId || !collectionImage) return;
+    const blueprint = createBlueprintClient({
+      cluster,
+    });
+    const updateCollection = async () => {
+      const { success } = await blueprint.collections.updateCollection({
+        id: collectionId,
+        imageUrl: collectionImage.url,
+      });
+    };
+
+    updateCollection();
+  }, [cluster, collectionId, collectionImage]);
+
+  useEffect(() => {
+    const debouncedSubmit = debounce(() => formik.submitForm(), 500);
+
+    debouncedSubmit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formik.values.collectionName,
+    formik.values.symbol,
+    formik.values.description,
+    formik.values.sellerFeeBasisPoints,
+    formik.values.image,
+    formik.values.creatorWallet,
+  ]);
+
+  useEffect(() => {
+    const fetchCollection = async () => {
+      const { data } = await getCollection({
+        variables: { id: collectionId },
+      });
+      const { collections_by_pk: existingCollection } = data;
+      if (existingCollection?.imageUrl) {
+        setExistingCollectionImageUrl(existingCollection.imageUrl);
+      }
+      formik.setValues({
+        collectionName: existingCollection?.name || "",
+        symbol: existingCollection?.symbol || "",
+        description: existingCollection?.description || "",
+        sellerFeeBasisPoints: !!existingCollection?.sellerFeeBasisPoints
+          ? existingCollection?.sellerFeeBasisPoints / 100
+          : 0,
+        creatorWallet:
+          existingCollection?.creators?.[0]?.address ||
+          publicKey?.toString() ||
+          "",
+        image: existingCollection?.imageUrl || "",
+      });
+    };
+
+    if (collectionId) {
+      fetchCollection();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collectionId, getCollection, publicKey]);
+
+  useEffect(() => {
+    const localAirdropId = localStorage.getItem("airdropId");
+    const localCollectionId = localStorage.getItem("collectionId");
+    if (localAirdropId) {
+      setAirdropId(localAirdropId);
+    }
+    if (localCollectionId) {
+      setCollectionId(localCollectionId);
+    }
+  }, []);
+
   return (
     <>
       <StepTitle>create on-chain collection</StepTitle>
       <StepSubtitle>this will represent your collection on-chain</StepSubtitle>
       <div className="flex flex-wrap w-full mb-28">
         <div className="w-full md:w-1/2 flex flex-col px-4">
-          <div className="text-2xl mb-1 text-left mx-5">collection image</div>
-          <SingleImageUpload
-            fileName={`${collectionId}-collection.png`}
-            driveAddress={ASSET_SHDW_DRIVE_ADDRESS}
-            setImage={setCollectionImage}
-          >
-            <div
-              className="relative w-full bg-gray-400 rounded-md shadow-deep"
-              style={{ paddingBottom: "100%" }}
-            >
-              <div className="absolute flex flex-col justify-center items-center text-gray-100 text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer h-full w-full hover:rounded-md">
-                <PlusCircleIcon className="w-48 h-48" />
-                <div className="text-3xl">add image</div>
+          {existingCollectionImageUrl ? (
+            <>
+              <div className="text-2xl mb-1 text-left">collection image</div>
+              <Image
+                src={existingCollectionImageUrl}
+                alt="collection image"
+                className="rounded-md shadow-deep"
+                width={1200}
+                height={1200}
+              />
+            </>
+          ) : (
+            <>
+              <div className="text-2xl mb-1 text-left mx-5">
+                collection image
               </div>
-            </div>
-          </SingleImageUpload>
+              <SingleImageUpload
+                fileName={`${collectionId}-collection.png`}
+                driveAddress={ASSET_SHDW_DRIVE_ADDRESS}
+                setImage={setCollectionImage}
+              >
+                <div
+                  className="relative w-full bg-gray-400 rounded-md shadow-deep"
+                  style={{ paddingBottom: "100%" }}
+                >
+                  <div className="absolute flex flex-col justify-center items-center text-gray-100 text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer h-full w-full hover:rounded-md">
+                    <PlusCircleIcon className="w-48 h-48" />
+                    <div className="text-3xl">add image</div>
+                  </div>
+                </div>
+              </SingleImageUpload>
+            </>
+          )}
         </div>
         <div className="w-full md:w-1/2 flex flex-col px-4">
           <form className="space-y-4 w-full">

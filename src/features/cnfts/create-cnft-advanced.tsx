@@ -36,7 +36,7 @@ enum SAVE_ACTIONS {
 
 type SortedTrait = Trait & { sortOrder: number };
 
-export const BuildCnftStep = ({
+export const CreateCnftAdvanced = ({
   collectionId,
   onCompleted,
 }: {

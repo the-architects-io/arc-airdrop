@@ -43,7 +43,7 @@ export const FlowProgressIndicator = () => {
       id="progress-indicator"
       className="fixed w-full h-20 min-w-screen max-w-screen bottom-0 bg-gray-100 opacity-0"
     >
-      <div className="flex items-center justify-between h-full mx-auto max-w-6xl">
+      <div className="flex items-center justify-between h-full mx-auto max-w-6xl px-10">
         <SecondaryButton className="flex space-x-1" onClick={goToPreviousStep}>
           <ChevronLeftIcon className="w-6 h-6" />
           <div>back</div>
