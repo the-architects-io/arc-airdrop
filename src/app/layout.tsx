@@ -26,8 +26,8 @@ const fontHeavy = IBM_Plex_Mono({
 });
 
 const createPageMetadata = (): Metadata => ({
-  title: "The Architects",
-  description: "Closing the loop",
+  title: "architects airdrop",
+  description: "the simple way to airdrop solana cnfts",
 });
 
 export const metadata: Metadata = createPageMetadata();
