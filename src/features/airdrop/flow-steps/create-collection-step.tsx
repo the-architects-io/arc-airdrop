@@ -1,4 +1,8 @@
 import { createBlueprintClient } from "@/app/blueprint/client";
+import {
+  useDebouncedFormikField,
+  useDebouncedFormikNumericField,
+} from "@/app/blueprint/hooks/formik-change-debounce";
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import { Collection, Creator } from "@/app/blueprint/types";
 import { ASSET_SHDW_DRIVE_ADDRESS } from "@/constants/constants";
@@ -110,6 +114,11 @@ export const CreateCollectionStep = () => {
     },
   });
 
+  const debouncedHandleChange = useDebouncedFormikField(
+    formik,
+    "collectionName"
+  );
+
   useEffect(() => {
     if (!collectionId || !collectionImage) return;
     const blueprint = createBlueprintClient({
@@ -124,6 +133,30 @@ export const CreateCollectionStep = () => {
 
     updateCollection();
   }, [cluster, collectionId, collectionImage]);
+
+  const handleCollectionNameChange = useDebouncedFormikField(
+    formik,
+    "collectionName",
+    1000
+  );
+  const handleSymbolChange = useDebouncedFormikField(formik, "symbol", 1000);
+  const handleDescriptionChange = useDebouncedFormikField(
+    formik,
+    "description",
+    1000
+  );
+  const handleSellerFeeChange = useDebouncedFormikNumericField(
+    formik,
+    "sellerFeeBasisPoints",
+    true,
+    1000
+  );
+
+  const handleCreatorWalletChange = useDebouncedFormikField(
+    formik,
+    "creatorWallet",
+    1000
+  );
 
   useEffect(() => {
     const debouncedSubmit = debounce(() => formik.submitForm(), 500);
@@ -227,21 +260,21 @@ export const CreateCollectionStep = () => {
               name="collectionName"
               placeholder="e.g. my collection"
               value={formik.values.collectionName}
-              onChange={formik.handleChange}
+              onChange={handleCollectionNameChange}
               description="the name of your collection on-chain"
             />
             <FormInputWithLabel
               label="symbol"
               name="symbol"
               value={formik.values.symbol}
-              onChange={formik.handleChange}
+              onChange={handleSymbolChange}
               description="the symbol of your collection on-chain"
             />
             <FormInputWithLabel
               label="creator wallet"
               name="creatorWallet"
               value={formik.values.creatorWallet}
-              onChange={formik.handleChange}
+              onChange={handleCreatorWalletChange}
               disabled={true}
               description="the wallet address of the collection creator"
             />
