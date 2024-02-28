@@ -27,7 +27,7 @@ export const SingleImageUpload = ({
         fileName={fileName}
         setIsInProgress={setIsInProgress}
       >
-        {!!children ? children : "Add Image"}
+        {!!children ? children : <></>}
       </SingleImageUploadField>
     </SingleImageUploadFieldWrapper>
   );

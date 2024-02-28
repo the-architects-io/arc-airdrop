@@ -38,12 +38,12 @@ export const CreateCollectionStep = () => {
       <StepSubtitle>this will represent your collection on-chain</StepSubtitle>
       <div className="flex flex-wrap w-full mb-28">
         <div className="w-full md:w-1/2 flex flex-col px-4">
+          <div className="text-2xl mb-1 text-left mx-5">collection image</div>
           <SingleImageUpload
             fileName={`${collectionId}-collection.png`}
             driveAddress={ASSET_SHDW_DRIVE_ADDRESS}
             setImage={setCollectionImage}
           >
-            <div className="text-2xl mb-1">collection image</div>
             <div
               className="relative w-full bg-gray-400 rounded-md shadow-deep"
               style={{ paddingBottom: "100%" }}

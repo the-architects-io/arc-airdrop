@@ -19,8 +19,14 @@ export const PreviewComponent = ({
   clearPreview: () => void;
 }) => {
   return (
-    <div className="relative border border-gray-600 p-2 rounded-lg mb-2">
-      <Image src={url} alt="Collection Image" width={500} height={500} />
+    <div className="relative border border-gray-400 rounded-md mb-2">
+      <Image
+        src={url}
+        alt="Collection Image"
+        width={500}
+        height={500}
+        className="rounded-md"
+      />
       {isInProgress ? (
         <div className="flex flex-col w-full h-full justify-center items-center text-lg opacity-50 bg-gray-800 absolute top-0 right-0 left-0 bottom-0">
           <Spinner />
@@ -37,7 +43,7 @@ export const PreviewComponent = ({
               <div className="absolute bottom-4 left-6 bg-black rounded-full">
                 <CheckBadgeIcon className="w-12 h-12 text-green-500" />
               </div>
-              <CloseButton onClick={clearPreview} />
+              {/* <CloseButton onClick={clearPreview} /> */}
             </>
           )}
         </>

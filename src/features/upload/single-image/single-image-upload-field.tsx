@@ -41,6 +41,7 @@ export const SingleImageUploadField = ({
   const [batch, setBatch] = useState<Batch | null>(null);
   const [isSuccessful, setIsSuccessful] = useState<boolean | null>(null);
   const [isReadyToUpload, setIsReadyToUpload] = useState(false);
+  const [shouldShowChildren, setShouldShowChildren] = useState(true);
 
   useBatchAddListener((batch: Batch) => {
     setBatch(batch);
@@ -52,7 +53,9 @@ export const SingleImageUploadField = ({
 
     const fullFileName = `${fileName}.${extension}`;
 
+    setShouldShowChildren(false);
     setIsInProgress(true);
+
     setTimeout(() => {
       uploady.processPending({
         params: {
@@ -62,7 +65,7 @@ export const SingleImageUploadField = ({
           overwrite: true,
         },
       });
-    }, 1000);
+    }, 100);
   });
 
   useBatchFinishListener((batch: Batch) => {
@@ -88,7 +91,7 @@ export const SingleImageUploadField = ({
           />
         )}
       />
-      {!selectedCollectionImagePreview && (
+      {!selectedCollectionImagePreview && shouldShowChildren && (
         <UploadButton autoUpload={false} className="w-full">
           {!!children ? children : "Add Image"}
         </UploadButton>
