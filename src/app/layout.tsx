@@ -10,6 +10,8 @@ import { Metadata } from "next";
 import UserMenu from "@/features/user-menu";
 import { FlowProgressIndicator } from "@/features/flow-progress-indicator";
 import { FlowProgressIndicatorWrapper } from "@/features/flow-progress-indicator-wrapper";
+import { StartOverButton } from "@/features/UI/buttons/start-over-button";
+import { DialogComponent } from "@/features/UI/dialog";
 
 const font = IBM_Plex_Mono({
   weight: "400",
@@ -49,6 +51,7 @@ export default function RootLayout({
           <ContextProvider>
             {children}
             <Toaster />
+            <StartOverButton />
             <UserMenu />
             <FlowProgressIndicatorWrapper />
           </ContextProvider>

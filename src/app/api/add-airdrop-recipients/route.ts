@@ -90,7 +90,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error(error as Error);
-    debugger;
     return NextResponse.json(
       {
         error: "Error adding recipients",

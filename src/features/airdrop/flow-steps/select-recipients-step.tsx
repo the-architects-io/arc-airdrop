@@ -8,7 +8,7 @@ import { useQuery } from "@apollo/client";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
 import Image from "next/image";
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isPublicKey } from "@metaplex-foundation/umi";
 import { BlueprintApiActions, UploadJsonResponse } from "@/types";
 import showToast from "@/features/toasts/show-toast";
@@ -19,7 +19,6 @@ import {
 import { Overlay } from "@/features/UI/overlay";
 import { animate } from "motion";
 import { createBlueprintClient } from "@/app/blueprint/client";
-import { getRpcEndpoint } from "@/utils/rpc";
 import { useCluster } from "@/hooks/cluster";
 import { useUserData } from "@nhost/nextjs";
 import { UploadyContextType } from "@rpldy/uploady";
@@ -50,6 +49,7 @@ export const SelectRecipientsStep = () => {
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [recipientCount, setRecipientCount] = useState(0);
   const [customHashlist, setCustomHashlist] = useState<string[]>([]);
+  const [customHashlistCount, setCustomHashlistCount] = useState<number>(0);
   const [selectedSnapshotOptions, setSelectedSnapshotOptions] = useState<
     SnapshotOption[] | null
   >(null);
@@ -183,7 +183,7 @@ export const SelectRecipientsStep = () => {
         airdropId: currentAirdropId,
         recipients,
       });
-      debugger;
+
       const { success: addRecipientsSuccess, addedReipientsCount } =
         await blueprint.airdrops.addAirdropRecipients({
           airdropId: currentAirdropId,
@@ -192,6 +192,7 @@ export const SelectRecipientsStep = () => {
 
       setRecipientCount(data.length + recipientCount);
       setCustomHashlist(data);
+      setCustomHashlistCount(data.length);
     },
     [recipientCount, blueprint.airdrops]
   );
@@ -322,6 +323,56 @@ export const SelectRecipientsStep = () => {
     }
   }, [jsonBeingUploaded, isValidHashlist, uploadJsonFile]);
 
+  useEffect(() => {
+    const localAirdropId = localStorage.getItem("airdropId");
+    const localCollectionId = localStorage.getItem("collectionId");
+    const localCustomLocalHashlistCount = localStorage.getItem(
+      "customHashlistCount"
+    );
+    const localSelectedSnapshotOptions = localStorage.getItem(
+      "selectedSnapshotOptions"
+    );
+    const localRecipientCount = localStorage.getItem("recipientCount");
+    if (localAirdropId) {
+      setAirdropId(localAirdropId);
+    }
+    if (localCollectionId) {
+      setCollectionId(localCollectionId);
+    }
+    if (localCustomLocalHashlistCount) {
+      setCustomHashlistCount(Number(localCustomLocalHashlistCount));
+    }
+    if (
+      localSelectedSnapshotOptions &&
+      Object.keys(JSON.parse(localSelectedSnapshotOptions)).length
+    ) {
+      setSelectedSnapshotOptions(JSON.parse(localSelectedSnapshotOptions));
+    }
+    if (localRecipientCount) {
+      setRecipientCount(Number(localRecipientCount));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (airdropId && collectionId) {
+      localStorage.setItem("recipientCount", String(recipientCount));
+      localStorage.setItem("airdropId", airdropId);
+      localStorage.setItem("collectionId", collectionId);
+      localStorage.setItem("customHashlistCount", String(customHashlistCount));
+      localStorage.setItem(
+        "selectedSnapshotOptions",
+        JSON.stringify(selectedSnapshotOptions)
+      );
+    }
+  }, [
+    airdropId,
+    collectionId,
+    selectedSnapshotOptions,
+    recipientCount,
+    customHashlist,
+    customHashlistCount,
+  ]);
+
   if (!snapshotOptionsData) {
     return <LoadingPanel />;
   }
@@ -350,11 +401,12 @@ export const SelectRecipientsStep = () => {
           className={classNames([
             "w-1/2 sm:w-1/3 lg:w-1/4 flex flex-col items-center justify-center mb-4",
             {
-              "pointer-events-none": !!customHashlist,
+              "pointer-events-none": customHashlistCount > 0,
             },
           ])}
         >
           <JsonUpload
+            shouldShowComplete={customHashlistCount > 0}
             isFileValid={isValidHashlist}
             uploadyInstance={jsonUploadyInstance}
             setUploadyInstance={setJsonUploadyInstance}

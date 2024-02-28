@@ -17,6 +17,7 @@ export const JsonUpload = ({
   children,
   uploadyInstance,
   isFileValid,
+  shouldShowComplete,
   setUploadyInstance,
   setJsonUploadResponse,
   setJsonBeingUploaded,
@@ -27,6 +28,7 @@ export const JsonUpload = ({
   children?: string | JSX.Element | JSX.Element[];
   uploadyInstance: UploadyContextType | null;
   isFileValid: boolean | null;
+  shouldShowComplete?: boolean;
   setUploadyInstance: (instance: UploadyContextType) => void;
   setJsonUploadResponse: (response: any) => void;
   setJsonBeingUploaded: (json: any) => void;
@@ -78,16 +80,18 @@ export const JsonUpload = ({
                 <Spinner />
               </div>
             )}
-            {isSuccessful === true && (
+            {(isSuccessful === true || shouldShowComplete) && (
               <div className="text-gray-100 flex flex-col justify-center items-center gap-y-4 uppercase bg-gray-400 h-48 w-48 rounded-md border-8 border-cyan-400">
                 <CheckBadgeIcon className="w-20 h-20" />
               </div>
             )}
-            {isSuccessful === null && !isInProgress && (
-              <div className="underline">
-                {!!children ? children : "Add JSONs"}
-              </div>
-            )}
+            {(isSuccessful === null || isSuccessful === true) &&
+              !isInProgress &&
+              !shouldShowComplete && (
+                <div className="underline">
+                  {!!children ? children : "Add JSONs"}
+                </div>
+              )}
           </>
         </JsonUploadField>
       </Uploady>
