@@ -73,6 +73,8 @@ export function useAirdropFlowStep() {
             setCurrentStep(airdropFlowSteps.Review);
           }, fadeOutTimeoutDuration);
           break;
+        case airdropFlowSteps.Review:
+          router.push("/airdrop/review?step=payment");
       }
     },
     goToPreviousStep: () => {

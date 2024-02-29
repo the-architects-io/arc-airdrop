@@ -56,3 +56,9 @@ export type UploadJsonFileToShadowDriveResponse = {
 export type UploadJsonResponse = BaseBlueprintResponse & {
   url: string;
 };
+
+export type TreeOptions = {
+  maxDepth: number;
+  maxBufferSize: number;
+  canopyDepth: number;
+};
