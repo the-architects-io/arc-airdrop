@@ -95,6 +95,7 @@ export const BuildCnftStep = () => {
             ...metadata,
             userId: user?.id,
             isPremint: true,
+            amountToMint: formik.values.quantity,
             collectionId,
             imageSizeInBytes: image.sizeInBytes,
           },
@@ -211,7 +212,7 @@ export const BuildCnftStep = () => {
                   <FormInputWithLabel
                     type="number"
                     label="quantity"
-                    name="qyantity"
+                    name="quantity"
                     placeholder="e.g. 100"
                     value={formik.values.quantity}
                     onChange={formik.handleChange}
