@@ -10,11 +10,15 @@ export const StartOverButton = () => {
   const user = useUserData();
 
   const clearLocalStorage = () => {
-    localStorage.removeItem("selectedSnapshotOptions");
-    localStorage.removeItem("airdropId");
-    localStorage.removeItem("collectionId");
-    localStorage.removeItem("recipientCount");
-    localStorage.removeItem("customHashlistCount");
+    const whiteList: string[] = ["publicKey", "userId"];
+
+    const allKeys = Object.keys(localStorage);
+
+    for (const key of allKeys) {
+      if (!whiteList.includes(key)) {
+        localStorage.removeItem(key);
+      }
+    }
   };
 
   const handleStartOver = () => {
