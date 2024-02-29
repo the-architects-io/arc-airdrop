@@ -508,7 +508,7 @@ export const ReviewStep = () => {
     <>
       <StepTitle>review</StepTitle>
       <div className="flex flex-wrap w-full mb-28 relative">
-        <div className="flex flex-wrap gap-y-4 w-full md:w-2/3">
+        <div className="flex flex-wrap gap-y-4 w-full md:w-2/3 px-4">
           {!!tokenData?.tokens?.length && (
             <>
               {tokenData.tokens.map((token: Token) => {

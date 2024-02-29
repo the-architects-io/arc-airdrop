@@ -1,10 +1,8 @@
 import { createBlueprintClient } from "@/app/blueprint/client";
 import {
   Airdrop,
-  Job,
   JobIcons,
   JobTypeUUIDs,
-  Recipient,
   StatusUUIDs,
 } from "@/app/blueprint/types";
 import {

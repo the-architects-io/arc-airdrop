@@ -93,7 +93,7 @@ export const FlowProgressIndicator = () => {
           onClick={goToNextStep}
           disabled={isSaving}
         >
-          {isSaving ? <Spinner /> : "next"}
+          next
           <ChevronLeftIcon className="w-6 h-6 transform rotate-180" />
         </SecondaryButton>
       </div>
