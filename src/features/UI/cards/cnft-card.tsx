@@ -1,34 +1,51 @@
-import { fadeOut } from "@/animations";
-import { fadeOutTimeoutDuration } from "@/constants/constants";
+import { useSaving } from "@/app/blueprint/hooks/saving";
+import { Token } from "@/app/blueprint/types";
+import { BASE_URL } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
-import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+import Spinner from "@/features/UI/spinner";
+import { REMOVE_TOKEN } from "@/graphql/mutations/remove-token";
+import { useMutation } from "@apollo/client";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { REMOVE_COST_COLLECTION } from "@the-architects/blueprint-graphql";
+import axios from "axios";
+import Image from "next/image";
 
-export const CnftCard = () => {
-  const router = useRouter();
-  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
+export const CnftCard = ({
+  token,
+  refetch,
+}: {
+  token: Token;
+  refetch: () => void;
+}) => {
+  const { isSaving, setIsSaving } = useSaving();
 
-  const handleAddNewCnft = () => {
-    fadeOut("#create-cnfts-panel");
-    setTimeout(() => {
-      router.push("/airdrop/create-cnfts/builder");
-      setCurrentStep(airdropFlowSteps.CreateCollection);
-    }, fadeOutTimeoutDuration);
+  const handleRemoveToken = async (id: string | undefined) => {
+    console.log({ id });
+    if (!id) return;
+    setIsSaving(true);
+    try {
+      const res = await axios.post(`${BASE_URL}/api/remove-token`, { id });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      refetch();
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="w-full sm:w-1/2 lg:w-1/3 flex flex-col mb-4">
+    <div className="w-full sm:w-1/2 lg:w-1/3 flex flex-col mb-4" key={token.id}>
       <div className="mx-4 h-full min-h-full">
         <div className="shadow-deep rounded-md hover:rounded-md border border-gray-400 w-full flex flex-col flex-1 h-full min-h-full">
-          <button
-            onClick={handleAddNewCnft}
-            className="w-full aspect-square flex flex-col items-center justify-center bg-gray-400 rounded-t-md text-gray-100 hover:bg-cyan-500 hover:rounded-t-md"
-          >
-            <PlusCircleIcon className="w-48 h-48" />
-            <div className="text-3xl">add new</div>
-          </button>
+          <Image
+            src={token.image}
+            alt={token.name}
+            height={800}
+            width={800}
+            objectFit="cover"
+            className="w-full rounded-t-md aspect-square"
+          />
           <div className="flex flex-col flex-grow bg-gray-500 rounded-b-md">
             <div className="p-4 w-full space-y-2 flex-grow">
               <FormInputWithLabel
@@ -36,7 +53,7 @@ export const CnftCard = () => {
                 label="name"
                 name="name"
                 placeholder="e.g. my nft"
-                value={""}
+                value={token.name}
                 disabled
               />
               <FormTextareaWithLabel
@@ -44,7 +61,7 @@ export const CnftCard = () => {
                 label="description"
                 name="description"
                 placeholder="e.g. my nft description"
-                value={""}
+                value={token.description}
                 disabled
               />
               <FormInputWithLabel
@@ -52,9 +69,32 @@ export const CnftCard = () => {
                 label="link"
                 name="link"
                 placeholder="e.g. my nft"
-                value={""}
+                value={token.external_url}
                 disabled
               />
+            </div>
+            <div className="flex w-full justify-between items-center p-4">
+              <button className="rounded-full bg-gray-500 p-2" disabled>
+                <TrashIcon className="w-8 h-8 text-gray-500" />
+              </button>
+              <div>
+                <div className="text-4xl text-cyan-400">
+                  {token.amountToMint || 0}
+                </div>
+              </div>
+              <button
+                className="rounded-full bg-cyan-400 hover:bg-cyan-500 p-2"
+                onClick={() => handleRemoveToken(token.id)}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <div className="h-8 w-8 flex items-center justify-center text-gray-100">
+                    <Spinner />
+                  </div>
+                ) : (
+                  <TrashIcon className="w-8 h-8 text-gray-100" />
+                )}
+              </button>
             </div>
           </div>
         </div>

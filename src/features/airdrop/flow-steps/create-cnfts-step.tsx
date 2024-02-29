@@ -12,19 +12,16 @@ import {
   EXECUTION_WALLET_ADDRESS,
 } from "@/constants/constants";
 import { CnftCard } from "@/features/UI/cards/cnft-card";
-import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
-import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
+import { CnftPlaceholderCard } from "@/features/UI/cards/cnft-placeholder-card";
 import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 import { useCluster } from "@/hooks/cluster";
 import { useQuery } from "@apollo/client";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { useUserData } from "@nhost/nextjs";
 import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import axios from "axios";
 import { useFormik } from "formik";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -39,12 +36,15 @@ export const CreateCnftsStep = () => {
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [airdropId, setAirdropId] = useState<string | null>(null);
 
-  const { data: tokenData } = useQuery(GET_PREMINT_TOKENS_BY_COLLECTION_ID, {
-    variables: {
-      id: collectionId,
-    },
-    fetchPolicy: "no-cache",
-  });
+  const { data: tokenData, refetch } = useQuery(
+    GET_PREMINT_TOKENS_BY_COLLECTION_ID,
+    {
+      variables: {
+        id: collectionId,
+      },
+      fetchPolicy: "network-only",
+    }
+  );
 
   const { loading, data: collectionData } = useQuery(GET_COLLECTION_BY_ID, {
     variables: {
@@ -293,73 +293,13 @@ export const CreateCnftsStep = () => {
       <StepTitle>create compressed nfts</StepTitle>
       <StepSubtitle>0 / 15,000 cnfts created</StepSubtitle>
       <div className="flex flex-wrap w-full min-h-full pb-28">
-        <CnftCard />
+        <CnftPlaceholderCard />
         <>
           {!!tokenData?.tokens?.length && !!formik.values.tokens.length && (
             <>
               {tokenData.tokens.map((token: Token) => {
                 return (
-                  <div
-                    className="w-full sm:w-1/2 lg:w-1/3 flex flex-col mb-4"
-                    key={token.id}
-                  >
-                    <div className="mx-4 h-full min-h-full">
-                      <div className="shadow-deep rounded-md hover:rounded-md border border-gray-400 w-full flex flex-col flex-1 h-full min-h-full">
-                        <Image
-                          src={token.image}
-                          alt={token.name}
-                          height={800}
-                          width={800}
-                          objectFit="cover"
-                          className="w-full rounded-t-md aspect-square"
-                        />
-                        <div className="flex flex-col flex-grow bg-gray-500 rounded-b-md">
-                          <div className="p-4 w-full space-y-2 flex-grow">
-                            <FormInputWithLabel
-                              className="text-gray-100 text-base"
-                              label="name"
-                              name="name"
-                              placeholder="e.g. my nft"
-                              value={token.name}
-                              disabled
-                            />
-                            <FormTextareaWithLabel
-                              className="text-gray-100 text-base"
-                              label="description"
-                              name="description"
-                              placeholder="e.g. my nft description"
-                              value={token.description}
-                              disabled
-                            />
-                            <FormInputWithLabel
-                              className="text-gray-100 text-base"
-                              label="link"
-                              name="link"
-                              placeholder="e.g. my nft"
-                              value={token.external_url}
-                              disabled
-                            />
-                          </div>
-                          <div className="flex w-full justify-between items-center p-4">
-                            <button
-                              className="rounded-full bg-gray-500 p-2"
-                              disabled
-                            >
-                              <TrashIcon className="w-8 h-8 text-gray-500" />
-                            </button>
-                            <div>
-                              <div className="text-4xl text-cyan-400">
-                                {token.amountToMint || 0}
-                              </div>
-                            </div>
-                            <button className="rounded-full bg-cyan-400 hover:bg-cyan-500 p-2">
-                              <TrashIcon className="w-8 h-8 text-gray-100" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <CnftCard refetch={refetch} token={token} key={token.id} />
                 );
               })}
             </>

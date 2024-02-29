@@ -13,6 +13,7 @@ import { StepTitle } from "@/features/UI/typography/step-title";
 import { SingleImageUploadResponse } from "@/features/upload/single-image/single-image-upload-field-wrapper";
 import { useCluster } from "@/hooks/cluster";
 import {
+  InformationCircleIcon,
   PlusCircleIcon,
   PlusIcon,
   TrashIcon,
@@ -31,6 +32,7 @@ import { SingleImageUpload } from "@/features/upload/single-image/single-image-u
 import { DndCard } from "@/features/UI/cards/dnd-card";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import { SubmitButton } from "@/features/UI/buttons/submit-button";
+import { FormCheckboxWithLabel } from "@/features/UI/forms/form-checkbox-with-label";
 
 type SortedTrait = Trait & { sortOrder: number };
 
@@ -58,6 +60,7 @@ export const BuildCnftStep = () => {
       saveAction: "mint",
       externalUrl: "",
       quantity: 1,
+      shouldFillRemaining: false,
     },
     onSubmit: async ({
       sellerFeeBasisPoints,
@@ -169,6 +172,13 @@ export const BuildCnftStep = () => {
   ]);
 
   useEffect(() => {
+    if (formik.values.shouldFillRemaining) {
+      formik.setFieldValue("quantity", 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.shouldFillRemaining]);
+
+  useEffect(() => {
     const localAirdropId = localStorage.getItem("airdropId");
     const localCollectionId = localStorage.getItem("collectionId");
     if (!localAirdropId || !localCollectionId) {
@@ -217,7 +227,22 @@ export const BuildCnftStep = () => {
                     value={formik.values.quantity}
                     onChange={formik.handleChange}
                     description="the number of cnfts to create"
+                    disabled={formik.values.shouldFillRemaining}
                   />
+                  <div className="flex">
+                    <FormCheckboxWithLabel
+                      label="fill"
+                      name="shouldFillRemaining"
+                      value={formik.values.shouldFillRemaining}
+                      onChange={(e: any) => {
+                        formik.setFieldValue(
+                          "shouldFillRemaining",
+                          e.target.checked
+                        );
+                      }}
+                    />
+                    <InformationCircleIcon className="h-6 w-6 text-gray-400 mt-1 ml-3" />
+                  </div>
                 </div>
               </div>
             </div>
