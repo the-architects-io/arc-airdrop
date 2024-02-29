@@ -35,6 +35,7 @@ export const CreateCnftsStep = () => {
   const user = useUserData();
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [airdropId, setAirdropId] = useState<string | null>(null);
+  const [totalTokenCount, setTotalTokenCount] = useState<number>(0);
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -264,6 +265,13 @@ export const CreateCnftsStep = () => {
     if (!tokenData?.tokens?.length) return;
     if (formik.values.tokens.length) return;
 
+    const amountToMint = tokenData.tokens.reduce(
+      (acc: number, token: Token) => acc + (token?.amountToMint ?? 0),
+      0
+    );
+
+    setTotalTokenCount(amountToMint + totalTokenCount);
+
     formik.setValues({
       tokens:
         tokenData?.tokens?.map(
@@ -274,7 +282,7 @@ export const CreateCnftsStep = () => {
             } as Token)
         ) || [],
     });
-  }, [formik, tokenData]);
+  }, [formik, tokenData, totalTokenCount]);
 
   useEffect(() => {
     const localAirdropId = localStorage.getItem("airdropId");
@@ -291,7 +299,7 @@ export const CreateCnftsStep = () => {
   return (
     <>
       <StepTitle>create compressed nfts</StepTitle>
-      <StepSubtitle>0 / 15,000 cnfts created</StepSubtitle>
+      <StepSubtitle>{totalTokenCount} / 15,000 cnfts created</StepSubtitle>
       <div className="flex flex-wrap w-full min-h-full pb-28">
         <CnftPlaceholderCard />
         <>
