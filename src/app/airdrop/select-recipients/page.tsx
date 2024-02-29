@@ -22,14 +22,19 @@ export default function SelectRecipientsPage() {
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!user?.id) {
+    const localUserId = localStorage.getItem("userId");
+    const localPublicKey = localStorage.getItem("publicKey");
+    if (!user?.id && !localUserId) {
       router.push("/login-signup");
       return;
     }
-    if (!wallet?.publicKey) {
+    if (!wallet?.publicKey && !localPublicKey) {
       router.push("/connect-wallet");
       return;
     }
+
+    localStorage.setItem("userId", user?.id as string);
+    localStorage.setItem("publicKey", wallet?.publicKey?.toString() as string);
 
     setCurrentStep(airdropFlowSteps.SelectRecipients);
     setIsLoading(false);

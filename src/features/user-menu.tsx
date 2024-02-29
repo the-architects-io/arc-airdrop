@@ -19,6 +19,11 @@ export default function UserMenu() {
     return <></>;
   }
 
+  const handleSignOut = async () => {
+    localStorage.removeItem("userId");
+    await signOut();
+  };
+
   return (
     <div className="top-4 right-4 absolute">
       <Menu as="div" className="relative inline-block text-left">
@@ -68,7 +73,7 @@ export default function UserMenu() {
               <Menu.Item>
                 {({ active }) => (
                   <button
-                    onClick={() => signOut()}
+                    onClick={() => handleSignOut()}
                     className="flex items-center hover:bg-cyan-500 hover:text-gray-100 group rounded w-full"
                   >
                     <ArrowLeftStartOnRectangleIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-100" />
