@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { fadeOut } from "@/animations";
-import { MerkleTree, TokenMetadata, Trait } from "@/app/blueprint/types";
+import { MerkleTree, Token, TokenMetadata, Trait } from "@/app/blueprint/types";
 import {
   ASSET_SHDW_DRIVE_ADDRESS,
   fadeOutTimeoutDuration,
@@ -99,6 +99,7 @@ export const BuildCnftStep = () => {
             userId: user?.id,
             isPremint: true,
             amountToMint: formik.values.quantity,
+            shouldFillRemaining: formik.values.shouldFillRemaining,
             collectionId,
             imageSizeInBytes: image.sizeInBytes,
           },
@@ -219,19 +220,21 @@ export const BuildCnftStep = () => {
               </SingleImageUpload>
               <div className="flex flex-col mt-8">
                 <div className="space-y-5 w-full">
-                  <FormInputWithLabel
-                    type="number"
-                    label="quantity"
-                    name="quantity"
-                    placeholder="e.g. 100"
-                    value={formik.values.quantity}
-                    onChange={formik.handleChange}
-                    description="the number of cnfts to create"
-                    disabled={formik.values.shouldFillRemaining}
-                  />
+                  {!formik.values.shouldFillRemaining && (
+                    <FormInputWithLabel
+                      type="number"
+                      label="quantity"
+                      name="quantity"
+                      placeholder="e.g. 100"
+                      value={formik.values.quantity}
+                      onChange={formik.handleChange}
+                      description="the number of cnfts to create"
+                      disabled={formik.values.shouldFillRemaining}
+                    />
+                  )}
                   <div className="flex">
                     <FormCheckboxWithLabel
-                      label="fill"
+                      label="fill remaining"
                       name="shouldFillRemaining"
                       value={formik.values.shouldFillRemaining}
                       onChange={(e: any) => {

@@ -11,6 +11,7 @@ export const airdropFlowSteps = {
   CreateCollection: "create-collection",
   CreateNfts: "create-cnfts",
   Review: "review",
+  ExecuteAirdrop: "execute-airdrop",
 };
 
 export const AirdropFlowStepContext = createContext(

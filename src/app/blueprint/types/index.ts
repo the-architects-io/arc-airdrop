@@ -529,6 +529,7 @@ export type Recipient = {
 export type Airdrop = {
   name: string;
   id: string;
+  hasBeenPaidFor: boolean;
   job?: {
     id: string;
     status: {
@@ -672,6 +673,7 @@ export type Token = {
   collectionId?: string;
   amountToMint?: number;
   imageSizeInBytes?: number;
+  shouldFillRemaining?: boolean;
 } & TokenMetadata;
 
 export type TokensInput = {
@@ -1112,6 +1114,7 @@ export type UpdateAirdropInput = {
   isReadyToDrop?: boolean;
   jobId?: string;
   cluster?: "devnet" | "mainnet-beta";
+  hasBeenPaidFor?: boolean;
 };
 
 export type UpdateAirdropRespone = BaseBlueprintResponse & {

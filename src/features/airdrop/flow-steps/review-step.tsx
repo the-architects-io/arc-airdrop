@@ -14,9 +14,11 @@ import Spinner from "@/features/UI/spinner";
 import { StepHeading } from "@/features/UI/typography/step-heading";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import showToast from "@/features/toasts/show-toast";
+import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 import { useCluster } from "@/hooks/cluster";
 import { TreeOptions } from "@/types";
+import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
 import { useQuery } from "@apollo/client";
 import {
   ALL_DEPTH_SIZE_PAIRS,
@@ -24,10 +26,7 @@ import {
 } from "@solana/spl-account-compression";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import {
-  GET_AIRDROP_BY_ID,
-  GET_COLLECTION_BY_ID,
-} from "@the-architects/blueprint-graphql";
+import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -128,14 +127,10 @@ export const ReviewStep = () => {
       }) => {
         console.log({ airdrop });
         setAirdrop(airdrop);
-        const { recipients } = airdrop;
-        setUniqueRecipientCount(recipients?.length || 0);
-        setRecipientCount(
-          recipients?.reduce(
-            (acc: number, recipient: any) => acc + recipient?.amount,
-            0
-          ) || 0
-        );
+        const { uniqueRecipients, recipientCount } =
+          getRecipientCountsFromAirdrop(airdrop);
+        setUniqueRecipientCount(uniqueRecipients);
+        setRecipientCount(recipientCount);
       },
     }
   );
@@ -377,7 +372,10 @@ export const ReviewStep = () => {
 
   const handleSolPayment = useCallback(
     async (amountInSol: number) => {
-      if (!wallet) return;
+      if (!wallet || !airdropId) {
+        console.error("Wallet or airdrop not found");
+        return;
+      }
       setIsSaving(true);
       const blueprint = createBlueprintClient({ cluster });
 
@@ -389,6 +387,10 @@ export const ReviewStep = () => {
           cluster,
         });
         if (txId) {
+          await blueprint.airdrops.updateAirdrop({
+            id: airdropId,
+            hasBeenPaidFor: true,
+          });
           showToast({
             primaryMessage: "Payment successful",
             link: {
@@ -396,11 +398,15 @@ export const ReviewStep = () => {
               title: "View transaction",
             },
           });
+          router.push(`${BASE_URL}/airdrop/execute/${airdropId}`);
+          debugger;
+          return;
         } else {
           showToast({
             primaryMessage: "Payment failed",
             secondaryMessage: "Please try again",
           });
+          router.push(`${BASE_URL}/airdrop/review`); // remove query params
         }
       } catch (error) {
         console.error(error);
@@ -408,17 +414,17 @@ export const ReviewStep = () => {
           primaryMessage: "Payment failed",
           secondaryMessage: "Please try again",
         });
+        router.push(`${BASE_URL}/airdrop/review`); // remove query params
       } finally {
         setIsSaving(false);
-        router.push(`${BASE_URL}/airdrop/review`); // remove query params
       }
     },
-    [wallet, cluster, setIsSaving, router]
+    [wallet, airdropId, setIsSaving, cluster, router]
   );
 
   useEffect(() => {
     if (!finalPrice) return;
-    if (searchParams.get("step")) {
+    if (searchParams.get("step") && searchParams.get("step") === "payment") {
       handleSolPayment(finalPrice);
     }
   }, [searchParams, finalPrice, handleSolPayment]);
@@ -439,8 +445,7 @@ export const ReviewStep = () => {
 
     if (totalCost && treeCost && storageCost) {
       const feeMultiplier = 1.15;
-      // round to 9 decimal places
-      const finalPrice = Math.round(totalCost * feeMultiplier * 1e9) / 1e9;
+      const finalPrice = Math.round(totalCost * feeMultiplier * 1e9) / 1e9; // round to 9 decimal places
       setFinalPrice(finalPrice);
     }
 

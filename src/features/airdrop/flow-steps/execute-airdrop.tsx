@@ -47,6 +47,19 @@ export const ExecuteAirdrop = ({
       canopyDepth,
     } = airdrop.collection;
 
+    console.log({
+      name,
+      symbol,
+      description,
+      sellerFeeBasisPoints,
+      driveAddress,
+      imageUrl,
+      id,
+      maxBufferSize,
+      maxDepth,
+      canopyDepth,
+    });
+
     if (
       !name ||
       !sellerFeeBasisPoints ||
@@ -54,7 +67,7 @@ export const ExecuteAirdrop = ({
       !maxBufferSize ||
       !maxDepth
     ) {
-      console.log("Missing collection data");
+      console.log("Missing required fields");
       return;
     }
 

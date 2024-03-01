@@ -4,6 +4,7 @@ export const GET_PREMINT_TOKENS_BY_COLLECTION_ID = gql`
   query GET_PREMINT_TOKENS_BY_COLLECTION_ID($id: uuid!) {
     tokens(where: { collectionId: { _eq: $id } }) {
       amountToMint
+      shouldFillRemaining
       animation_url
       attributes
       cluster

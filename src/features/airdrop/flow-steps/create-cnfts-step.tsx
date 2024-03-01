@@ -1,6 +1,7 @@
 import { createBlueprintClient } from "@/app/blueprint/client";
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import {
+  Airdrop,
   Collection,
   JobIcons,
   StatusUUIDs,
@@ -15,8 +16,10 @@ import { CnftCard } from "@/features/UI/cards/cnft-card";
 import { CnftPlaceholderCard } from "@/features/UI/cards/cnft-placeholder-card";
 import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
+import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 import { useCluster } from "@/hooks/cluster";
+import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
 import { useQuery } from "@apollo/client";
 import { useUserData } from "@nhost/nextjs";
 import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
@@ -36,6 +39,8 @@ export const CreateCnftsStep = () => {
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [airdropId, setAirdropId] = useState<string | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<number>(0);
+  const [recipientCount, setRecipientCount] = useState<number>(0);
+  const [hasFillerToken, setHasFillerToken] = useState<boolean>(false);
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -62,6 +67,28 @@ export const CreateCnftsStep = () => {
       setCollection(collection);
     },
   });
+
+  const { loading: loadingAirdrop, data: airdropData } = useQuery(
+    GET_AIRDROP_BY_ID,
+    {
+      variables: {
+        id: airdropId,
+      },
+      skip: !airdropId,
+      fetchPolicy: "network-only",
+      onCompleted: ({
+        airdrops_by_pk: airdrop,
+      }: {
+        airdrops_by_pk: Airdrop;
+      }) => {
+        console.log({ airdrop });
+
+        const { uniqueRecipients, recipientCount } =
+          getRecipientCountsFromAirdrop(airdrop);
+        setRecipientCount(recipientCount);
+      },
+    }
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -270,7 +297,12 @@ export const CreateCnftsStep = () => {
       0
     );
 
+    const hasFillerToken = tokenData.tokens.some(
+      (token: Token) => token.shouldFillRemaining
+    );
+
     setTotalTokenCount(amountToMint + totalTokenCount);
+    setHasFillerToken(hasFillerToken);
 
     formik.setValues({
       tokens:
@@ -299,7 +331,10 @@ export const CreateCnftsStep = () => {
   return (
     <>
       <StepTitle>create compressed nfts</StepTitle>
-      <StepSubtitle>{totalTokenCount} / 15,000 cnfts created</StepSubtitle>
+      <StepSubtitle>
+        {hasFillerToken ? recipientCount : totalTokenCount} / {recipientCount}{" "}
+        cnfts created
+      </StepSubtitle>
       <div className="flex flex-wrap w-full min-h-full pb-28">
         <CnftPlaceholderCard />
         <>

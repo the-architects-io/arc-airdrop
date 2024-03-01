@@ -4,10 +4,7 @@ import { BASE_URL } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
 import Spinner from "@/features/UI/spinner";
-import { REMOVE_TOKEN } from "@/graphql/mutations/remove-token";
-import { useMutation } from "@apollo/client";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { REMOVE_COST_COLLECTION } from "@the-architects/blueprint-graphql";
 import axios from "axios";
 import Image from "next/image";
 
@@ -77,10 +74,8 @@ export const CnftCard = ({
               <button className="rounded-full bg-gray-500 p-2" disabled>
                 <TrashIcon className="w-8 h-8 text-gray-500" />
               </button>
-              <div>
-                <div className="text-4xl text-cyan-400">
-                  {token.amountToMint || 0}
-                </div>
+              <div className="text-4xl text-cyan-400">
+                {token.shouldFillRemaining ? "fill" : token.amountToMint}
               </div>
               <button
                 className="rounded-full bg-cyan-400 hover:bg-cyan-500 p-2"

@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     isReadyToDrop,
     shouldKickoffManually,
     jobId,
+    hasBeenPaidFor,
   } = await req.json();
 
   if (!id) {
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     isReadyToDrop,
     shouldKickoffManually,
     jobId,
+    hasBeenPaidFor,
   });
 
   try {
@@ -52,6 +54,7 @@ export async function POST(req: NextRequest) {
           ...(isReadyToDrop && { isReadyToDrop }),
           ...(shouldKickoffManually && { shouldKickoffManually }),
           ...(jobId && { jobId }),
+          ...(hasBeenPaidFor && { hasBeenPaidFor }),
         },
       }
     );
