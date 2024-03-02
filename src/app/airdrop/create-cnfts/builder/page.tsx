@@ -21,6 +21,8 @@ export default function BuildCnftPage() {
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!window) return;
+
     const localUserId = localStorage.getItem("userId");
     const localPublicKey = localStorage.getItem("publicKey");
     if (!user?.id && !localUserId) {

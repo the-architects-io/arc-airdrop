@@ -158,6 +158,8 @@ export const BuildCnftStep = () => {
   }, [tokenId]);
 
   useEffect(() => {
+    if (!window) return;
+
     if (airdropId && collectionId) {
       localStorage.setItem("airdropId", airdropId);
       localStorage.setItem("collectionId", collectionId);

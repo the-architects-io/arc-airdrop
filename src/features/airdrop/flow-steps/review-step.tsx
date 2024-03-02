@@ -541,6 +541,8 @@ export const ReviewStep = () => {
   ]);
 
   useEffect(() => {
+    if (!window) return;
+
     const localAirdropId = localStorage.getItem("airdropId");
     const localCollectionId = localStorage.getItem("collectionId");
     if (!localAirdropId || !localCollectionId) {

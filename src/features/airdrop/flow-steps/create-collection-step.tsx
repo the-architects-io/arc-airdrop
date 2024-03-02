@@ -185,6 +185,8 @@ export const CreateCollectionStep = () => {
   }, [collectionId, getCollection, publicKey]);
 
   useEffect(() => {
+    if (!window) return;
+
     const localAirdropId = localStorage.getItem("airdropId");
     const localCollectionId = localStorage.getItem("collectionId");
     if (localAirdropId) {

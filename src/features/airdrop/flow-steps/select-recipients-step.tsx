@@ -363,6 +363,8 @@ export const SelectRecipientsStep = () => {
   }, []);
 
   useEffect(() => {
+    if (!window) return;
+
     if (airdropId && collectionId) {
       localStorage.setItem("recipientCount", String(recipientCount));
       localStorage.setItem("airdropId", airdropId);
