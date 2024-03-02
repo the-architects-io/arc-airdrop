@@ -331,6 +331,8 @@ export const SelectRecipientsStep = () => {
   }, [jsonBeingUploaded, isValidHashlist, uploadJsonFile]);
 
   useEffect(() => {
+    if (!window) return;
+
     const localAirdropId = localStorage.getItem("airdropId");
     const localCollectionId = localStorage.getItem("collectionId");
     const localCustomLocalHashlistCount = localStorage.getItem(
