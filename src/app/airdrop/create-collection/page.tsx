@@ -11,8 +11,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function CreateCollectionPage() {
+  const [walletInitialized, setWalletInitialized] = useState(false);
   const user = useUserData();
-  const wallet = useWallet();
+  const { publicKey } = useWallet();
   const router = useRouter();
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
@@ -21,25 +22,35 @@ export default function CreateCollectionPage() {
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!window) return;
-
-    const localUserId = localStorage.getItem("userId");
-    const localPublicKey = localStorage.getItem("publicKey");
-    if (!user?.id && !localUserId) {
+    if (!user && !localStorage.getItem("userId")) {
       router.push("/login-signup");
-      return;
-    }
-    if (!wallet?.publicKey && !localPublicKey) {
+    } else if (!walletInitialized) {
+      const timeoutId = setTimeout(() => {
+        setWalletInitialized(true);
+      });
+
+      return () => clearTimeout(timeoutId);
+    } else if (
+      walletInitialized &&
+      !publicKey &&
+      !localStorage.getItem("publicKey")
+    ) {
       router.push("/connect-wallet");
-      return;
     }
 
-    localStorage.setItem("userId", user?.id as string);
-    localStorage.setItem("publicKey", wallet?.publicKey?.toString() as string);
+    if (user?.id) localStorage.setItem("userId", user.id);
+    if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
     setCurrentStep(airdropFlowSteps.CreateCollection);
     setIsLoading(false);
-  }, [wallet, user, setCurrentStep, airdropFlowSteps, router]);
+  }, [
+    user,
+    publicKey,
+    walletInitialized,
+    router,
+    setCurrentStep,
+    airdropFlowSteps.CreateCollection,
+  ]);
 
   useEffect(() => {
     setTimeout(() => {

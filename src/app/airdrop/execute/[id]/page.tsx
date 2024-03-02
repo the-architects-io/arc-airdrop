@@ -27,10 +27,10 @@ import { JobStatus } from "@/features/jobs/job-status";
 
 export default function AirdropDetailsPage({ params }: { params: any }) {
   const user = useUserData();
-  const wallet = useWallet();
+  const { publicKey } = useWallet();
   const router = useRouter();
   const { setCurrentStep } = useAirdropFlowStep();
-
+  const [walletInitialized, setWalletInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [airdrop, setAirdrop] = useState<Airdrop | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -94,25 +94,28 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
   );
 
   useEffect(() => {
-    if (!window) return;
-
-    const localUserId = localStorage.getItem("userId");
-    const localPublicKey = localStorage.getItem("publicKey");
-    if (!user?.id && !localUserId) {
+    if (!user && !localStorage.getItem("userId")) {
       router.push("/login-signup");
-      return;
-    }
-    if (!wallet?.publicKey && !localPublicKey) {
+    } else if (!walletInitialized) {
+      const timeoutId = setTimeout(() => {
+        setWalletInitialized(true);
+      });
+
+      return () => clearTimeout(timeoutId);
+    } else if (
+      walletInitialized &&
+      !publicKey &&
+      !localStorage.getItem("publicKey")
+    ) {
       router.push("/connect-wallet");
-      return;
     }
 
-    localStorage.setItem("userId", user?.id as string);
-    localStorage.setItem("publicKey", wallet?.publicKey?.toString() as string);
+    if (user?.id) localStorage.setItem("userId", user.id);
+    if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
     setCurrentStep(airdropFlowSteps.ExecuteAirdrop);
     setIsLoading(false);
-  }, [wallet, user, setCurrentStep, router]);
+  }, [user, publicKey, walletInitialized, router, setCurrentStep]);
 
   if (isLoading) {
     return <LoadingPanel />;

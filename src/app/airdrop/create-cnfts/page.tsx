@@ -12,8 +12,9 @@ import { CreateCnftsStep } from "@/features/airdrop/flow-steps/create-cnfts-step
 
 export default function CreateCnftsPage() {
   const user = useUserData();
-  const wallet = useWallet();
+  const { publicKey } = useWallet();
   const router = useRouter();
+  const [walletInitialized, setWalletInitialized] = useState(false);
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -21,25 +22,36 @@ export default function CreateCnftsPage() {
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!window) return;
-
-    const localUserId = localStorage.getItem("userId");
-    const localPublicKey = localStorage.getItem("publicKey");
-    if (!user?.id && !localUserId) {
+    if (!user && !localStorage.getItem("userId")) {
       router.push("/login-signup");
-      return;
-    }
-    if (!wallet?.publicKey && !localPublicKey) {
+    } else if (!walletInitialized) {
+      const timeoutId = setTimeout(() => {
+        setWalletInitialized(true);
+      });
+
+      return () => clearTimeout(timeoutId);
+    } else if (
+      walletInitialized &&
+      !publicKey &&
+      !localStorage.getItem("publicKey")
+    ) {
       router.push("/connect-wallet");
-      return;
     }
 
-    localStorage.setItem("userId", user?.id as string);
-    localStorage.setItem("publicKey", wallet?.publicKey?.toString() as string);
+    if (user?.id) localStorage.setItem("userId", user.id);
+    if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
     setCurrentStep(airdropFlowSteps.CreateNfts);
     setIsLoading(false);
-  }, [wallet, user, setCurrentStep, airdropFlowSteps, router]);
+  }, [
+    user,
+    publicKey,
+    walletInitialized,
+    router,
+    setCurrentStep,
+    airdropFlowSteps.CreateCollection,
+    airdropFlowSteps.CreateNfts,
+  ]);
 
   useEffect(() => {
     setTimeout(() => {
