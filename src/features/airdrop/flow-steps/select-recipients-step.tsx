@@ -1,3 +1,5 @@
+"use client";
+
 import axios from "axios";
 import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
