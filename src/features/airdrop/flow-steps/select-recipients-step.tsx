@@ -357,7 +357,9 @@ export const SelectRecipientsStep = () => {
       localSelectedSnapshotOptions &&
       Object.keys(JSON.parse(localSelectedSnapshotOptions)).length
     ) {
-      setSelectedSnapshotOptions(JSON.parse(localSelectedSnapshotOptions));
+      setSelectedSnapshotOptions(
+        JSON.parse(localSelectedSnapshotOptions) || []
+      );
     }
     if (localRecipientCount) {
       setRecipientCount(Number(localRecipientCount));
