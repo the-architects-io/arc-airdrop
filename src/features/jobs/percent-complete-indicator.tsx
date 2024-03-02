@@ -10,7 +10,7 @@ export const PercentCompleteIndicator = ({
       {!!percentComplete && percentComplete > 0 && percentComplete < 100 && (
         <>
           <div className="mb-8 flex flex-col items-center justify-center w-full h-48">
-            <div className="flex justify-center items-end mb-4 text-sky-200">
+            <div className="flex justify-center items-end mb-4 text-gray-400">
               <div className="text-8xl">{Math.floor(percentComplete)}</div>
               <span className="ml-3 text-xl">%</span>
             </div>

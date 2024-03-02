@@ -3,6 +3,7 @@ import { useSaving } from "@/app/blueprint/hooks/saving";
 import {
   Airdrop,
   Collection,
+  CollectionBuildSourceUUIDs,
   Token,
   TreeCreationMethod,
 } from "@/app/blueprint/types";
@@ -399,7 +400,6 @@ export const ReviewStep = () => {
             },
           });
           router.push(`${BASE_URL}/airdrop/execute/${airdropId}`);
-          debugger;
           return;
         } else {
           showToast({
@@ -421,6 +421,49 @@ export const ReviewStep = () => {
     },
     [wallet, airdropId, setIsSaving, cluster, router]
   );
+
+  const updateCollectionWithTreeInfo = useCallback(async () => {
+    if (!collection || !treeMaxDepth || !treeMaxBufferSize) {
+      console.error("Collection or tree info not found");
+      return;
+    }
+    const blueprint = createBlueprintClient({ cluster });
+
+    const { METADATA_JSONS, PREMINT_TOKENS } = CollectionBuildSourceUUIDs;
+
+    type CollectionBuildSourceIdType =
+      | (typeof CollectionBuildSourceUUIDs)["METADATA_JSONS"]
+      | (typeof CollectionBuildSourceUUIDs)["PREMINT_TOKENS"];
+
+    const tokenCount = tokenData.tokens.reduce(
+      (acc: number, token: Token) => acc + (Number(token?.amountToMint) || 0),
+      0
+    );
+
+    console.log({ tokenCount });
+
+    const { success } = await blueprint.collections.updateCollection({
+      tokenImagesSizeInBytes: tokenData.tokens.reduce(
+        (acc: number, token: Token) =>
+          acc + (Number(token?.imageSizeInBytes) || 0),
+        0
+      ),
+      tokenCount,
+      collectionBuildSourceId: PREMINT_TOKENS,
+      id: collection.id,
+      maxDepth: treeMaxDepth,
+      maxBufferSize: treeMaxBufferSize,
+      canopyDepth: treeCanopyDepth || 0,
+      isReadyToMint: true,
+    });
+  }, [
+    collection,
+    treeMaxDepth,
+    treeMaxBufferSize,
+    cluster,
+    tokenData?.tokens,
+    treeCanopyDepth,
+  ]);
 
   useEffect(() => {
     if (!finalPrice) return;
@@ -446,6 +489,9 @@ export const ReviewStep = () => {
     if (totalCost && treeCost && storageCost) {
       const feeMultiplier = 1.15;
       const finalPrice = Math.round(totalCost * feeMultiplier * 1e9) / 1e9; // round to 9 decimal places
+
+      updateCollectionWithTreeInfo();
+
       setFinalPrice(finalPrice);
     }
 
@@ -491,6 +537,7 @@ export const ReviewStep = () => {
     totalCost,
     totalTokenCount,
     treeCost,
+    updateCollectionWithTreeInfo,
   ]);
 
   useEffect(() => {

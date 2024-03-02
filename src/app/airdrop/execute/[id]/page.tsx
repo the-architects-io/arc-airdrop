@@ -1,9 +1,13 @@
 "use client";
-import { Airdrop, Job, StatusUUIDs } from "@/app/blueprint/types";
+import { Airdrop, Collection, Job, StatusUUIDs } from "@/app/blueprint/types";
 import { BASE_URL } from "@/constants/constants";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 
-import { GET_JOB_BY_ID } from "@the-architects/blueprint-graphql";
+import {
+  GET_COLLECTION_BY_ID,
+  GET_JOB_BY_ID,
+  GET_UPLOAD_JOB_BY_ID,
+} from "@the-architects/blueprint-graphql";
 import { useQuery } from "@apollo/client";
 import { useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
@@ -19,6 +23,7 @@ import {
 import { AirdropStatus } from "@/features/airdrop/flow-steps/airdrop-status";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { LoadingPanel } from "@/features/loading-panel";
+import { JobStatus } from "@/features/jobs/job-status";
 
 export default function AirdropDetailsPage({ params }: { params: any }) {
   const user = useUserData();
@@ -29,10 +34,12 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
   const [isLoading, setIsLoading] = useState(true);
   const [airdrop, setAirdrop] = useState<Airdrop | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [uploadJobId, setUploadJobId] = useState<string | null>(null);
+  const [collection, setCollection] = useState<Collection | null>(null);
 
   const {
     loading,
-    data,
+    data: jobData,
   }: { loading: boolean; data: { jobs_by_pk: Job } | undefined } = useQuery(
     GET_JOB_BY_ID,
     {
@@ -44,6 +51,15 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
       fetchPolicy: "no-cache",
     }
   );
+
+  const { error, data: uploadJobData } = useQuery(GET_UPLOAD_JOB_BY_ID, {
+    variables: {
+      id: uploadJobId,
+    },
+    skip: !uploadJobId,
+    pollInterval: 1000,
+    fetchPolicy: "no-cache",
+  });
 
   useQuery(GET_AIRDROP_BY_ID, {
     variables: {
@@ -57,6 +73,25 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
       if (airdrops_by_pk?.job?.id) setJobId(airdrops_by_pk?.job?.id);
     },
   });
+
+  const { loading: loadingCollection, data: collectionData } = useQuery(
+    GET_COLLECTION_BY_ID,
+    {
+      variables: {
+        id: airdrop?.collection?.id,
+      },
+      skip: !airdrop?.collection?.id,
+      fetchPolicy: "no-cache",
+      onCompleted: ({
+        collections_by_pk: collection,
+      }: {
+        collections_by_pk: Collection;
+      }) => {
+        console.log({ collection });
+        setCollection(collection);
+      },
+    }
+  );
 
   useEffect(() => {
     const localUserId = localStorage.getItem("userId");
@@ -89,28 +124,46 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
     );
 
   return (
-    <div className="w-full h-full min-h-screen text-stone-300">
-      {!!data?.jobs_by_pk && airdrop?.id ? (
+    <div className="w-full h-full min-h-screen text-gray-400">
+      {/* {collection?.id &&
+        uploadJobData?.uploadJobs_by_pk?.id &&
+        uploadJobData?.uploadJobs_by_pk?.status !== StatusUUIDs.COMPLETE && (
+          <ContentWrapper>
+            <ContentWrapperYAxisCenteredContent>
+              <JobStatus
+                jobId={uploadJobData?.uploadJobs_by_pk?.id}
+                setJob={(job) => {
+                  if (!job) {
+                    setUploadJobId(null);
+                  }
+                }}
+                collectionId={collection?.id}
+              />
+            </ContentWrapperYAxisCenteredContent>
+          </ContentWrapper>
+        )} */}
+      {(jobData?.jobs_by_pk?.id || uploadJobData?.uploadJobs_by_pk?.id) &&
+      airdrop?.id &&
+      collection?.id ? (
         <ContentWrapper>
           <ContentWrapperYAxisCenteredContent>
             <AirdropStatus
               airdropId={airdrop?.id}
-              jobId={data?.jobs_by_pk?.id}
-              setJob={(job) => {
-                if (!job) {
-                  setJobId(null);
-                }
-              }}
+              jobId={jobData?.jobs_by_pk?.id}
+              uploadJobId={uploadJobData?.uploadJobs_by_pk?.id}
             />
           </ContentWrapperYAxisCenteredContent>
         </ContentWrapper>
       ) : (
         <ContentWrapper className="text-center">
-          <div className="text-lg mb-4">
-            {!!airdrop?.recipients?.length && (
-              <ExecuteAirdrop airdrop={airdrop} setJobId={setJobId} />
-            )}
-          </div>
+          {!!airdrop?.recipients?.length && !!collection?.id && (
+            <ExecuteAirdrop
+              airdrop={airdrop}
+              collection={collection}
+              setJobId={setJobId}
+              setUploadJobId={setUploadJobId}
+            />
+          )}
         </ContentWrapper>
       )}
     </div>
