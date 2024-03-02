@@ -55,8 +55,8 @@ export const SelectRecipientsStep = () => {
   const [customHashlist, setCustomHashlist] = useState<string[]>([]);
   const [customHashlistCount, setCustomHashlistCount] = useState<number>(0);
   const [selectedSnapshotOptions, setSelectedSnapshotOptions] = useState<
-    SnapshotOption[] | null
-  >(null);
+    SnapshotOption[] | []
+  >([]);
   const [jsonUploadyInstance, setJsonUploadyInstance] =
     useState<UploadyContextType | null>(null);
   const [jsonBeingUploaded, setJsonBeingUploaded] = useState<any>(null);
