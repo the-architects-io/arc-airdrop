@@ -2,15 +2,17 @@ import { fadeIn } from "@/animations";
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import Spinner from "@/features/UI/spinner";
-import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import {
+  airdropFlowSteps,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
 import { use, useEffect, useRef, useState } from "react";
 
 export const FlowProgressIndicator = () => {
   const { isSaving } = useSaving();
-  const { currentStep, goToNextStep, goToPreviousStep, airdropFlowSteps } =
-    useAirdropFlowStep();
+  const { currentStep, goToNextStep, goToPreviousStep } = useAirdropFlowStep();
 
   const [showIndicator, setShowIndicator] = useState(false);
   const progressIndicatorRef = useRef<HTMLDivElement>(null);
@@ -31,7 +33,7 @@ export const FlowProgressIndicator = () => {
         }, 400);
       }
     }
-  }, [currentStep, airdropFlowSteps, progressIndicatorRef, showIndicator]);
+  }, [currentStep, progressIndicatorRef, showIndicator]);
 
   if (!showIndicator) {
     return null;

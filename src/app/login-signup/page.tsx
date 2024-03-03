@@ -8,7 +8,10 @@ import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrappe
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import Spinner from "@/features/UI/spinner";
 import { LoadingPanel } from "@/features/loading-panel";
-import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import {
+  airdropFlowSteps,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import {
   useAuthenticationStatus,
   useSignInEmailPassword,
@@ -22,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function LoginSignupPage() {
-  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
+  const { setCurrentStep } = useAirdropFlowStep();
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [didStartAnimation, setDidStartAnimation] = useState(false);
@@ -116,7 +119,6 @@ export default function LoginSignupPage() {
     isLoadingAuth,
     isLoggingIn,
     setCurrentStep,
-    airdropFlowSteps.LoginSignup,
     fadeOutPanel,
   ]);
 

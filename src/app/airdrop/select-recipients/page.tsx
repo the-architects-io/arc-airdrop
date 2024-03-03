@@ -4,7 +4,10 @@ import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { SelectRecipientsStep } from "@/features/airdrop/flow-steps/select-recipients-step";
 import { LoadingPanel } from "@/features/loading-panel";
-import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import {
+  airdropFlowSteps,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
@@ -14,8 +17,7 @@ export default function SelectRecipientsPage() {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
-  const { currentStep, setCurrentStep, airdropFlowSteps } =
-    useAirdropFlowStep();
+  const { setCurrentStep, setCurrentStepIsValid } = useAirdropFlowStep();
 
   const [walletInitialized, setWalletInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,15 +46,7 @@ export default function SelectRecipientsPage() {
 
     setCurrentStep(airdropFlowSteps.SelectRecipients);
     setIsLoading(false);
-  }, [
-    user,
-    publicKey,
-    walletInitialized,
-    router,
-    setCurrentStep,
-    airdropFlowSteps.CreateCollection,
-    airdropFlowSteps.SelectRecipients,
-  ]);
+  }, [user, publicKey, walletInitialized, router, setCurrentStep]);
 
   useEffect(() => {
     setTimeout(() => {

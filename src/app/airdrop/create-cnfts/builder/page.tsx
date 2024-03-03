@@ -4,7 +4,10 @@ import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { BuildCnftStep } from "@/features/airdrop/flow-steps/build-cnft-step";
 import { LoadingPanel } from "@/features/loading-panel";
-import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import {
+  airdropFlowSteps,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
@@ -15,7 +18,7 @@ export default function BuildCnftPage() {
   const { publicKey } = useWallet();
   const router = useRouter();
   const [walletInitialized, setWalletInitialized] = useState(false);
-  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
+  const { setCurrentStep } = useAirdropFlowStep();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,15 +46,7 @@ export default function BuildCnftPage() {
 
     setCurrentStep(airdropFlowSteps.CreateNfts);
     setIsLoading(false);
-  }, [
-    user,
-    publicKey,
-    walletInitialized,
-    router,
-    setCurrentStep,
-    airdropFlowSteps.CreateCollection,
-    airdropFlowSteps.CreateNfts,
-  ]);
+  }, [user, publicKey, walletInitialized, router, setCurrentStep]);
 
   useEffect(() => {
     setTimeout(() => {

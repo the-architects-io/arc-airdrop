@@ -14,6 +14,13 @@ export const airdropFlowSteps = {
   ExecuteAirdrop: "execute-airdrop",
 };
 
+export type AirdropFlowStepContext = {
+  currentStep: string;
+  setCurrentStep: (step: string) => void;
+  currentStepIsValid?: boolean;
+  setCurrentStepIsValid?: (isValid: boolean) => void;
+};
+
 export const AirdropFlowStepContext = createContext(
   {} as AirdropFlowStepContext
 );
@@ -39,19 +46,21 @@ export const AirdropFlowStepProvider = ({
   );
 };
 
-export type AirdropFlowStepContext = {
-  currentStep: string;
-  setCurrentStep: (step: string) => void;
-};
-
 export function useAirdropFlowStep() {
-  const { currentStep, setCurrentStep } = useContext(AirdropFlowStepContext);
+  const {
+    currentStep,
+    setCurrentStep,
+    currentStepIsValid,
+    setCurrentStepIsValid,
+  } = useContext(AirdropFlowStepContext);
   const router = useRouter();
 
   return {
     currentStep,
     setCurrentStep,
     goToNextStep: () => {
+      if (!currentStepIsValid) return;
+
       switch (currentStep) {
         case airdropFlowSteps.SelectRecipients:
           fadeOut("#select-recipients-panel");
@@ -104,6 +113,7 @@ export function useAirdropFlowStep() {
           break;
       }
     },
-    airdropFlowSteps,
+    currentStepIsValid,
+    setCurrentStepIsValid,
   };
 }
