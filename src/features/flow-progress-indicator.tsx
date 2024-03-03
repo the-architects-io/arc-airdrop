@@ -1,39 +1,46 @@
 import { fadeIn } from "@/animations";
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
-import Spinner from "@/features/UI/spinner";
 import {
-  airdropFlowSteps,
+  AirdropFlowStepName,
   useAirdropFlowStep,
 } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const FlowProgressIndicator = () => {
   const { isSaving } = useSaving();
-  const { currentStep, goToNextStep, goToPreviousStep } = useAirdropFlowStep();
+  const {
+    currentStep,
+    goToNextStep,
+    goToPreviousStep,
+    currentStepIsValid,
+    airdropFlowSteps,
+  } = useAirdropFlowStep();
 
   const [showIndicator, setShowIndicator] = useState(false);
   const progressIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (
-      currentStep === airdropFlowSteps.Welcome ||
-      currentStep === airdropFlowSteps.LoginSignup ||
-      currentStep === airdropFlowSteps.ConnectWallet
-    ) {
+    // Determine if the current step is one of the initial steps
+    const isInitialStep = [
+      AirdropFlowStepName.Welcome,
+      AirdropFlowStepName.LoginSignup,
+      AirdropFlowStepName.ConnectWallet,
+    ].includes(currentStep.name);
+
+    if (isInitialStep) {
       setShowIndicator(false);
-      return;
-    } else {
-      if (!showIndicator) {
-        setShowIndicator(true);
-        setTimeout(() => {
-          fadeIn("#progress-indicator");
-        }, 400);
-      }
+    } else if (!showIndicator) {
+      setShowIndicator(true);
+      setTimeout(() => {
+        fadeIn("#progress-indicator");
+      }, 400);
     }
-  }, [currentStep, progressIndicatorRef, showIndicator]);
+    // Since fadeIn is likely a stable function, it's not listed as a dependency here.
+    // Ensure currentStep.name is a stable reference or primitive (e.g., string).
+  }, [currentStep.name, showIndicator]);
 
   if (!showIndicator) {
     return null;
@@ -93,7 +100,7 @@ export const FlowProgressIndicator = () => {
         <SecondaryButton
           className="flex space-x-1"
           onClick={goToNextStep}
-          disabled={isSaving}
+          disabled={isSaving || !currentStepIsValid}
         >
           next
           <ChevronLeftIcon className="w-6 h-6 transform rotate-180" />

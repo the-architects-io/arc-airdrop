@@ -25,6 +25,10 @@ import { useCluster } from "@/hooks/cluster";
 import { useUserData } from "@nhost/nextjs";
 import { UploadyContextType } from "@rpldy/uploady";
 import { useSaving } from "@/app/blueprint/hooks/saving";
+import {
+  AirdropFlowStepName,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 
 type SnapshotOption = {
   updatedAt: string;
@@ -47,6 +51,7 @@ type HolderSnapshotResponse = {
 };
 
 export const SelectRecipientsStep = () => {
+  const { setStepIsValid } = useAirdropFlowStep();
   const user = useUserData();
   const { setIsSaving } = useSaving();
   const { cluster } = useCluster();
@@ -224,6 +229,12 @@ export const SelectRecipientsStep = () => {
     setJsonBeingUploaded(null);
     jsonUploadyInstance?.clearPending();
   }, [jsonUploadyInstance]);
+
+  useEffect(() => {
+    // set valid if recipient count > 0
+    setStepIsValid(AirdropFlowStepName.SelectRecipients, recipientCount > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipientCount]);
 
   const validateHashlist = useCallback(
     (json: any) => {

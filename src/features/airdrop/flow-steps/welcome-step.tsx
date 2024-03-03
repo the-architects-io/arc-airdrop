@@ -3,8 +3,7 @@ import { fadeIn, fadeOut } from "@/animations";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 
 export const WelcomeStep = () => {
-  const { currentStep, setCurrentStep, airdropFlowSteps } =
-    useAirdropFlowStep();
+  const { currentStep, airdropFlowSteps } = useAirdropFlowStep();
 
   useEffect(() => {
     fadeIn("#welcome");

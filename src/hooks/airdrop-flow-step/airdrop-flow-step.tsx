@@ -1,10 +1,18 @@
 import { fadeOut } from "@/animations";
 import { fadeOutTimeoutDuration } from "@/constants/constants";
 import { useRouter } from "next/navigation";
-import { useContext, createContext, useState, ReactNode, useRef } from "react";
+import {
+  useContext,
+  createContext,
+  useState,
+  ReactNode,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 
 type AirdropFlowStep = {
-  name: string;
+  name: AirdropFlowStepName;
   isValid: boolean;
 };
 
@@ -28,6 +36,10 @@ export type AirdropFlowStepContext = {
   setCurrentStep: (step: AirdropFlowStep) => void;
   setStepIsValid: (stepName: AirdropFlowStepName, isValid: boolean) => void;
   airdropFlowSteps: AirdropFlowSteps;
+  nextStepIsValid: boolean;
+  setNextStepIsValid: React.Dispatch<React.SetStateAction<boolean>>;
+  currentStepIsValid: boolean;
+  setCurrentStepIsValid: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const AirdropFlowStepContext = createContext<AirdropFlowStepContext>(
@@ -40,37 +52,58 @@ export const AirdropFlowStepProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const airdropFlowSteps = useRef<AirdropFlowSteps>({
-    Welcome: { name: "welcome", isValid: true },
-    LoginSignup: { name: "login-signup", isValid: true },
-    ConnectWallet: { name: "connect-wallet", isValid: true },
-    SelectRecipients: { name: "select-recipients", isValid: false },
-    CreateCollection: { name: "create-collection", isValid: false },
-    CreateNfts: { name: "create-cnfts", isValid: false },
-    Review: { name: "review", isValid: false },
-    ExecuteAirdrop: { name: "execute-airdrop", isValid: false },
+  const [steps, setSteps] = useState({
+    Welcome: { name: AirdropFlowStepName.Welcome, isValid: true },
+    LoginSignup: { name: AirdropFlowStepName.LoginSignup, isValid: true },
+    ConnectWallet: { name: AirdropFlowStepName.ConnectWallet, isValid: true },
+    SelectRecipients: {
+      name: AirdropFlowStepName.SelectRecipients,
+      isValid: false,
+    },
+    CreateCollection: {
+      name: AirdropFlowStepName.CreateCollection,
+      isValid: false,
+    },
+    CreateNfts: { name: AirdropFlowStepName.CreateNfts, isValid: false },
+    Review: { name: AirdropFlowStepName.Review, isValid: false },
+    ExecuteAirdrop: { name: AirdropFlowStepName.ExecuteAirdrop, isValid: true },
   });
 
   const [currentStep, setCurrentStep] = useState<AirdropFlowStep>(
-    airdropFlowSteps.current.Welcome
+    steps.SelectRecipients
   );
+  const [nextStepIsValid, setNextStepIsValid] = useState(false);
+  const [currentStepIsValid, setCurrentStepIsValid] = useState(false);
 
-  const [_, forceUpdate] = useState({}); // Used to force re-render
-
-  const setStepIsValid = (stepName: string, isValid: boolean) => {
-    if (airdropFlowSteps.current[stepName]) {
-      airdropFlowSteps.current[stepName].isValid = isValid;
-      forceUpdate({}); // Trigger a re-render
-    }
+  const setStepIsValid = (stepName: AirdropFlowStepName, isValid: boolean) => {
+    setSteps((prevSteps) => ({
+      ...prevSteps,
+      [stepName]: { ...prevSteps[stepName], isValid },
+    }));
   };
+
+  useEffect(() => {
+    setCurrentStepIsValid(steps[currentStep.name].isValid);
+    setNextStepIsValid(
+      steps[
+        Object.values(AirdropFlowStepName)[
+          Object.values(AirdropFlowStepName).indexOf(currentStep.name) + 1
+        ]
+      ].isValid
+    );
+  }, [currentStep, setCurrentStepIsValid, steps]);
 
   return (
     <Provider
       value={{
-        airdropFlowSteps: airdropFlowSteps.current,
+        airdropFlowSteps: steps,
         currentStep,
         setCurrentStep,
         setStepIsValid,
+        nextStepIsValid,
+        currentStepIsValid,
+        setNextStepIsValid,
+        setCurrentStepIsValid,
       }}
     >
       {children}
@@ -79,8 +112,14 @@ export const AirdropFlowStepProvider = ({
 };
 
 export function useAirdropFlowStep() {
-  const { currentStep, setCurrentStep, airdropFlowSteps, setStepIsValid } =
-    useContext(AirdropFlowStepContext);
+  const {
+    currentStep,
+    setCurrentStep,
+    airdropFlowSteps,
+    setStepIsValid,
+    nextStepIsValid,
+    currentStepIsValid,
+  } = useContext(AirdropFlowStepContext);
   const [_, forceUpdate] = useState({});
 
   const router = useRouter();
@@ -144,6 +183,8 @@ export function useAirdropFlowStep() {
           break;
       }
     },
+    currentStepIsValid,
+    nextStepIsValid,
     setStepIsValid,
     airdropFlowSteps,
   };
