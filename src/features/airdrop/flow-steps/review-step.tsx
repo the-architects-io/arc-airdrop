@@ -80,6 +80,7 @@ export const ReviewStep = () => {
   );
   const [treeCanopyDepth, setTreeCanopyDepth] = useState<number | null>(null);
   const [treeProofLength, setTreeProofLength] = useState<number | null>(null);
+  const [premintTokensCount, setPremintTokensCount] = useState<number>(0);
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -94,7 +95,7 @@ export const ReviewStep = () => {
           0
         );
 
-        setTotalTokenCount(amountToMint + totalTokenCount);
+        setPremintTokensCount(amountToMint);
       },
     }
   );
@@ -440,20 +441,13 @@ export const ReviewStep = () => {
       | (typeof CollectionBuildSourceUUIDs)["METADATA_JSONS"]
       | (typeof CollectionBuildSourceUUIDs)["PREMINT_TOKENS"];
 
-    const tokenCount = tokenData.tokens.reduce(
-      (acc: number, token: Token) => acc + (Number(token?.amountToMint) || 0),
-      0
-    );
-
-    console.log({ tokenCount });
-
     const { success } = await blueprint.collections.updateCollection({
       tokenImagesSizeInBytes: tokenData.tokens.reduce(
         (acc: number, token: Token) =>
           acc + (Number(token?.imageSizeInBytes) || 0),
         0
       ),
-      tokenCount,
+      tokenCount: totalTokenCount,
       collectionBuildSourceId: PREMINT_TOKENS,
       id: collection.id,
       maxDepth: treeMaxDepth,
@@ -466,8 +460,9 @@ export const ReviewStep = () => {
     treeMaxDepth,
     treeMaxBufferSize,
     cluster,
-    tokenData?.tokens,
+    tokenData.tokens,
     treeCanopyDepth,
+    totalTokenCount,
   ]);
 
   useEffect(() => {
@@ -562,6 +557,18 @@ export const ReviewStep = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const hasFillToken = tokenData.tokens.some(
+      (token: Token) => token?.shouldFillRemaining
+    );
+
+    if (hasFillToken) {
+      setTotalTokenCount(recipientCount);
+    } else {
+      setTotalTokenCount(premintTokensCount);
+    }
+  }, [premintTokensCount, recipientCount, tokenData?.tokens]);
 
   useEffect(() => {
     setStepIsValid(
