@@ -40,14 +40,10 @@ export const BuildCnftStep = () => {
   const router = useRouter();
   const user = useUserData();
   const { cluster } = useCluster();
-  const [availableMerkleTrees, setAvailableMerkleTrees] = useState<
-    (MerkleTree & { label: string; value: string })[]
-  >([]);
   const [image, setImage] = useState<SingleImageUploadResponse | null>(null);
   const [tokenId, setTokenId] = useState<string | null>(null);
   const [collectionId, setCollectionId] = useState<string | undefined>();
   const [airdropId, setAirdropId] = useState<string | undefined>();
-  const { publicKey } = useWallet();
 
   const formik = useFormik({
     initialValues: {

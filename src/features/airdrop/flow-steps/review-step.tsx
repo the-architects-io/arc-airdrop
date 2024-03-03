@@ -17,6 +17,10 @@ import { StepTitle } from "@/features/UI/typography/step-title";
 import showToast from "@/features/toasts/show-toast";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
+import {
+  AirdropFlowStepName,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useCluster } from "@/hooks/cluster";
 import { TreeOptions } from "@/types";
 import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
@@ -53,6 +57,7 @@ export const ReviewStep = () => {
   const { cluster } = useCluster();
   const router = useRouter();
   const { connection } = useConnection();
+  const { setStepIsValid } = useAirdropFlowStep();
 
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [airdropId, setAirdropId] = useState<string | null>(null);
@@ -557,6 +562,14 @@ export const ReviewStep = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setStepIsValid(
+      AirdropFlowStepName.Review,
+      !!finalPrice && !isCalculating && !hasCalcError
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finalPrice, hasCalcError, isCalculating, recipientCount]);
 
   return (
     <>

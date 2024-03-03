@@ -12,6 +12,10 @@ import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import { SingleImageUpload } from "@/features/upload/single-image/single-image-upload";
 import { SingleImageUploadResponse } from "@/features/upload/single-image/single-image-upload-field-wrapper";
+import {
+  AirdropFlowStepName,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useCluster } from "@/hooks/cluster";
 import { debounce } from "@/utils/debounce";
 import { useLazyQuery } from "@apollo/client";
@@ -24,6 +28,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export const CreateCollectionStep = () => {
   const { publicKey } = useWallet();
+  const { setStepIsValid } = useAirdropFlowStep();
   const { isSaving, setIsSaving } = useSaving();
   const [airdropId, setAirdropId] = useState<string | null>(null);
   const [collectionId, setCollectionId] = useState<string | null>(null);
@@ -196,6 +201,31 @@ export const CreateCollectionStep = () => {
       setCollectionId(localCollectionId);
     }
   }, []);
+
+  useEffect(() => {
+    setStepIsValid(
+      AirdropFlowStepName.CreateCollection,
+      !!formik.values.collectionName &&
+        !!formik.values.creatorWallet &&
+        !isSaving &&
+        !loading &&
+        !!collectionId &&
+        (!!collectionImage || !!existingCollectionImageUrl) &&
+        formik.values.sellerFeeBasisPoints >= 0 &&
+        formik.values.sellerFeeBasisPoints <= 100
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formik.values.collectionName,
+    formik.values.symbol,
+    formik.values.creatorWallet,
+    formik.values.sellerFeeBasisPoints,
+    isSaving,
+    loading,
+    collectionId,
+    collectionImage,
+    existingCollectionImageUrl,
+  ]);
 
   return (
     <>

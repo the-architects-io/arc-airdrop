@@ -18,6 +18,10 @@ import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
+import {
+  AirdropFlowStepName,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useCluster } from "@/hooks/cluster";
 import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
 import { useQuery } from "@apollo/client";
@@ -30,6 +34,7 @@ import { useEffect, useState } from "react";
 
 export const CreateCnftsStep = () => {
   const { isSaving, setIsSaving } = useSaving();
+  const { setStepIsValid, previousStepIsValid } = useAirdropFlowStep();
   const { cluster } = useCluster();
   const router = useRouter();
   const [collection, setCollection] = useState<Collection | null>(null);
@@ -329,6 +334,24 @@ export const CreateCnftsStep = () => {
       setCollectionId(localCollectionId);
     }
   }, []);
+
+  useEffect(() => {
+    setStepIsValid(
+      AirdropFlowStepName.CreateNfts,
+      !!formik.values.tokens.length &&
+        !isSaving &&
+        previousStepIsValid &&
+        (recipientCount === totalTokenCount || hasFillerToken)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formik.values.tokens.length,
+    hasFillerToken,
+    isSaving,
+    previousStepIsValid,
+    recipientCount,
+    totalTokenCount,
+  ]);
 
   return (
     <>

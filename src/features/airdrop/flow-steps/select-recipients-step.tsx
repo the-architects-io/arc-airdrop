@@ -211,7 +211,7 @@ export const SelectRecipientsStep = () => {
 
   useEffect(() => {
     if (recipientCountRef?.current) {
-      const { innerHTML } = recipientCountRef.current;
+      const { innerHTML } = recipientCountRef?.current;
       if (!innerHTML) return;
       animate(
         (progress) => {
@@ -231,7 +231,6 @@ export const SelectRecipientsStep = () => {
   }, [jsonUploadyInstance]);
 
   useEffect(() => {
-    // set valid if recipient count > 0
     setStepIsValid(AirdropFlowStepName.SelectRecipients, recipientCount > 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipientCount]);

@@ -4,10 +4,12 @@ import { useSaving } from "@/app/blueprint/hooks/saving";
 import Spinner from "@/features/UI/spinner";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import { useUserData } from "@nhost/nextjs";
+import { useRouter } from "next/navigation";
 
 export const StartOverButton = () => {
   const { isSaving } = useSaving();
   const user = useUserData();
+  const router = useRouter();
 
   const clearLocalStorage = () => {
     const whiteList: string[] = ["publicKey", "userId"];
@@ -23,6 +25,7 @@ export const StartOverButton = () => {
 
   const handleStartOver = () => {
     clearLocalStorage();
+    router.push("/");
     window.location.reload();
   };
 
