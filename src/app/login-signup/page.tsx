@@ -8,10 +8,7 @@ import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrappe
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import Spinner from "@/features/UI/spinner";
 import { LoadingPanel } from "@/features/loading-panel";
-import {
-  airdropFlowSteps,
-  useAirdropFlowStep,
-} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import {
   useAuthenticationStatus,
   useSignInEmailPassword,
@@ -25,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function LoginSignupPage() {
-  const { setCurrentStep } = useAirdropFlowStep();
+  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [didStartAnimation, setDidStartAnimation] = useState(false);
@@ -63,12 +60,23 @@ export default function LoginSignupPage() {
     onSubmit: async ({ email, password }) => {
       setIsLoggingIn(true);
       let res;
-      try {
-        res = await signInEmailPassword(email, password);
-      } catch (err) {
-        console.log(err);
+
+      if (mode === "signup") {
+        try {
+          res = await signUpEmailPassword(email, password);
+        } catch (err) {
+          console.log(err);
+        }
+        formik.setValues({ email: "", password: "" });
+        return;
+      } else {
+        try {
+          res = await signInEmailPassword(email, password);
+        } catch (err) {
+          console.log(err);
+        }
+        formik.setValues({ email: "", password: "" });
       }
-      formik.setValues({ email: "", password: "" });
     },
   });
 
@@ -120,6 +128,7 @@ export default function LoginSignupPage() {
     isLoggingIn,
     setCurrentStep,
     fadeOutPanel,
+    airdropFlowSteps.LoginSignup,
   ]);
 
   if (isLoadingAuth || isLoading) {

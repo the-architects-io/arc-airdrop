@@ -16,10 +16,7 @@ import { useEffect, useState } from "react";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { ExecuteAirdrop } from "@/features/airdrop/flow-steps/execute-airdrop";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  airdropFlowSteps,
-  useAirdropFlowStep,
-} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { AirdropStatus } from "@/features/airdrop/flow-steps/airdrop-status";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { LoadingPanel } from "@/features/loading-panel";
@@ -29,7 +26,7 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
-  const { setCurrentStep } = useAirdropFlowStep();
+  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
   const [walletInitialized, setWalletInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [airdrop, setAirdrop] = useState<Airdrop | null>(null);
@@ -115,7 +112,14 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
 
     setCurrentStep(airdropFlowSteps.ExecuteAirdrop);
     setIsLoading(false);
-  }, [user, publicKey, walletInitialized, router, setCurrentStep]);
+  }, [
+    user,
+    publicKey,
+    walletInitialized,
+    router,
+    setCurrentStep,
+    airdropFlowSteps.ExecuteAirdrop,
+  ]);
 
   if (isLoading) {
     return <LoadingPanel />;

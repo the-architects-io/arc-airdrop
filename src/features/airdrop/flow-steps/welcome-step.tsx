@@ -1,8 +1,11 @@
 import { useEffect } from "react";
 import { fadeIn, fadeOut } from "@/animations";
-import { airdropFlowSteps } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 
-export const WelcomeStep = ({ currentStep }: { currentStep: string }) => {
+export const WelcomeStep = () => {
+  const { currentStep, setCurrentStep, airdropFlowSteps } =
+    useAirdropFlowStep();
+
   useEffect(() => {
     fadeIn("#welcome");
     fadeIn("#click-anywhere", {
@@ -15,7 +18,7 @@ export const WelcomeStep = ({ currentStep }: { currentStep: string }) => {
       fadeOut("#welcome");
       fadeOut("#click-anywhere");
     }
-  }, [currentStep]);
+  }, [airdropFlowSteps.Welcome, currentStep]);
 
   return (
     <>

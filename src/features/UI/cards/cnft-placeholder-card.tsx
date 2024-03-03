@@ -2,16 +2,13 @@ import { fadeOut } from "@/animations";
 import { fadeOutTimeoutDuration } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
-import {
-  airdropFlowSteps,
-  useAirdropFlowStep,
-} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 
 export const CnftPlaceholderCard = () => {
   const router = useRouter();
-  const { setCurrentStep } = useAirdropFlowStep();
+  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
   const handleAddNewCnft = () => {
     fadeOut("#create-cnfts-panel");

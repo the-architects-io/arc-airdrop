@@ -4,10 +4,7 @@ import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { ReviewStep } from "@/features/airdrop/flow-steps/review-step";
 import { LoadingPanel } from "@/features/loading-panel";
-import {
-  airdropFlowSteps,
-  useAirdropFlowStep,
-} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
@@ -17,7 +14,7 @@ export default function ReviewPage() {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
-  const { setCurrentStep } = useAirdropFlowStep();
+  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
   const [walletInitialized, setWalletInitialized] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +43,14 @@ export default function ReviewPage() {
 
     setCurrentStep(airdropFlowSteps.Review);
     setIsLoading(false);
-  }, [user, publicKey, walletInitialized, router, setCurrentStep]);
+  }, [
+    user,
+    publicKey,
+    walletInitialized,
+    router,
+    setCurrentStep,
+    airdropFlowSteps.Review,
+  ]);
 
   useEffect(() => {
     setTimeout(() => {
