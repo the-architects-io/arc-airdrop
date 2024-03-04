@@ -460,7 +460,7 @@ export const ReviewStep = () => {
     treeMaxDepth,
     treeMaxBufferSize,
     cluster,
-    tokenData.tokens,
+    tokenData?.tokens,
     treeCanopyDepth,
     totalTokenCount,
   ]);
