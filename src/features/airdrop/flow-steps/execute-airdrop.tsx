@@ -82,11 +82,12 @@ export const ExecuteAirdrop = ({
 
     if (
       !name ||
-      !sellerFeeBasisPoints ||
       !user ||
       !maxBufferSize ||
       !maxDepth ||
-      !tokenData?.tokens?.length
+      !tokenData?.tokens?.length ||
+      sellerFeeBasisPoints < 0 ||
+      sellerFeeBasisPoints > 10000
     ) {
       console.log("Missing required fields");
       return;
