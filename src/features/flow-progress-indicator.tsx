@@ -28,7 +28,7 @@ export const FlowProgressIndicator = () => {
       AirdropFlowStepName.Welcome,
       AirdropFlowStepName.LoginSignup,
       AirdropFlowStepName.ConnectWallet,
-    ].includes(currentStep.name);
+    ].includes(currentStep?.name);
 
     if (isInitialStep) {
       setShowIndicator(false);
@@ -40,7 +40,7 @@ export const FlowProgressIndicator = () => {
     }
     // Since fadeIn is likely a stable function, it's not listed as a dependency here.
     // Ensure currentStep.name is a stable reference or primitive (e.g., string).
-  }, [currentStep.name, showIndicator]);
+  }, [currentStep?.name, showIndicator]);
 
   if (!showIndicator) {
     return null;

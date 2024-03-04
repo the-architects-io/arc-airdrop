@@ -38,6 +38,11 @@ export const CreateCollectionStep = () => {
   const [existingCollectionImageUrl, setExistingCollectionImageUrl] = useState<
     string | null
   >(null);
+  const [collectionImageSizeInBytes, setCollectionImageSizeInBytes] =
+    useState<number>(0);
+  const [collectionImageUrl, setCollectionImageUrl] = useState<string | null>(
+    null
+  );
 
   const [getCollection, { loading }] = useLazyQuery(GET_COLLECTION_BY_ID, {
     fetchPolicy: "network-only",
@@ -88,9 +93,11 @@ export const CreateCollectionStep = () => {
         isReadyToMint: true,
       } as Collection;
 
-      if (collectionImage && collectionImage.sizeInBytes) {
-        collection.imageSizeInBytes = collectionImage.sizeInBytes;
-        collection.imageUrl = collectionImage.url;
+      if (collectionImage) {
+        collection.imageSizeInBytes = collectionImageSizeInBytes;
+      }
+      if (collectionImageUrl) {
+        collection.imageUrl = collectionImageUrl;
       }
 
       const { data } = await getCollection({
@@ -226,6 +233,26 @@ export const CreateCollectionStep = () => {
     collectionImage,
     existingCollectionImageUrl,
   ]);
+
+  useEffect(() => {
+    if (!collectionId || !collectionImage) return;
+
+    const blueprint = createBlueprintClient({
+      cluster,
+    });
+    setCollectionImageSizeInBytes(collectionImage.sizeInBytes ?? 0);
+    setCollectionImageUrl(collectionImage.url);
+    console.log({
+      collectionImage,
+      sizeinbytes: collectionImage.sizeInBytes,
+      url: collectionImage.url,
+    });
+    blueprint.collections.updateCollection({
+      id: collectionId,
+      imageUrl: collectionImage.url,
+      imageSizeInBytes: collectionImage.sizeInBytes,
+    });
+  }, [cluster, collectionId, collectionImage]);
 
   return (
     <>

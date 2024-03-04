@@ -31,8 +31,8 @@ export const MiniCnftCard = ({
               </div>
               <div className="text-base">{token?.external_url}</div>
             </div>
-            <div className="text-3xl text-cyan-400 self-center mt-4">
-              {token?.amountToMint}
+            <div className="text-3xl text-cyan-400 flex justify-center">
+              {token?.shouldFillRemaining ? "fill" : token?.amountToMint}
             </div>
           </div>
         </div>

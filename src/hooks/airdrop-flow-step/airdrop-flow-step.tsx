@@ -86,6 +86,7 @@ export const AirdropFlowStepProvider = ({
   };
 
   useEffect(() => {
+    if (!currentStep) return;
     setCurrentStepIsValid(steps[currentStep.name].isValid);
     setNextStepIsValid(
       steps[

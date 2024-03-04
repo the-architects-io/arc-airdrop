@@ -2,17 +2,22 @@
 
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import Spinner from "@/features/UI/spinner";
+import {
+  AirdropFlowStepName,
+  useAirdropFlowStep,
+} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import { useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
 
 export const StartOverButton = () => {
   const { isSaving } = useSaving();
+  const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
   const user = useUserData();
   const router = useRouter();
 
   const clearLocalStorage = () => {
-    const whiteList: string[] = ["publicKey", "userId"];
+    const whiteList: string[] = ["publicKey", "userId", "walletName"];
 
     const allKeys = Object.keys(localStorage);
 
@@ -25,8 +30,8 @@ export const StartOverButton = () => {
 
   const handleStartOver = () => {
     clearLocalStorage();
-    router.push("/");
-    window.location.reload();
+    setCurrentStep(airdropFlowSteps.SelectRecipients);
+    router.push("/airdrop/select-recipients");
   };
 
   const handleConfirmStartOver = () => {

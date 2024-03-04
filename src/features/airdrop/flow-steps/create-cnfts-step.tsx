@@ -367,7 +367,14 @@ export const CreateCnftsStep = () => {
             <>
               {tokenData.tokens.map((token: Token) => {
                 return (
-                  <CnftCard refetch={refetch} token={token} key={token.id} />
+                  <CnftCard
+                    refetch={() => {
+                      refetch();
+                      setTotalTokenCount(0);
+                    }}
+                    token={token}
+                    key={token.id}
+                  />
                 );
               })}
             </>

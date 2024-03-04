@@ -25,6 +25,7 @@ export const SingleImageUploadFieldWrapper = ({
       isSuccessfulCall={({ response }: { response: string }) => {
         const parsedResponse: UploadFileResponse & BaseBlueprintResponse =
           JSON.parse(response);
+        debugger;
         if (parsedResponse.success) {
           setImage?.(parsedResponse);
           return true;
