@@ -23,7 +23,6 @@ export const FlowProgressIndicator = () => {
   const progressIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Determine if the current step is one of the initial steps
     const isInitialStep = [
       AirdropFlowStepName.Welcome,
       AirdropFlowStepName.LoginSignup,
@@ -38,8 +37,6 @@ export const FlowProgressIndicator = () => {
         fadeIn("#progress-indicator");
       }, 400);
     }
-    // Since fadeIn is likely a stable function, it's not listed as a dependency here.
-    // Ensure currentStep.name is a stable reference or primitive (e.g., string).
   }, [currentStep?.name, showIndicator]);
 
   if (!showIndicator) {

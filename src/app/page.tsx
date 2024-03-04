@@ -9,6 +9,7 @@ import {
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Page() {
   const wallet = useWallet();
@@ -42,6 +43,16 @@ export default function Page() {
       handleGoToNextStep();
     }
   };
+
+  useEffect(() => {
+    setCurrentStep(airdropFlowSteps.Welcome);
+  }, [
+    wallet?.publicKey,
+    setCurrentStep,
+    airdropFlowSteps.SelectRecipients,
+    router,
+    airdropFlowSteps.Welcome,
+  ]);
 
   return (
     <ContentWrapper className="cursor-pointer">

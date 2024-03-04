@@ -72,7 +72,7 @@ export const AirdropFlowStepProvider = ({
   });
 
   const [currentStep, setCurrentStep] = useState<AirdropFlowStep>(
-    steps.SelectRecipients
+    steps.Welcome
   );
   const [nextStepIsValid, setNextStepIsValid] = useState(false);
   const [currentStepIsValid, setCurrentStepIsValid] = useState(false);
@@ -95,6 +95,9 @@ export const AirdropFlowStepProvider = ({
         ]
       ].isValid
     );
+
+    if (Object.values(AirdropFlowStepName).indexOf(currentStep.name) === 0)
+      return;
     setPreviousStepIsValid(
       steps[
         Object.values(AirdropFlowStepName)[
