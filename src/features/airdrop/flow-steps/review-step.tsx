@@ -386,11 +386,14 @@ export const ReviewStep = () => {
       setIsSaving(true);
       const blueprint = createBlueprintClient({ cluster });
 
+      // round to nearest lamport
+      const baseAmount = Math.round(amountInSol * LAMPORTS_PER_SOL);
+
       try {
         const { txId } = await blueprint.payments.takePayment({
           wallet,
           mintAddress: SOL_MINT_ADDRESS,
-          baseAmount: amountInSol * LAMPORTS_PER_SOL,
+          baseAmount,
           cluster,
         });
         if (txId) {
@@ -581,7 +584,9 @@ export const ReviewStep = () => {
   return (
     <>
       <StepTitle>review</StepTitle>
-
+      {JSON.stringify({
+        finalPrice,
+      })}
       <div className="flex flex-wrap w-full mb-28 relative">
         <div className="flex flex-wrap gap-y-4 w-full md:w-2/3 px-4">
           {!!tokenData?.tokens?.length && (

@@ -87,6 +87,14 @@ export const AirdropFlowStepProvider = ({
 
   useEffect(() => {
     if (!currentStep) return;
+    if (Object.values(AirdropFlowStepName).indexOf(currentStep.name) === 0)
+      return;
+    if (
+      Object.values(AirdropFlowStepName).indexOf(currentStep.name) ===
+      Object.values(AirdropFlowStepName).length - 1
+    )
+      return;
+
     setCurrentStepIsValid(steps[currentStep.name].isValid);
     setNextStepIsValid(
       steps[
@@ -96,8 +104,6 @@ export const AirdropFlowStepProvider = ({
       ].isValid
     );
 
-    if (Object.values(AirdropFlowStepName).indexOf(currentStep.name) === 0)
-      return;
     setPreviousStepIsValid(
       steps[
         Object.values(AirdropFlowStepName)[
