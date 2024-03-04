@@ -99,6 +99,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const isValidSellerFeeBasisPoints =
+    sellerFeeBasisPoints >= 0 && sellerFeeBasisPoints <= 10000;
+
   let updatedCollection;
   try {
     const {
@@ -112,7 +115,7 @@ export async function POST(req: NextRequest) {
           ...(name && { name }),
           ...(symbol && { symbol }),
           ...(description && { description }),
-          ...(sellerFeeBasisPoints && { sellerFeeBasisPoints }),
+          ...(isValidSellerFeeBasisPoints && { sellerFeeBasisPoints }),
           ...(isReadyToMint && { isReadyToMint }),
           ...(driveAddress && { driveAddress }),
           ...(uploadJobId && { uploadJobId }),
