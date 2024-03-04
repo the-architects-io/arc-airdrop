@@ -584,9 +584,6 @@ export const ReviewStep = () => {
   return (
     <>
       <StepTitle>review</StepTitle>
-      {JSON.stringify({
-        finalPrice,
-      })}
       <div className="flex flex-wrap w-full mb-28 relative">
         <div className="flex flex-wrap gap-y-4 w-full md:w-2/3 px-4">
           {!!tokenData?.tokens?.length && (
