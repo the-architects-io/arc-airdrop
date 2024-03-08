@@ -54,7 +54,8 @@ export const StartOverButton = () => {
     <>
       <div className="absolute top-4 left-4" onClick={handleConfirmStartOver}>
         <button className="rounded-full text-gray-600 px-4 py-2 text-sm shadow-deep">
-          <ArrowUturnLeftIcon className="h-6 w-6 text-gray-400 group-hover:text-gray-600" />
+          {/* // <ArrowUturnLeftIcon className="h-6 w-6 text-gray-400 group-hover:text-gray-600" /> */}
+          reset
         </button>
       </div>
     </>

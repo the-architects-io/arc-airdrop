@@ -272,6 +272,7 @@ export const BuildCnftStep = () => {
                   placeholder="e.g. my nft"
                   value={formik.values.externalUrl}
                   onChange={formik.handleChange}
+                  description="the url for your website, e.g. the-architects.io"
                 />
                 <div className="flex flex-col w-full pt-8">
                   <>

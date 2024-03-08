@@ -52,6 +52,10 @@ export const ExecuteAirdrop = ({
     },
     skip: !collection?.id,
     fetchPolicy: "no-cache",
+    onCompleted: (data) => {
+      console.log({ data });
+      debugger;
+    },
   });
 
   const mintCollectionNft = useCallback(async () => {

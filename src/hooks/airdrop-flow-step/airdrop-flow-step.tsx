@@ -40,8 +40,6 @@ export type AirdropFlowStepContext = {
   setNextStepIsValid: React.Dispatch<React.SetStateAction<boolean>>;
   currentStepIsValid: boolean;
   setCurrentStepIsValid: React.Dispatch<React.SetStateAction<boolean>>;
-  previousStepIsValid: boolean;
-  setPreviousStepIsValid: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const AirdropFlowStepContext = createContext<AirdropFlowStepContext>(
@@ -76,7 +74,6 @@ export const AirdropFlowStepProvider = ({
   );
   const [nextStepIsValid, setNextStepIsValid] = useState(false);
   const [currentStepIsValid, setCurrentStepIsValid] = useState(false);
-  const [previousStepIsValid, setPreviousStepIsValid] = useState(false);
 
   const setStepIsValid = (stepName: AirdropFlowStepName, isValid: boolean) => {
     setSteps((prevSteps) => ({
@@ -103,14 +100,6 @@ export const AirdropFlowStepProvider = ({
         ]
       ].isValid
     );
-
-    setPreviousStepIsValid(
-      steps[
-        Object.values(AirdropFlowStepName)[
-          Object.values(AirdropFlowStepName).indexOf(currentStep.name) - 1
-        ]
-      ].isValid
-    );
   }, [currentStep, setCurrentStepIsValid, steps]);
 
   return (
@@ -122,10 +111,8 @@ export const AirdropFlowStepProvider = ({
         setStepIsValid,
         nextStepIsValid,
         currentStepIsValid,
-        previousStepIsValid,
         setNextStepIsValid,
         setCurrentStepIsValid,
-        setPreviousStepIsValid,
       }}
     >
       {children}
@@ -141,7 +128,6 @@ export function useAirdropFlowStep() {
     setStepIsValid,
     nextStepIsValid,
     currentStepIsValid,
-    previousStepIsValid,
   } = useContext(AirdropFlowStepContext);
   const [_, forceUpdate] = useState({});
 
@@ -208,7 +194,6 @@ export function useAirdropFlowStep() {
     },
     currentStepIsValid,
     nextStepIsValid,
-    previousStepIsValid,
     setStepIsValid,
     airdropFlowSteps,
   };

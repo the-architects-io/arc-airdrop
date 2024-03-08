@@ -34,7 +34,7 @@ import { useEffect, useState } from "react";
 
 export const CreateCnftsStep = () => {
   const { isSaving, setIsSaving } = useSaving();
-  const { setStepIsValid, previousStepIsValid } = useAirdropFlowStep();
+  const { setStepIsValid } = useAirdropFlowStep();
   const { cluster } = useCluster();
   const router = useRouter();
   const [collection, setCollection] = useState<Collection | null>(null);
@@ -53,6 +53,7 @@ export const CreateCnftsStep = () => {
       variables: {
         id: collectionId,
       },
+      skip: !collectionId,
       fetchPolicy: "network-only",
     }
   );
@@ -340,7 +341,6 @@ export const CreateCnftsStep = () => {
       AirdropFlowStepName.CreateNfts,
       !!formik.values.tokens.length &&
         !isSaving &&
-        previousStepIsValid &&
         (recipientCount === totalTokenCount || hasFillerToken)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -348,7 +348,6 @@ export const CreateCnftsStep = () => {
     formik.values.tokens.length,
     hasFillerToken,
     isSaving,
-    previousStepIsValid,
     recipientCount,
     totalTokenCount,
   ]);

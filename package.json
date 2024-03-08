@@ -40,6 +40,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.26",
     "@solana/web3.js": "^1.90.0",
     "@the-architects/blueprint-graphql": "^0.2.12",
+    "@uidotdev/usehooks": "^2.4.1",
     "@zip.js/zip.js": "^2.7.35",
     "axios": "^1.6.7",
     "bytes": "link:@coral-xyz/anchor/dist/cjs/utils/bytes",

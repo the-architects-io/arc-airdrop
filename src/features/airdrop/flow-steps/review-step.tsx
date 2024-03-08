@@ -88,6 +88,7 @@ export const ReviewStep = () => {
       variables: {
         id: collectionId,
       },
+      skip: !collectionId,
       fetchPolicy: "network-only",
       onCompleted: ({ tokens }: { tokens: Token[] }) => {
         const amountToMint = tokens.reduce(
