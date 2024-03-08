@@ -7,6 +7,7 @@ interface Props {
   value: boolean;
   name: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export const FormCheckboxWithLabel = ({
@@ -15,6 +16,7 @@ export const FormCheckboxWithLabel = ({
   value,
   name,
   className,
+  disabled,
   ...props
 }: Props) => {
   return (
@@ -25,11 +27,16 @@ export const FormCheckboxWithLabel = ({
       >
         <span className="mb-1 text-2xl">{label}</span>
         <input
-          className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400 shadow-md"
+          className={classNames([
+            "w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400 shadow-md",
+            disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+          ])}
           type="checkbox"
           name={name}
           checked={value || false}
           onChange={onChange}
+          disabled={disabled}
+          {...props}
         />
       </label>
     </div>

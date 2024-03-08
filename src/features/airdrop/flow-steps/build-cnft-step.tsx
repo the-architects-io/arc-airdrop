@@ -3,9 +3,9 @@ import { fadeOut } from "@/animations";
 import { MerkleTree, Token, TokenMetadata, Trait } from "@/app/blueprint/types";
 import {
   ASSET_SHDW_DRIVE_ADDRESS,
+  BASE_URL,
   fadeOutTimeoutDuration,
 } from "@/constants/constants";
-import { PrimaryButton } from "@/features/UI/buttons/primary-button";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
 import { StepHeading } from "@/features/UI/typography/step-heading";
@@ -15,13 +15,9 @@ import { useCluster } from "@/hooks/cluster";
 import {
   InformationCircleIcon,
   PlusCircleIcon,
-  PlusIcon,
-  TrashIcon,
   XCircleIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useUserData } from "@nhost/nextjs";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { FieldArray, FormikProvider, useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -33,6 +29,9 @@ import { DndCard } from "@/features/UI/cards/dnd-card";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import { SubmitButton } from "@/features/UI/buttons/submit-button";
 import { FormCheckboxWithLabel } from "@/features/UI/forms/form-checkbox-with-label";
+import Link from "next/link";
+import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
+import { useQuery } from "@apollo/client";
 
 type SortedTrait = Trait & { sortOrder: number };
 
@@ -44,6 +43,18 @@ export const BuildCnftStep = () => {
   const [tokenId, setTokenId] = useState<string | null>(null);
   const [collectionId, setCollectionId] = useState<string | undefined>();
   const [airdropId, setAirdropId] = useState<string | undefined>();
+  const [hasFillerToken, setHasFillerToken] = useState(false);
+
+  const { data: tokenData, refetch } = useQuery(
+    GET_PREMINT_TOKENS_BY_COLLECTION_ID,
+    {
+      variables: {
+        id: collectionId,
+      },
+      skip: !collectionId,
+      fetchPolicy: "network-only",
+    }
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -151,7 +162,15 @@ export const BuildCnftStep = () => {
     if (!tokenId) {
       setTokenId(uuidv4());
     }
-  }, [tokenId]);
+
+    if (!tokenData?.tokens) return;
+
+    const hasFillerToken = tokenData.tokens.some(
+      (token: Token) => token.shouldFillRemaining
+    );
+
+    setHasFillerToken(hasFillerToken);
+  }, [tokenId, tokenData]);
 
   useEffect(() => {
     if (!window) return;
@@ -232,20 +251,31 @@ export const BuildCnftStep = () => {
                       disabled={formik.values.shouldFillRemaining}
                     />
                   )}
-                  <div className="flex">
-                    <FormCheckboxWithLabel
-                      label="fill remaining"
-                      name="shouldFillRemaining"
-                      value={formik.values.shouldFillRemaining}
-                      onChange={(e: any) => {
-                        formik.setFieldValue(
-                          "shouldFillRemaining",
-                          e.target.checked
-                        );
-                      }}
-                    />
-                    <InformationCircleIcon className="h-6 w-6 text-gray-400 mt-1 ml-3" />
-                  </div>
+                  {!!hasFillerToken ? (
+                    <div>
+                      <div className="mb-2 text-2xl">fill remaining</div>
+                      <div className="text-sm italic max-w-sm">
+                        you have already added a token that will fill the
+                        remaining quantity
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex">
+                      <FormCheckboxWithLabel
+                        label="fill remaining"
+                        name="shouldFillRemaining"
+                        value={formik.values.shouldFillRemaining}
+                        disabled={hasFillerToken}
+                        onChange={(e: any) => {
+                          formik.setFieldValue(
+                            "shouldFillRemaining",
+                            e.target.checked
+                          );
+                        }}
+                      />
+                      <InformationCircleIcon className="h-6 w-6 text-gray-400 mt-1 ml-3" />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -345,24 +375,40 @@ export const BuildCnftStep = () => {
                         <PlusCircleIcon className="h-6 w-6 mr-4" />
                         add trait
                       </SecondaryButton>
-                      <div className="mt-2 italic">
+                      <div className="mt-2 italic text-sm">
                         traits for your cnft, e.g. name: hat, value: sombrero
                       </div>
                     </>
+                    <div className="w-full flex justify-center mt-16 space-x-8">
+                      <Link href="/airdrop/create-cnfts">
+                        <SecondaryButton
+                          onClick={() => {
+                            formik.resetForm();
+                          }}
+                        >
+                          cancel
+                        </SecondaryButton>
+                      </Link>
+                      <SubmitButton
+                        isSubmitting={formik.isSubmitting}
+                        onClick={() => {
+                          formik.submitForm();
+                        }}
+                        disabled={
+                          formik.isSubmitting ||
+                          !formik.isValid ||
+                          !image ||
+                          !formik.values.name?.length ||
+                          (Number(formik.values.quantity) < 1 &&
+                            !formik.values.shouldFillRemaining)
+                        }
+                      >
+                        done
+                      </SubmitButton>
+                    </div>
                   </>
                 </div>
               </form>
-            </div>
-            <div className="w-full flex justify-center mt-8">
-              <SubmitButton
-                isSubmitting={formik.isSubmitting}
-                onClick={() => {
-                  formik.submitForm();
-                }}
-                disabled={formik.isSubmitting || !formik.isValid}
-              >
-                done
-              </SubmitButton>
             </div>
           </div>
         </>

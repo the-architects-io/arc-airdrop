@@ -288,6 +288,7 @@ export const ReviewStep = () => {
   const calculateStorageCost = useCallback(
     async (collection: Collection, tokenImagesSizeInBytes?: number) => {
       const storageCostPerGbInUsd = 0.05;
+      const shdwDriveAllocationFeeInLamports = 3803200;
 
       const { imageSizeInBytes } = collection;
 
@@ -318,7 +319,10 @@ export const ReviewStep = () => {
         return null;
       }
 
-      const costInSol = costInUsd / solPriceInUsd;
+      const costInSolBeforeAllocationFee = costInUsd / solPriceInUsd;
+      const costInSol =
+        costInSolBeforeAllocationFee +
+        shdwDriveAllocationFeeInLamports / LAMPORTS_PER_SOL;
       setSolPriceInUsd(solPriceInUsd);
       setStorageCost(costInSol);
     },

@@ -27,7 +27,7 @@ import { useUserData } from "@nhost/nextjs";
 import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import axios from "axios";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const ExecuteAirdrop = ({
   airdrop,
@@ -54,7 +54,6 @@ export const ExecuteAirdrop = ({
     fetchPolicy: "no-cache",
     onCompleted: (data) => {
       console.log({ data });
-      debugger;
     },
   });
 
@@ -111,7 +110,7 @@ export const ExecuteAirdrop = ({
     );
 
     const { job: uploadJob } = await blueprint.jobs.createUploadJob({
-      statusText: "Creating SHDW Drive",
+      statusText: "creating shdw drive",
       userId: user?.id,
       icon: JobIcons.CREATING_SHADOW_DRIVE,
       cluster,
@@ -157,7 +156,7 @@ export const ExecuteAirdrop = ({
         break;
       } catch (error) {
         if (attempt === maxRetries) {
-          console.error("Failed to create drive", error);
+          console.error("failed to create drive", error);
           throw error;
         }
         console.error(`Attempt ${attempt} failed: ${error}`);
@@ -166,11 +165,11 @@ export const ExecuteAirdrop = ({
 
     if (!driveAddress) {
       setIsSaving(false);
-      console.error("Failed to create drive");
+      console.error("failed to create drive");
       blueprint.jobs.updateUploadJob({
         id: uploadJob.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to create drive.",
+        statusText: "failed to create drive",
         cluster,
       });
       return;
@@ -180,7 +179,7 @@ export const ExecuteAirdrop = ({
       blueprint.jobs.updateUploadJob({
         id: uploadJob.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Collection image is missing",
+        statusText: "collection image is missing",
         cluster,
       });
       return;
@@ -189,7 +188,7 @@ export const ExecuteAirdrop = ({
     blueprint.jobs.updateUploadJob({
       id: uploadJob.id,
       statusId: StatusUUIDs.IN_PROGRESS,
-      statusText: "Uploading files to SHDW Drive",
+      statusText: "uploading files to shdw drive",
       cluster,
     });
 
@@ -215,7 +214,7 @@ export const ExecuteAirdrop = ({
         blueprint.jobs.updateUploadJob({
           id: uploadJob.id,
           statusId: StatusUUIDs.ERROR,
-          statusText: "Failed to fetch token image",
+          statusText: "failed to fetch token image",
           cluster,
         });
         return;
@@ -235,7 +234,7 @@ export const ExecuteAirdrop = ({
         blueprint.jobs.updateUploadJob({
           id: uploadJob.id,
           statusId: StatusUUIDs.ERROR,
-          statusText: "Failed to upload token image",
+          statusText: "failed to upload token image",
           cluster,
         });
         return;
@@ -250,7 +249,7 @@ export const ExecuteAirdrop = ({
 
     if (!collectionUpdateSuccess) {
       setIsSaving(false);
-      console.error("Failed to update collection drive address");
+      console.error("failed to update collection drive address");
       return;
     }
 
@@ -264,7 +263,7 @@ export const ExecuteAirdrop = ({
 
     const { success, job } = await blueprint.jobs.createJob({
       statusId: StatusUUIDs.IN_PROGRESS,
-      statusText: "Minting collection NFT",
+      statusText: "minting collection nft",
       userId: user.id,
       jobTypeId: JobTypeUUIDs.AIRDROP,
       icon: JobIcons.COLLECTION_IMAGE,
@@ -279,7 +278,7 @@ export const ExecuteAirdrop = ({
       });
 
     if (!success || !job?.id) {
-      console.log("Failed to create job");
+      console.log("failed to create job");
       return;
     }
 
@@ -287,7 +286,7 @@ export const ExecuteAirdrop = ({
 
     await blueprint.jobs.updateJob({
       id: job.id,
-      statusText: "Uploading collection NFT metadata",
+      statusText: "uploading collection nft metadata",
       icon: JobIcons.UPLOADING_FILES,
     });
 
@@ -319,15 +318,15 @@ export const ExecuteAirdrop = ({
       blueprint.jobs.updateJob({
         id: job.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to upload collection NFT metadata",
+        statusText: "failed to upload collection NFT metadata",
         icon: JobIcons.ERROR,
       });
-      console.error("Error uploading collection NFT metadata", error);
+      console.error("error uploading collection NFT metadata", error);
     }
 
     await blueprint.jobs.updateJob({
       id: job.id,
-      statusText: "Minting collection NFT",
+      statusText: "minting collection nft",
       icon: JobIcons.MINTING_NFTS,
     });
 
@@ -349,7 +348,7 @@ export const ExecuteAirdrop = ({
       const { signature, result, mintAddress } = data;
       collectionNftMintAddress = mintAddress;
 
-      console.log("minting collection NFT", {
+      console.log("minting collection nft", {
         signature,
         mintAddress,
       });
@@ -357,15 +356,15 @@ export const ExecuteAirdrop = ({
       blueprint.jobs.updateJob({
         id: job.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to mint collection NFT",
+        statusText: "Failed to mint collection nft",
         icon: JobIcons.ERROR,
       });
-      console.error("Error minting collection NFT", error);
+      console.error("Error minting collection nft", error);
     }
 
     await blueprint.jobs.updateJob({
       id: job.id,
-      statusText: "Creating merkle tree",
+      statusText: "creating merkle tree",
       icon: JobIcons.CREATING_TREE,
     });
 
@@ -400,22 +399,22 @@ export const ExecuteAirdrop = ({
         treeId,
       });
 
-      if (!success) throw new Error("Error creating Merkle Tree");
+      if (!success) throw new Error("error creating merkle tree");
     } catch (error) {
       blueprint.jobs.updateJob({
         id: job.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to create merkle tree",
+        statusText: "failed to create merkle tree",
         icon: JobIcons.ERROR,
       });
-      console.error("Error creating merkle tree", error);
+      console.error("error creating merkle tree", error);
     }
 
     if (!collectionNftMintAddress) {
       blueprint.jobs.updateJob({
         id: job.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to mint collection NFT",
+        statusText: "failed to mint collection nft",
         icon: JobIcons.ERROR,
       });
       return;
@@ -432,10 +431,10 @@ export const ExecuteAirdrop = ({
       blueprint.jobs.updateJob({
         id: job.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to update collection NFT address",
+        statusText: "failed to update collection nft address",
         icon: JobIcons.ERROR,
       });
-      console.error("Error updating collection NFT address", error);
+      console.error("Error updating collection nft address", error);
     }
 
     try {
@@ -449,15 +448,14 @@ export const ExecuteAirdrop = ({
       );
 
       console.log({ data, status });
-      debugger;
     } catch (error) {
       blueprint.jobs.updateJob({
         id: job.id,
         statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to airdrop collection NFTs",
+        statusText: "failed to airdrop collection nfts",
         icon: JobIcons.ERROR,
       });
-      console.error("Error airdropping collection NFTs", error);
+      console.error("Error airdropping collection nfts", error);
     }
   }, [
     airdrop?.collection,
@@ -473,25 +471,13 @@ export const ExecuteAirdrop = ({
     user,
   ]);
 
-  const handleExecuteAirdrop = () => {
-    setIsDisabled(true);
-
-    mintCollectionNft();
-  };
+  useEffect(() => {
+    if (airdrop?.id && collection?.id) {
+      mintCollectionNft();
+    }
+  }, [airdrop?.id, collection?.id, mintCollectionNft]);
 
   if (!airdrop || !collection) {
     return <LoadingPanel />;
   }
-
-  return (
-    <ContentWrapper className="flex flex-col items-center justify-center">
-      <SubmitButton
-        onClick={handleExecuteAirdrop}
-        disabled={isDisabled}
-        isSubmitting={isDisabled}
-      >
-        Execute
-      </SubmitButton>
-    </ContentWrapper>
-  );
 };

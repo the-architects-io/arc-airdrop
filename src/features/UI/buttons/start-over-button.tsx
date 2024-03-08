@@ -3,6 +3,7 @@
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import Spinner from "@/features/UI/spinner";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { clearLocalStorage } from "@/utils/local-storage";
 import { useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -12,23 +13,10 @@ export const StartOverButton = () => {
   const user = useUserData();
   const router = useRouter();
 
-  const clearLocalStorage = () => {
-    const whiteList: string[] = ["publicKey", "userId", "walletName"];
-
-    const allKeys = Object.keys(localStorage);
-
-    for (const key of allKeys) {
-      if (!whiteList.includes(key)) {
-        localStorage.removeItem(key);
-      }
-    }
-  };
-
   const handleStartOver = () => {
     clearLocalStorage();
     setCurrentStep(airdropFlowSteps.SelectRecipients);
-    router.push("/airdrop/select-recipients");
-    window.location.reload();
+    router.push("/connect-wallet");
   };
 
   const handleConfirmStartOver = () => {
@@ -50,7 +38,7 @@ export const StartOverButton = () => {
   return (
     <>
       <div className="absolute top-4 left-4" onClick={handleConfirmStartOver}>
-        <button className="rounded-full text-gray-600 px-4 py-2 text-sm shadow-deep">
+        <button className="rounded-full text-gray-400 px-4 py-2 text-sm shadow-deep hover:shadow-deep-float transition-all">
           {/* // <ArrowUturnLeftIcon className="h-6 w-6 text-gray-400 group-hover:text-gray-600" /> */}
           reset
         </button>

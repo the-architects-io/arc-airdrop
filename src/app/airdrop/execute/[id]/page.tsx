@@ -1,6 +1,5 @@
 "use client";
 import { Airdrop, Collection, Job, StatusUUIDs } from "@/app/blueprint/types";
-import { BASE_URL } from "@/constants/constants";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 
 import {
@@ -11,7 +10,6 @@ import {
 import { useQuery } from "@apollo/client";
 import { useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
-import { Line } from "rc-progress";
 import { useEffect, useState } from "react";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
 import { ExecuteAirdrop } from "@/features/airdrop/flow-steps/execute-airdrop";
@@ -20,13 +18,14 @@ import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step"
 import { AirdropStatus } from "@/features/airdrop/flow-steps/airdrop-status";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { LoadingPanel } from "@/features/loading-panel";
-import { JobStatus } from "@/features/jobs/job-status";
+import { useCluster } from "@/hooks/cluster";
 
 export default function AirdropDetailsPage({ params }: { params: any }) {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
+  const { cluster } = useCluster();
   const [walletInitialized, setWalletInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [airdrop, setAirdrop] = useState<Airdrop | null>(null);
@@ -157,7 +156,8 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
         <ContentWrapper>
           <ContentWrapperYAxisCenteredContent>
             <AirdropStatus
-              airdropId={airdrop?.id}
+              airdrop={airdrop}
+              collection={collection}
               jobId={jobData?.jobs_by_pk?.id}
               uploadJobId={uploadJobData?.uploadJobs_by_pk?.id}
             />

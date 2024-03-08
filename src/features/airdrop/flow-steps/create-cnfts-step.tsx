@@ -110,7 +110,7 @@ export const CreateCnftsStep = () => {
     },
     onSubmit: async (values) => {
       if (!user?.id || !collectionId) {
-        console.error("User or collection not found");
+        console.error("user or collection not found");
         setIsSaving(false);
         return;
       }
@@ -121,7 +121,7 @@ export const CreateCnftsStep = () => {
       });
 
       if (!collection?.id) {
-        console.error("Collection not found");
+        console.error("collection not found");
         setIsSaving(false);
         return;
       }
@@ -134,7 +134,7 @@ export const CreateCnftsStep = () => {
       );
 
       const { job } = await blueprint.jobs.createUploadJob({
-        statusText: "Creating SHDW Drive",
+        statusText: "creating shdw drive",
         userId: user?.id,
         icon: JobIcons.CREATING_SHADOW_DRIVE,
         cluster,
@@ -168,7 +168,7 @@ export const CreateCnftsStep = () => {
           );
 
           if (status !== 200) {
-            throw new Error("Failed to create drive");
+            throw new Error("failed to create drive");
           }
 
           const { address, txSig } = data;
@@ -182,10 +182,10 @@ export const CreateCnftsStep = () => {
         } catch (error) {
           if (attempt === maxRetries) {
             console.log({ error });
-            console.error(`Failed to create drive: ${error}`);
+            console.error(`failed to create drive: ${error}`);
             throw error;
           }
-          console.error(`Attempt ${attempt} failed: ${error}`);
+          console.error(`attempt ${attempt} failed: ${error}`);
         }
       }
 
@@ -195,7 +195,7 @@ export const CreateCnftsStep = () => {
         blueprint.jobs.updateUploadJob({
           id: job.id,
           statusId: StatusUUIDs.ERROR,
-          statusText: "Failed to create drive.",
+          statusText: "failed to create drive.",
           cluster,
         });
         return;
@@ -205,7 +205,7 @@ export const CreateCnftsStep = () => {
         blueprint.jobs.updateUploadJob({
           id: job.id,
           statusId: StatusUUIDs.ERROR,
-          statusText: "Collection image is missing",
+          statusText: "collection image is missing",
           cluster,
         });
         return;
@@ -214,7 +214,7 @@ export const CreateCnftsStep = () => {
       blueprint.jobs.updateUploadJob({
         id: job.id,
         statusId: StatusUUIDs.IN_PROGRESS,
-        statusText: "Uploading files to SHDW Drive",
+        statusText: "uploading files to shdw drive",
         cluster,
       });
 
@@ -225,7 +225,7 @@ export const CreateCnftsStep = () => {
           blueprint.jobs.updateUploadJob({
             id: job.id,
             statusId: StatusUUIDs.ERROR,
-            statusText: "Token image is missing",
+            statusText: "token image is missing",
             cluster,
           });
           return;
@@ -240,7 +240,7 @@ export const CreateCnftsStep = () => {
           blueprint.jobs.updateUploadJob({
             id: job.id,
             statusId: StatusUUIDs.ERROR,
-            statusText: "Failed to fetch token image",
+            statusText: "failed to fetch token image",
             cluster,
           });
           return;
@@ -260,7 +260,7 @@ export const CreateCnftsStep = () => {
           blueprint.jobs.updateUploadJob({
             id: job.id,
             statusId: StatusUUIDs.ERROR,
-            statusText: "Failed to upload token image",
+            statusText: "failed to upload token image",
             cluster,
           });
           return;
@@ -286,7 +286,7 @@ export const CreateCnftsStep = () => {
 
       if (!successOne || !successTwo) {
         setIsSaving(false);
-        console.error("Failed to update collection");
+        console.error("failed to update collection");
         return;
       }
 
@@ -307,8 +307,8 @@ export const CreateCnftsStep = () => {
       (token: Token) => token.shouldFillRemaining
     );
 
-    setTotalTokenCount(amountToMint + totalTokenCount);
     setHasFillerToken(hasFillerToken);
+    setTotalTokenCount(amountToMint + totalTokenCount);
 
     formik.setValues({
       tokens:

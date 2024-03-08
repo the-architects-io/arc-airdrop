@@ -22,6 +22,14 @@ export const GET_AIRDROP_BY_ID = gql`
         statusText
       }
       collection {
+        merkleTree {
+          id
+          maxBufferSize
+          maxDepth
+          canopyDepth
+          address
+          cluster
+        }
         maxBufferSize
         maxDepth
         canopyDepth

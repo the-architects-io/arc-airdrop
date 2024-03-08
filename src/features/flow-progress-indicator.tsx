@@ -9,10 +9,13 @@ import {
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
 import { animate } from "motion";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export const FlowProgressIndicator = () => {
+  const pathname = usePathname();
   const { isSaving } = useSaving();
+  const [isCnftBuilder, setIsCnftBuilder] = useState(false);
   const {
     currentStep,
     goToNextStep,
@@ -41,14 +44,14 @@ export const FlowProgressIndicator = () => {
         if (!element) {
           return;
         }
-        animate(
-          elementSelector,
-          { bottom: [-element.clientHeight, 0] },
-          { duration: fadeInDuration }
-        );
+        animate(elementSelector, { bottom: [0] }, { duration: fadeInDuration });
       }, 400);
     }
   }, [currentStep?.name, showIndicator]);
+
+  useEffect(() => {
+    setIsCnftBuilder(pathname === "/airdrop/create-cnfts/builder");
+  }, [pathname]);
 
   if (!showIndicator) {
     return null;
@@ -58,7 +61,10 @@ export const FlowProgressIndicator = () => {
     <div
       ref={progressIndicatorRef}
       id="progress-indicator"
-      className="fixed w-full h-20 min-w-screen max-w-screen -bottom-16 backdrop-blur-md backdrop-opacity-100 backdrop-contrast-150 z-50 transition-all"
+      className={classNames([
+        "fixed w-full h-20 min-w-screen max-w-screen -bottom-32 backdrop-blur-md backdrop-opacity-100 backdrop-contrast-150 transition-all",
+        isCnftBuilder ? "opacity-0" : "opacity-100",
+      ])}
     >
       <div className="flex items-center justify-between h-full mx-auto max-w-6xl px-10">
         <SecondaryButton className="flex space-x-1" onClick={goToPreviousStep}>
@@ -110,7 +116,7 @@ export const FlowProgressIndicator = () => {
           onClick={goToNextStep}
           disabled={isSaving || !currentStepIsValid}
         >
-          next
+          {currentStep === airdropFlowSteps.Review ? "start airdrop" : "next"}
           <ChevronLeftIcon className="w-6 h-6 transform rotate-180" />
         </SecondaryButton>
       </div>

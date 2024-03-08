@@ -37,7 +37,6 @@ export const SubmitButton = ({
           : "",
         className,
       ])}
-      type="submit"
     >
       {isSubmitting ? (
         <Spinner />

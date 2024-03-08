@@ -724,6 +724,7 @@ export type UnmintedMetadata = {
 export type Collection = {
   id: string;
   collectionNftAddress?: string;
+  merkleTree?: MerkleTree;
   createdAt: string;
   updatedAt: string;
   owner: User;
