@@ -25,7 +25,9 @@ export const MiniCnftCard = ({
           </div>
           <div className="flex flex-col flex-grow p-4">
             <div className="text-gray-100 space-y-3 flex-grow">
-              <div className="text-2xl font-bold">{token?.name}</div>
+              <div className="text-2xl font-bold line-clamp-1">
+                {token?.name}
+              </div>
               <div className="text-base italic line-clamp-2">
                 {token?.description}
               </div>

@@ -46,7 +46,7 @@ export const CnftCard = ({
           <div className="flex flex-col flex-grow bg-gray-500 rounded-b-md">
             <div className="p-4 w-full space-y-2 flex-grow">
               <FormInputWithLabel
-                className="text-gray-100 text-base"
+                className="text-gray-100 text-base line-clamp-1"
                 label="name"
                 name="name"
                 placeholder="e.g. my nft"
@@ -54,7 +54,7 @@ export const CnftCard = ({
                 disabled
               />
               <FormTextareaWithLabel
-                className="text-gray-100 text-base"
+                className="text-gray-100 text-base line-clamp-2"
                 label="description"
                 name="description"
                 placeholder="e.g. my nft description"

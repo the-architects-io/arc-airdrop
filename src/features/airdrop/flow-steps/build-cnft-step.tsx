@@ -345,6 +345,9 @@ export const BuildCnftStep = () => {
                         <PlusCircleIcon className="h-6 w-6 mr-4" />
                         add trait
                       </SecondaryButton>
+                      <div className="mt-2 italic">
+                        traits for your cnft, e.g. name: hat, value: sombrero
+                      </div>
                     </>
                   </>
                 </div>

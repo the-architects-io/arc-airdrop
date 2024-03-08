@@ -25,7 +25,7 @@ export const FormCheckboxWithLabel = ({
       >
         <span className="mb-1 text-2xl">{label}</span>
         <input
-          className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400"
+          className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400 shadow-md"
           type="checkbox"
           name={name}
           checked={value || false}

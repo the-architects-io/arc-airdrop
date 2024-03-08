@@ -2,11 +2,7 @@
 
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import Spinner from "@/features/UI/spinner";
-import {
-  AirdropFlowStepName,
-  useAirdropFlowStep,
-} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
-import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
 
