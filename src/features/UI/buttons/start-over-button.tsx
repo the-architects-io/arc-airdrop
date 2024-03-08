@@ -32,6 +32,7 @@ export const StartOverButton = () => {
     clearLocalStorage();
     setCurrentStep(airdropFlowSteps.SelectRecipients);
     router.push("/airdrop/select-recipients");
+    window.location.reload();
   };
 
   const handleConfirmStartOver = () => {
