@@ -1,5 +1,6 @@
 import { fadeIn } from "@/animations";
 import { useSaving } from "@/app/blueprint/hooks/saving";
+import { fadeInDuration } from "@/constants/constants";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import {
   AirdropFlowStepName,
@@ -7,6 +8,7 @@ import {
 } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
+import { animate } from "motion";
 import { useEffect, useRef, useState } from "react";
 
 export const FlowProgressIndicator = () => {
@@ -34,7 +36,16 @@ export const FlowProgressIndicator = () => {
     } else if (!showIndicator) {
       setShowIndicator(true);
       setTimeout(() => {
-        fadeIn("#progress-indicator");
+        const elementSelector = "#progress-indicator";
+        const element = document.querySelector(elementSelector);
+        if (!element) {
+          return;
+        }
+        animate(
+          elementSelector,
+          { bottom: [-element.clientHeight, 0] },
+          { duration: fadeInDuration }
+        );
       }, 400);
     }
   }, [currentStep?.name, showIndicator]);
@@ -47,7 +58,7 @@ export const FlowProgressIndicator = () => {
     <div
       ref={progressIndicatorRef}
       id="progress-indicator"
-      className="fixed w-full h-20 min-w-screen max-w-screen bottom-0 bg-gray-100 opacity-0"
+      className="fixed w-full h-20 min-w-screen max-w-screen -bottom-16 backdrop-blur-md backdrop-opacity-100 backdrop-contrast-150 z-50 transition-all"
     >
       <div className="flex items-center justify-between h-full mx-auto max-w-6xl px-10">
         <SecondaryButton className="flex space-x-1" onClick={goToPreviousStep}>
