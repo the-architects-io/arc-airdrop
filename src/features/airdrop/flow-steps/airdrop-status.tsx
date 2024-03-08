@@ -37,11 +37,13 @@ export const AirdropStatus = ({
   uploadJobId,
   airdrop,
   collection,
+  refetch,
 }: {
   jobId?: string;
   uploadJobId?: string;
   airdrop: Airdrop;
   collection: Collection;
+  refetch: () => void;
 }) => {
   const { setIsSaving } = useSaving();
   const { cluster } = useCluster();
@@ -67,11 +69,22 @@ export const AirdropStatus = ({
   );
 
   useEffect(() => {
-    if (jobData?.jobs_by_pk?.status?.name === UploadJobStatus.COMPLETE) {
-      clearLocalStorage();
+    if (
+      jobData?.jobs_by_pk?.status?.name === UploadJobStatus.COMPLETE ||
+      jobData?.jobs_by_pk?.status?.name === UploadJobStatus.ERROR
+    ) {
       setIsSaving(false);
     }
-  }, [jobData, setIsSaving]);
+    if (jobData?.jobs_by_pk?.status?.name === UploadJobStatus.COMPLETE) {
+      refetch();
+      clearLocalStorage();
+    }
+  }, [
+    jobData,
+    setIsSaving,
+    uploadJobData?.uploadJobs_by_pk?.status?.name,
+    refetch,
+  ]);
 
   if (!jobData && !uploadJobData && !loadingJob && !loadingUploadJob) {
     return null;
@@ -89,19 +102,25 @@ export const AirdropStatus = ({
         {JSON.stringify(uploadJobData)}
       </div> */}
 
-      {jobData?.jobs_by_pk?.status?.name === UploadJobStatus.ERROR ||
-        (uploadJobData?.uploadJobs_by_pk?.status?.name ===
-          UploadJobStatus.ERROR && (
-          <div className="flex flex-col items-center justify-center w-full h-full">
-            <div className="mb-4">Airdrop encountered an error.</div>
-            <div className="mb-4">Airdrop ID:</div>
-            {airdrop?.id}
+      {(jobData?.jobs_by_pk?.status?.name === UploadJobStatus.ERROR ||
+        uploadJobData?.uploadJobs_by_pk?.status?.name ===
+          UploadJobStatus.ERROR) && (
+        <div className="flex flex-col items-center justify-center w-full h-full">
+          <div className="mb-4">airdrop encountered an error</div>
+          <div className="mb-4">airdrop id:</div>
+          {airdrop?.id}
+          <div className="w-full flex justify-center mb-16 text-sm text-gray-400 mt-16">
+            <div>
+              {jobData?.jobs_by_pk?.statusText ||
+                uploadJobData?.uploadJobs_by_pk?.statusText}
+            </div>
           </div>
-        ))}
+        </div>
+      )}
 
       {uploadJobData?.uploadJobs_by_pk?.status?.name ===
         UploadJobStatus.IN_PROGRESS && (
-        <div className="w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center text-center">
           <JobIcon
             icon={uploadJobData.uploadJobs_by_pk.icon as unknown as JobIconType}
           />
@@ -115,7 +134,7 @@ export const AirdropStatus = ({
       )}
 
       {jobData?.jobs_by_pk?.status?.name === UploadJobStatus.IN_PROGRESS && (
-        <div className="w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center text-center">
           <JobIcon icon={jobData?.jobs_by_pk?.icon as unknown as JobIconType} />
           <div className="w-full flex justify-center mb-16 text-3xl text-gray-400 mt-4">
             <div>{jobData?.jobs_by_pk?.statusText}</div>
@@ -127,7 +146,7 @@ export const AirdropStatus = ({
       )}
 
       {jobData?.jobs_by_pk?.status?.name === UploadJobStatus.COMPLETE && (
-        <div className="w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center text-center">
           <JobIcon icon={jobData?.jobs_by_pk?.icon as unknown as JobIconType} />
           <div className="w-full flex justify-center mb-16 text-3xl text-gray-400 mt-4">
             <div>{jobData?.jobs_by_pk?.statusText}</div>

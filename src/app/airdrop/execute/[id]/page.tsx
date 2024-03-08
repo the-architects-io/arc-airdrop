@@ -57,37 +57,46 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
     fetchPolicy: "no-cache",
   });
 
-  useQuery(GET_AIRDROP_BY_ID, {
-    variables: {
-      id: params?.id,
-    },
-    skip: !params?.id,
-    fetchPolicy: "no-cache",
-    onCompleted: ({ airdrops_by_pk }) => {
-      setAirdrop(airdrops_by_pk);
-
-      if (airdrops_by_pk?.job?.id) setJobId(airdrops_by_pk?.job?.id);
-    },
-  });
-
-  const { loading: loadingCollection, data: collectionData } = useQuery(
-    GET_COLLECTION_BY_ID,
+  const { data: airdropData, refetch: refetchAirdrop } = useQuery(
+    GET_AIRDROP_BY_ID,
     {
       variables: {
-        id: airdrop?.collection?.id,
+        id: params?.id,
       },
-      skip: !airdrop?.collection?.id,
+      skip: !params?.id,
       fetchPolicy: "no-cache",
-      onCompleted: ({
-        collections_by_pk: collection,
-      }: {
-        collections_by_pk: Collection;
-      }) => {
-        console.log({ collection });
-        setCollection(collection);
+      onCompleted: ({ airdrops_by_pk }) => {
+        setAirdrop(airdrops_by_pk);
+
+        if (airdrops_by_pk?.job?.id) setJobId(airdrops_by_pk?.job?.id);
       },
     }
   );
+
+  const {
+    loading: loadingCollection,
+    data: collectionData,
+    refetch: refetchCollection,
+  } = useQuery(GET_COLLECTION_BY_ID, {
+    variables: {
+      id: airdrop?.collection?.id,
+    },
+    skip: !airdrop?.collection?.id,
+    fetchPolicy: "no-cache",
+    onCompleted: ({
+      collections_by_pk: collection,
+    }: {
+      collections_by_pk: Collection;
+    }) => {
+      console.log({ collection });
+      setCollection(collection);
+    },
+  });
+
+  const handleRefetch = () => {
+    refetchAirdrop();
+    refetchCollection();
+  };
 
   useEffect(() => {
     if (!user && !localStorage.getItem("userId")) {
@@ -156,8 +165,9 @@ export default function AirdropDetailsPage({ params }: { params: any }) {
         <ContentWrapper>
           <ContentWrapperYAxisCenteredContent>
             <AirdropStatus
-              airdrop={airdrop}
-              collection={collection}
+              refetch={handleRefetch}
+              airdrop={airdropData?.airdrops_by_pk}
+              collection={collectionData?.collections_by_pk}
               jobId={jobData?.jobs_by_pk?.id}
               uploadJobId={uploadJobData?.uploadJobs_by_pk?.id}
             />
