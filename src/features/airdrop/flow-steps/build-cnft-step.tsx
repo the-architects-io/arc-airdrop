@@ -1,6 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 import { fadeOut } from "@/animations";
-import { MerkleTree, Token, TokenMetadata, Trait } from "@/app/blueprint/types";
+import {
+  Collection,
+  MerkleTree,
+  Token,
+  TokenMetadata,
+  Trait,
+} from "@/app/blueprint/types";
 import {
   ASSET_SHDW_DRIVE_ADDRESS,
   BASE_URL,
@@ -32,6 +38,7 @@ import { FormCheckboxWithLabel } from "@/features/UI/forms/form-checkbox-with-la
 import Link from "next/link";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 import { useQuery } from "@apollo/client";
+import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 
 type SortedTrait = Trait & { sortOrder: number };
 
@@ -43,6 +50,7 @@ export const BuildCnftStep = () => {
   const [tokenId, setTokenId] = useState<string | null>(null);
   const [collectionId, setCollectionId] = useState<string | undefined>();
   const [airdropId, setAirdropId] = useState<string | undefined>();
+  const [collection, setCollection] = useState<Collection | null>(null);
   const [hasFillerToken, setHasFillerToken] = useState(false);
 
   const { data: tokenData, refetch } = useQuery(
@@ -56,9 +64,24 @@ export const BuildCnftStep = () => {
     }
   );
 
+  useQuery(GET_COLLECTION_BY_ID, {
+    variables: {
+      id: collectionId,
+    },
+    skip: !collectionId,
+    fetchPolicy: "no-cache",
+    onCompleted: ({
+      collections_by_pk: collection,
+    }: {
+      collections_by_pk: Collection;
+    }) => {
+      console.log({ collection });
+      setCollection(collection);
+    },
+  });
+
   const formik = useFormik({
     initialValues: {
-      sellerFeeBasisPoints: 0,
       symbol: "",
       name: "",
       uri: "",
@@ -70,14 +93,13 @@ export const BuildCnftStep = () => {
       shouldFillRemaining: false,
     },
     onSubmit: async ({
-      sellerFeeBasisPoints,
       name,
       description,
       symbol,
       saveAction,
       externalUrl,
     }) => {
-      if (!user?.id || !image) {
+      if (!user?.id || !image || !collection?.id) {
         console.error("Missing user or image");
         return;
       }
@@ -86,7 +108,7 @@ export const BuildCnftStep = () => {
         name,
         symbol,
         description,
-        seller_fee_basis_points: sellerFeeBasisPoints * 100,
+        seller_fee_basis_points: collection.sellerFeeBasisPoints,
         external_url: externalUrl,
         image: image.url,
         attributes: formik.values.traits.map((trait) => ({
@@ -112,6 +134,7 @@ export const BuildCnftStep = () => {
           },
         ],
       });
+      debugger;
 
       if (!success) {
         console.error("Failed to create token");
