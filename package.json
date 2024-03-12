@@ -39,6 +39,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.26",
     "@solana/web3.js": "^1.90.0",
+    "@tanstack/react-table": "^8.13.2",
     "@the-architects/blueprint-graphql": "^0.2.12",
     "@uidotdev/usehooks": "^2.4.1",
     "@zip.js/zip.js": "^2.7.35",
@@ -62,6 +63,7 @@
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
     "react-use-websocket": "^4.7.0",
+    "react-virtuoso": "^4.7.2",
     "uuid": "^9.0.1",
     "uuidv4": "^6.2.13"
   },

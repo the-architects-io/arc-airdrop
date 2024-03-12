@@ -14,6 +14,7 @@ import { MiniCnftCard } from "@/features/UI/cards/mini-cnft-card";
 import Spinner from "@/features/UI/spinner";
 import { StepHeading } from "@/features/UI/typography/step-heading";
 import { StepTitle } from "@/features/UI/typography/step-title";
+import { TreeCostOptionSelector } from "@/features/merkle-trees/tree-cost-option-selector";
 import showToast from "@/features/toasts/show-toast";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
@@ -39,17 +40,6 @@ import { useCallback, useEffect, useState } from "react";
 
 const SOLANA_TRANSACTION_FEE = 0.000005;
 
-const treeCreationMethodOptions = [
-  {
-    value: TreeCreationMethod.CHEAPEST,
-    label: "Cheapest",
-  },
-  {
-    value: TreeCreationMethod.TRADABLE,
-    label: "Trading Platform Friendly",
-  },
-];
-
 export const ReviewStep = () => {
   const searchParams = useSearchParams();
   const { isSaving, setIsSaving } = useSaving();
@@ -70,7 +60,6 @@ export const ReviewStep = () => {
   const [treeCost, setTreeCost] = useState<number | null>(null);
   const [storageCost, setStorageCost] = useState<number | null>(null);
   const [solPriceInUsd, setSolPriceInUsd] = useState<number | null>(null);
-  const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [hasCalcError, setHasCalcError] = useState<boolean>(false);
   const [totalCost, setTotalCost] = useState<number | null>(null);
   const [finalPrice, setFinalPrice] = useState<number | null>(null);
@@ -78,9 +67,12 @@ export const ReviewStep = () => {
   const [treeMaxBufferSize, setTreeMaxBufferSize] = useState<number | null>(
     null
   );
+  const [treeCreationMethod, setTreeCreationMethod] =
+    useState<TreeCreationMethod | null>(null);
   const [treeCanopyDepth, setTreeCanopyDepth] = useState<number | null>(null);
   const [treeProofLength, setTreeProofLength] = useState<number | null>(null);
   const [premintTokensCount, setPremintTokensCount] = useState<number>(0);
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -142,18 +134,6 @@ export const ReviewStep = () => {
       },
     }
   );
-
-  const formik = useFormik({
-    initialValues: {
-      treeCreationMethod: TreeCreationMethod.CHEAPEST,
-    },
-    onSubmit: async (values) => {
-      if (!airdropId || !collectionId) {
-        console.error("Airdrop or collection not found");
-        return;
-      }
-    },
-  });
 
   function calculateSpaceRequired(options: TreeOptions): number {
     return getConcurrentMerkleTreeAccountSize(
@@ -346,11 +326,9 @@ export const ReviewStep = () => {
       let maxDepth = 0;
       let maxBufferSize = 0;
 
-      if (formik.values.treeCreationMethod === TreeCreationMethod.CHEAPEST) {
+      if (treeCreationMethod === TreeCreationMethod.CHEAPEST) {
         cost = await findCheapestTreeCost(creatorCount, totalTokenCount);
-      } else if (
-        formik.values.treeCreationMethod === TreeCreationMethod.TRADABLE
-      ) {
+      } else if (treeCreationMethod === TreeCreationMethod.TRADABLE) {
         const result = await findBestTreeCost(creatorCount, totalTokenCount);
         cost = result.cost;
         canopyDepth = result.canopyDepth;
@@ -378,8 +356,8 @@ export const ReviewStep = () => {
     collection?.creators?.length,
     findBestTreeCost,
     findCheapestTreeCost,
-    formik.values.treeCreationMethod,
     totalTokenCount,
+    treeCreationMethod,
   ]);
 
   const handleSolPayment = useCallback(
@@ -487,7 +465,6 @@ export const ReviewStep = () => {
     collection?.creators?.length,
     findBestTreeCost,
     findCheapestTreeCost,
-    formik.values.treeCreationMethod,
     totalTokenCount,
   ]);
 
@@ -612,66 +589,12 @@ export const ReviewStep = () => {
               {tokenData?.tokens?.length > 1 ? "s" : ""}
             </StepHeading>
 
-            <div className="pt-8 mb-4 text-black text-2xl space-y-4">
-              <div>select cost option:</div>
-              <div className="flex max-w-sm mx-auto mb-8">
-                <div className="flex flex-col space-y-4 text-lg text-gray-400">
-                  <div className="flex items-center space-x-4">
-                    <input
-                      type="checkbox"
-                      id="cheapest"
-                      name="cheapest"
-                      className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400"
-                      checked={
-                        formik.values.treeCreationMethod ===
-                        TreeCreationMethod.CHEAPEST
-                      }
-                      onChange={() => {
-                        formik.setFieldValue(
-                          "treeCreationMethod",
-                          TreeCreationMethod.CHEAPEST
-                        );
-                      }}
-                    />
-                    <label htmlFor="cheapest">
-                      cheapest (not marketplace compatible)
-                    </label>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <input
-                      type="checkbox"
-                      id="tradable"
-                      name="tradable"
-                      className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400"
-                      checked={
-                        formik.values.treeCreationMethod ===
-                        TreeCreationMethod.TRADABLE
-                      }
-                      onChange={() => {
-                        formik.setFieldValue(
-                          "treeCreationMethod",
-                          TreeCreationMethod.TRADABLE
-                        );
-                      }}
-                    />
-                    <label htmlFor="tradable">
-                      tradable (marketplace compatible)
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div className="py-8 flex flex-col space-y-2">
-                <div>final price:</div>
-                <div className="flex items-center h-10">
-                  {isCalculating ? (
-                    <Spinner />
-                  ) : (
-                    <>{!!finalPrice && `${finalPrice} SOL`}</>
-                  )}
-                </div>
-              </div>
-            </div>
+            <TreeCostOptionSelector
+              isCalculating={isCalculating}
+              setIsCalculating={setIsCalculating}
+              finalPrice={finalPrice}
+              setFinalPrice={setFinalPrice}
+            />
           </div>
         </div>
       </div>
