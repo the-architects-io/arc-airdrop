@@ -134,7 +134,6 @@ export const BuildCnftStep = () => {
           },
         ],
       });
-      debugger;
 
       if (!success) {
         console.error("Failed to create token");

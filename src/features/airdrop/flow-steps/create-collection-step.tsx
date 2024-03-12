@@ -230,7 +230,6 @@ export const CreateCollectionStep = () => {
       const { data } = await axios.post("/api/remove-creator", {
         id: formik.values.creators[index].id,
       });
-      debugger;
     },
     [formik]
   );

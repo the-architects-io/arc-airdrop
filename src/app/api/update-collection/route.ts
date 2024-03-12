@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   }: { collections_by_pk: Collection; creators: Creator[] } =
     await client.request(GET_COLLECTION_BY_ID, { id });
 
-  const newCreators = creators.filter(
+  const newCreators = creators?.filter(
     (creator: Creator) =>
       !existingCreators.find(
         (existingCreator: Collection["creators"][0]) =>
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   }
 
   for (const creator of existingCreators) {
-    const updatedCreator = creators.find(
+    const updatedCreator = creators?.find(
       (c: Collection["creators"][0]) => c.address === creator?.wallet?.address
     );
     if (updatedCreator) {
