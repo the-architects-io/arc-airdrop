@@ -1,10 +1,12 @@
 import { Collection, Creator, Wallet } from "@/app/blueprint/types";
 import { client } from "@/graphql/backend-client";
+import { UPDATE_CREATOR } from "@/graphql/mutations/update-creator";
 import {
   ADD_CREATORS,
   ADD_WALLETS,
   UPDATE_COLLECTION,
   GET_WALLETS_BY_ADDRESSES,
+  GET_COLLECTION_BY_ID,
 } from "@the-architects/blueprint-graphql";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -41,19 +43,33 @@ export async function POST(req: NextRequest) {
   console.log({ creators });
 
   let addedCreators;
-  if (creators?.length) {
+
+  const {
+    collections_by_pk: { creators: existingCreators },
+  }: { collections_by_pk: Collection; creators: Creator[] } =
+    await client.request(GET_COLLECTION_BY_ID, { id });
+
+  const newCreators = creators.filter(
+    (creator: Creator) =>
+      !existingCreators.find(
+        (existingCreator: Collection["creators"][0]) =>
+          existingCreator?.wallet?.address === creator.address
+      )
+  );
+
+  if (newCreators?.length) {
     try {
       console.log("@@@@@@@ adding creators");
 
       const { wallets }: { wallets: Wallet[] } = await client.request({
         document: GET_WALLETS_BY_ADDRESSES,
         variables: {
-          addresses: creators.map((creator: Creator) => creator.address),
+          addresses: newCreators.map((creator: Creator) => creator.address),
         },
       });
 
       // add wallets that don't exist
-      const walletsToAdd = creators.filter(
+      const walletsToAdd = newCreators.filter(
         (creator: Creator, i: number) => !wallets[i]
       );
 
@@ -74,7 +90,7 @@ export async function POST(req: NextRequest) {
         insert_creators,
       }: { insert_creators: { returning: { id: string }[] } } =
         await client.request(ADD_CREATORS, {
-          creators: creators.map(
+          creators: newCreators.map(
             ({ share, sortOrder }: Creator, i: number) => ({
               walletId: wallets[i].id,
               share,
@@ -96,6 +112,33 @@ export async function POST(req: NextRequest) {
         },
         { status: 500 }
       );
+    }
+  }
+
+  for (const creator of existingCreators) {
+    const updatedCreator = creators.find(
+      (c: Collection["creators"][0]) => c.address === creator?.wallet?.address
+    );
+    if (updatedCreator) {
+      try {
+        const { update_creators_by_pk }: { update_creators_by_pk: Creator } =
+          await client.request(UPDATE_CREATOR, {
+            id: creator.id,
+            creator: {
+              share: updatedCreator.share,
+              sortOrder: updatedCreator.sortOrder,
+            },
+          });
+      } catch (error) {
+        console.error(error as Error);
+        return NextResponse.json(
+          {
+            message: "Error updating creator",
+            error: JSON.stringify(error),
+          },
+          { status: 500 }
+        );
+      }
     }
   }
 
