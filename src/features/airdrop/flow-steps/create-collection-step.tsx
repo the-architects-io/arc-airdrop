@@ -268,12 +268,14 @@ export const CreateCollectionStep = () => {
           ? existingCollection?.sellerFeeBasisPoints / 100
           : 0,
         image: existingCollection?.imageUrl || "",
-        creators: creators.map((creator: Collection["creators"][0]) => ({
-          address: creator?.wallet?.address,
-          share: creator.share,
-          sortOrder: creator.sortOrder,
-          id: creator.id,
-        })),
+        creators: creators?.length
+          ? creators.map((creator: Collection["creators"][0]) => ({
+              address: creator?.wallet?.address,
+              share: creator.share,
+              sortOrder: creator.sortOrder,
+              id: creator.id,
+            }))
+          : ([{ address: "", share: 0, sortOrder: 0, id: 0 }] as Creator[]),
       });
     };
 
