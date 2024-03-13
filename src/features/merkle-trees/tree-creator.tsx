@@ -18,8 +18,6 @@ import {
   maxNumberOfCnftsInMerkleTree,
 } from "@/app/blueprint/utils/merkle-trees";
 import { useUserData } from "@nhost/nextjs";
-import { useQuery } from "@apollo/client";
-import { GET_MERKLE_TREES_BY_USER_ID } from "@the-architects/blueprint-graphql";
 import { useConnection } from "@solana/wallet-adapter-react";
 import {
   ALL_DEPTH_SIZE_PAIRS,
@@ -336,12 +334,9 @@ export const TreeCreator = () => {
       </div>
       <div className="flex flex-col justify-center space-y-4">
         <TreeCostOptionSelector
-          treeCreationMethod={treeCreationMethod}
           setTreeCreationMethod={setTreeCreationMethod}
           isCalculating={isCalculating}
-          setIsCalculating={setIsCalculating}
           finalPrice={finalPrice}
-          setFinalPrice={setFinalPrice}
         />
       </div>
     </div>

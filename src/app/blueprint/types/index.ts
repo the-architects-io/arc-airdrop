@@ -773,7 +773,7 @@ export type UpdateCollectionInput = {
   isReadyToMint?: boolean;
   uploadJobId?: string;
   driveAddress?: string;
-  merkleTreeId?: string;
+  merkleTreeId?: string | null;
   collectionNftAddress?: string;
   nftId?: string;
   tokenCount?: number;

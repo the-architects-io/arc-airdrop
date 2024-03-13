@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     driveAddress,
     isReadyToMint,
     uploadJobId,
-    merkleTreeAddress,
+    merkleTreeId,
     collectionNftAddress,
     tokenCount,
     imageSizeInBytes,
@@ -163,7 +163,10 @@ export async function POST(req: NextRequest) {
           ...(driveAddress && { driveAddress }),
           ...(uploadJobId && { uploadJobId }),
           ...(collectionNftAddress && { collectionNftAddress }),
-          ...(merkleTreeAddress && { merkleTreeAddress }),
+          // if merkleTreeId === null remove it from the collection
+          ...(merkleTreeId === null && { merkleTreeId: null }),
+          ...(merkleTreeId !== null &&
+            merkleTreeId !== undefined && { merkleTreeId }),
           ...(tokenCount && { tokenCount }),
           ...(imageSizeInBytes && { imageSizeInBytes }),
           ...(maxDepth && { maxDepth }),

@@ -4,6 +4,7 @@ import {
   Airdrop,
   Collection,
   CollectionBuildSourceUUIDs,
+  MerkleTree,
   Token,
   TreeCreationMethod,
 } from "@/app/blueprint/types";
@@ -11,6 +12,7 @@ import { getMinimumMaxBufferSizeAndMaxDepthForCapacity } from "@/app/blueprint/u
 import { SOL_MINT_ADDRESS } from "@/app/blueprint/utils/payments";
 import { BASE_URL } from "@/constants/constants";
 import { MiniCnftCard } from "@/features/UI/cards/mini-cnft-card";
+import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
 import Spinner from "@/features/UI/spinner";
 import { StepHeading } from "@/features/UI/typography/step-heading";
 import { StepTitle } from "@/features/UI/typography/step-title";
@@ -25,14 +27,19 @@ import {
 import { useCluster } from "@/hooks/cluster";
 import { TreeOptions } from "@/types";
 import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
+import { getAbbreviatedAddress } from "@/utils/formatting";
 import { useQuery } from "@apollo/client";
+import { useUserData } from "@nhost/nextjs";
 import {
   ALL_DEPTH_SIZE_PAIRS,
   getConcurrentMerkleTreeAccountSize,
 } from "@solana/spl-account-compression";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
+import {
+  GET_COLLECTION_BY_ID,
+  GET_MERKLE_TREES_BY_USER_ID,
+} from "@the-architects/blueprint-graphql";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -41,6 +48,7 @@ import { useCallback, useEffect, useState } from "react";
 const SOLANA_TRANSACTION_FEE = 0.000005;
 
 export const ReviewStep = () => {
+  const user = useUserData();
   const searchParams = useSearchParams();
   const { isSaving, setIsSaving } = useSaving();
   const wallet = useWallet();
@@ -73,6 +81,17 @@ export const ReviewStep = () => {
   const [treeProofLength, setTreeProofLength] = useState<number | null>(null);
   const [premintTokensCount, setPremintTokensCount] = useState<number>(0);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [shouldUseExistingTree, setShouldUseExistingTree] =
+    useState<boolean>(false);
+  const [selectedTree, setSelectedTree] = useState<MerkleTree | null>(null);
+
+  const { data: userMerleTreesData } = useQuery(GET_MERKLE_TREES_BY_USER_ID, {
+    variables: {
+      userId: user?.id,
+    },
+    skip: !user?.id,
+    fetchPolicy: "no-cache",
+  });
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -314,7 +333,6 @@ export const ReviewStep = () => {
 
     if (totalTokenCount <= 0) {
       setIsCalculating(false);
-      console.error("Invalid token count");
       return;
     }
 
@@ -563,6 +581,21 @@ export const ReviewStep = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalPrice, hasCalcError, isCalculating, recipientCount]);
 
+  useEffect(() => {
+    const blueprint = createBlueprintClient({ cluster });
+    if (shouldUseExistingTree && selectedTree && collectionId) {
+      blueprint.collections.updateCollection({
+        id: collectionId,
+        merkleTreeId: selectedTree.id,
+      });
+    } else if (collectionId) {
+      blueprint.collections.updateCollection({
+        id: collectionId,
+        merkleTreeId: null,
+      });
+    }
+  }, [cluster, collectionId, selectedTree, shouldUseExistingTree]);
+
   return (
     <>
       <StepTitle>review</StepTitle>
@@ -588,14 +621,55 @@ export const ReviewStep = () => {
               {tokenData?.tokens?.length} cnft variation
               {tokenData?.tokens?.length > 1 ? "s" : ""}
             </StepHeading>
-
-            <TreeCostOptionSelector
-              isCalculating={isCalculating}
-              setIsCalculating={setIsCalculating}
-              finalPrice={finalPrice}
-              setFinalPrice={setFinalPrice}
-            />
           </div>
+          <div className="flex items-center space-x-4 my-8">
+            <input
+              type="checkbox"
+              id="shouldUseExistingTree"
+              name="shouldUseExistingTree"
+              className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400"
+              checked={shouldUseExistingTree}
+              onChange={() => {
+                setShouldUseExistingTree(!shouldUseExistingTree);
+              }}
+            />
+            <label htmlFor="shouldUseExistingTree">use existing tree</label>
+          </div>
+          {shouldUseExistingTree ? (
+            <SelectInputWithLabel
+              value={selectedTree?.id || ""}
+              label="Select tree"
+              name="selectedTree"
+              options={[
+                ...(
+                  userMerleTreesData?.merkleTrees?.filter(
+                    (tree: MerkleTree) => tree?.cluster === cluster
+                  ) || []
+                ).map((tree: MerkleTree) => ({
+                  label: `${getAbbreviatedAddress(tree.address)} - capacity: ${
+                    tree.maxCapacity
+                  }`,
+                  value: tree.id,
+                })),
+              ]}
+              onChange={(e) => {
+                const selectedTreeId = e.target.value;
+                const selectedTree = userMerleTreesData?.merkleTrees.find(
+                  (tree: MerkleTree) => tree.id === selectedTreeId
+                );
+                setSelectedTree(selectedTree);
+              }}
+              onBlur={() => {}}
+              placeholder="Select tree"
+              hideLabel={false}
+            />
+          ) : (
+            <TreeCostOptionSelector
+              setTreeCreationMethod={setTreeCreationMethod}
+              isCalculating={isCalculating}
+              finalPrice={finalPrice}
+            />
+          )}
         </div>
       </div>
     </>

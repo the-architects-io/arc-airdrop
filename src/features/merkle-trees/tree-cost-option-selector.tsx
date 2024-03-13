@@ -4,19 +4,13 @@ import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 
 export const TreeCostOptionSelector = ({
-  treeCreationMethod,
   setTreeCreationMethod,
   isCalculating,
-  setIsCalculating,
   finalPrice,
-  setFinalPrice,
 }: {
-  treeCreationMethod: TreeCreationMethod;
   setTreeCreationMethod: (treeCreationMethod: TreeCreationMethod) => void;
   isCalculating: boolean;
-  setIsCalculating: (isCalculating: boolean) => void;
   finalPrice: number | null;
-  setFinalPrice: (finalPrice: number | null) => void;
 }) => {
   const treeCreationMethodOptions = [
     {
