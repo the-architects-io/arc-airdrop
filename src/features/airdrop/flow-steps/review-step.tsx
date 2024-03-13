@@ -574,9 +574,18 @@ export const ReviewStep = () => {
   }, [premintTokensCount, recipientCount, tokenData?.tokens]);
 
   useEffect(() => {
+    let capacityCanHoldAllTokens = true;
+    if (shouldUseExistingTree) {
+      capacityCanHoldAllTokens =
+        (selectedTree?.maxCapacity || 0) >= totalTokenCount;
+    }
+
     setStepIsValid(
       AirdropFlowStepName.Review,
-      !!finalPrice && !isCalculating && !hasCalcError
+      !!finalPrice &&
+        !isCalculating &&
+        !hasCalcError &&
+        capacityCanHoldAllTokens
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalPrice, hasCalcError, isCalculating, recipientCount]);
@@ -636,33 +645,40 @@ export const ReviewStep = () => {
             <label htmlFor="shouldUseExistingTree">use existing tree</label>
           </div>
           {shouldUseExistingTree ? (
-            <SelectInputWithLabel
-              value={selectedTree?.id || ""}
-              label="Select tree"
-              name="selectedTree"
-              options={[
-                ...(
-                  userMerleTreesData?.merkleTrees?.filter(
-                    (tree: MerkleTree) => tree?.cluster === cluster
-                  ) || []
-                ).map((tree: MerkleTree) => ({
-                  label: `${getAbbreviatedAddress(tree.address)} - capacity: ${
-                    tree.maxCapacity
-                  }`,
-                  value: tree.id,
-                })),
-              ]}
-              onChange={(e) => {
-                const selectedTreeId = e.target.value;
-                const selectedTree = userMerleTreesData?.merkleTrees.find(
-                  (tree: MerkleTree) => tree.id === selectedTreeId
-                );
-                setSelectedTree(selectedTree);
-              }}
-              onBlur={() => {}}
-              placeholder="Select tree"
-              hideLabel={false}
-            />
+            <>
+              <SelectInputWithLabel
+                value={selectedTree?.id || ""}
+                label="Select tree"
+                name="selectedTree"
+                options={[
+                  ...(
+                    userMerleTreesData?.merkleTrees?.filter(
+                      (tree: MerkleTree) => tree?.cluster === cluster
+                    ) || []
+                  ).map((tree: MerkleTree) => ({
+                    label: `${getAbbreviatedAddress(
+                      tree.address
+                    )} - capacity: ${tree.maxCapacity}`,
+                    value: tree.id,
+                  })),
+                ]}
+                onChange={(e) => {
+                  const selectedTreeId = e.target.value;
+                  const selectedTree = userMerleTreesData?.merkleTrees.find(
+                    (tree: MerkleTree) => tree.id === selectedTreeId
+                  );
+                  setSelectedTree(selectedTree);
+                }}
+                onBlur={() => {}}
+                placeholder="Select tree"
+                hideLabel={false}
+              />
+              {selectedTree && selectedTree.maxCapacity < totalTokenCount && (
+                <div className="text-red-500 mt-2 text-sm">
+                  capacity is not large enough
+                </div>
+              )}
+            </>
           ) : (
             <TreeCostOptionSelector
               setTreeCreationMethod={setTreeCreationMethod}
