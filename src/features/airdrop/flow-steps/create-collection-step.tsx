@@ -11,6 +11,7 @@ import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import { DndCard } from "@/features/UI/cards/dnd-card";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { FormTextareaWithLabel } from "@/features/UI/forms/form-textarea-with-label";
+import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
 import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import { SingleImageUpload } from "@/features/upload/single-image/single-image-upload";
@@ -22,7 +23,7 @@ import {
 import { useCluster } from "@/hooks/cluster";
 import { debounce } from "@/utils/debounce";
 import { isValidPublicKey } from "@/utils/rpc";
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import {
   CheckBadgeIcon,
   PlusCircleIcon,
@@ -30,8 +31,12 @@ import {
   XCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
+import {
+  GET_COLLECTIONS_BY_OWNER_ID,
+  GET_COLLECTION_BY_ID,
+} from "@the-architects/blueprint-graphql";
 import axios from "axios";
 import { FieldArray, FormikProvider, useFormik } from "formik";
 import Image from "next/image";
@@ -40,6 +45,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 export const CreateCollectionStep = () => {
+  const user = useUserData();
   const { publicKey } = useWallet();
   const { setStepIsValid } = useAirdropFlowStep();
   const { isSaving, setIsSaving } = useSaving();
@@ -56,6 +62,10 @@ export const CreateCollectionStep = () => {
   const [collectionImageUrl, setCollectionImageUrl] = useState<string | null>(
     null
   );
+  const [shouldUseExistingCollection, setShouldUseExistingCollection] =
+    useState<boolean>(false);
+  const [selectedExistingCollection, setSelectedExistingCollection] =
+    useState<Collection | null>(null);
 
   const [getCollection, { loading }] = useLazyQuery(GET_COLLECTION_BY_ID, {
     fetchPolicy: "network-only",
@@ -63,6 +73,17 @@ export const CreateCollectionStep = () => {
       console.log({ data });
     },
   });
+
+  const { data: existingCollectionsData } = useQuery(
+    GET_COLLECTIONS_BY_OWNER_ID,
+    {
+      variables: {
+        id: user?.id,
+      },
+      skip: !user?.id,
+      fetchPolicy: "no-cache",
+    }
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -298,22 +319,29 @@ export const CreateCollectionStep = () => {
   }, []);
 
   useEffect(() => {
-    setStepIsValid(
-      AirdropFlowStepName.CreateCollection,
-      !!formik.values.collectionName &&
-        !!formik.values.creators?.[0]?.address &&
-        // shares add up to 100
-        formik.values.creators.reduce(
-          (acc, creator) => acc + creator.share,
-          0
-        ) === 100 &&
-        !isSaving &&
-        !loading &&
-        !!collectionId &&
-        (!!collectionImage || !!existingCollectionImageUrl) &&
-        formik.values.sellerFeeBasisPoints >= 0 &&
-        formik.values.sellerFeeBasisPoints <= 100
-    );
+    if (shouldUseExistingCollection) {
+      setStepIsValid(
+        AirdropFlowStepName.CreateCollection,
+        !!selectedExistingCollection
+      );
+    } else {
+      setStepIsValid(
+        AirdropFlowStepName.CreateCollection,
+        !!formik.values.collectionName &&
+          !!formik.values.creators?.[0]?.address &&
+          // shares add up to 100
+          formik.values.creators.reduce(
+            (acc, creator) => acc + creator.share,
+            0
+          ) === 100 &&
+          !isSaving &&
+          !loading &&
+          !!collectionId &&
+          (!!collectionImage || !!existingCollectionImageUrl) &&
+          formik.values.sellerFeeBasisPoints >= 0 &&
+          formik.values.sellerFeeBasisPoints <= 100
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     formik.values.collectionName,
@@ -346,6 +374,19 @@ export const CreateCollectionStep = () => {
     });
   }, [cluster, collectionId, collectionImage]);
 
+  useEffect(() => {
+    if (!collectionId) return;
+
+    if (shouldUseExistingCollection && selectedExistingCollection?.id) {
+      localStorage.setItem("collectionId", selectedExistingCollection?.id);
+    }
+  }, [
+    cluster,
+    collectionId,
+    selectedExistingCollection?.id,
+    shouldUseExistingCollection,
+  ]);
+
   return (
     <DndProvider backend={HTML5Backend}>
       <FormikProvider value={formik}>
@@ -353,168 +394,210 @@ export const CreateCollectionStep = () => {
         <StepSubtitle>
           this will represent your collection on-chain
         </StepSubtitle>
-        <div className="flex flex-wrap w-full mb-28">
-          <div className="w-full md:w-1/2 flex flex-col px-4">
-            {existingCollectionImageUrl ? (
-              <>
-                <div className="text-2xl mb-1 text-left">collection image</div>
-                <Image
-                  src={existingCollectionImageUrl}
-                  alt="collection image"
-                  className="rounded-md shadow-deep"
-                  width={1200}
-                  height={1200}
-                />
-              </>
-            ) : (
-              <>
-                <div className="text-2xl mb-1 text-left mx-5">
-                  collection image
-                </div>
-                <SingleImageUpload
-                  fileName={`${collectionId}-collection.png`}
-                  driveAddress={ASSET_SHDW_DRIVE_ADDRESS}
-                  setImage={setCollectionImage}
-                >
-                  <div
-                    className="relative w-full bg-gray-400 rounded-md shadow-deep"
-                    style={{ paddingBottom: "100%" }}
-                  >
-                    <div className="absolute flex flex-col justify-center items-center text-gray-100 text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer h-full w-full hover:rounded-md">
-                      <PlusCircleIcon className="w-48 h-48" />
-                      <div className="text-3xl">add image</div>
-                    </div>
-                  </div>
-                </SingleImageUpload>
-              </>
-            )}
+        <div className="flex items-center space-x-4 mb-4">
+          <input
+            type="checkbox"
+            id="shouldUseExistingCollection"
+            name="shouldUseExistingCollection"
+            className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400"
+            checked={shouldUseExistingCollection}
+            onChange={() => {
+              setShouldUseExistingCollection(!shouldUseExistingCollection);
+            }}
+          />
+          <label htmlFor="shouldUseExistingTree">use existing collection</label>
+        </div>
+        {shouldUseExistingCollection ? (
+          <div className="max-w-lg">
+            <SelectInputWithLabel
+              value={selectedExistingCollection?.id || ""}
+              label="select collection"
+              name="selectedCollection"
+              options={[
+                ...existingCollectionsData?.collections.map(
+                  (c: Collection) => ({
+                    label: c.name,
+                    value: c.id,
+                  })
+                ),
+              ]}
+              onChange={(e) => {
+                const collection = existingCollectionsData?.collections.find(
+                  (c: Collection) => c.id === e.target.value
+                );
+                setSelectedExistingCollection(collection);
+              }}
+              onBlur={() => {}}
+              placeholder="select collection"
+              hideLabel={false}
+            />
           </div>
-          <div className="w-full md:w-1/2 flex flex-col px-4">
-            <form className="space-y-4 w-full">
-              <FormInputWithLabel
-                label="collection name"
-                name="collectionName"
-                placeholder="e.g. my collection"
-                value={formik.values.collectionName}
-                onChange={formik.handleChange}
-                description="the name of your collection on-chain"
-              />
-              <FormInputWithLabel
-                label="symbol"
-                name="symbol"
-                value={formik.values.symbol}
-                onChange={formik.handleChange}
-                description="the symbol of your collection on-chain"
-              />
-              <div className="flex relative">
+        ) : (
+          <div className="flex flex-wrap w-full mb-28">
+            <div className="w-full md:w-1/2 flex flex-col px-4">
+              {existingCollectionImageUrl ? (
+                <>
+                  <div className="text-2xl mb-1 text-left">
+                    collection image
+                  </div>
+                  <Image
+                    src={existingCollectionImageUrl}
+                    alt="collection image"
+                    className="rounded-md shadow-deep"
+                    width={1200}
+                    height={1200}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl mb-1 text-left mx-5">
+                    collection image
+                  </div>
+                  <SingleImageUpload
+                    fileName={`${collectionId}-collection.png`}
+                    driveAddress={ASSET_SHDW_DRIVE_ADDRESS}
+                    setImage={setCollectionImage}
+                  >
+                    <div
+                      className="relative w-full bg-gray-400 rounded-md shadow-deep"
+                      style={{ paddingBottom: "100%" }}
+                    >
+                      <div className="absolute flex flex-col justify-center items-center text-gray-100 text-3xl p-2 transition-all hover:bg-cyan-400 cursor-pointer h-full w-full hover:rounded-md">
+                        <PlusCircleIcon className="w-48 h-48" />
+                        <div className="text-3xl">add image</div>
+                      </div>
+                    </div>
+                  </SingleImageUpload>
+                </>
+              )}
+            </div>
+            <div className="w-full md:w-1/2 flex flex-col px-4">
+              <form className="space-y-4 w-full">
                 <FormInputWithLabel
-                  label="royalty"
-                  name="sellerFeeBasisPoints"
-                  type="number"
-                  min={0}
-                  max={100}
-                  placeholder="e.g. 5%"
-                  description="the royalties received by creator(s) on secondary sales"
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    if (Number(e.target.value) > 100) {
-                      formik.setFieldValue("sellerFeeBasisPoints", 100);
-                    }
-                  }}
-                  value={formik.values.sellerFeeBasisPoints}
+                  label="collection name"
+                  name="collectionName"
+                  placeholder="e.g. my collection"
+                  value={formik.values.collectionName}
+                  onChange={formik.handleChange}
+                  description="the name of your collection on-chain"
                 />
-                <div className="text-3xl text-gray-100 top-10 right-8 absolute mt-0.5">
-                  %
+                <FormInputWithLabel
+                  label="symbol"
+                  name="symbol"
+                  value={formik.values.symbol}
+                  onChange={formik.handleChange}
+                  description="the symbol of your collection on-chain"
+                />
+                <div className="flex relative">
+                  <FormInputWithLabel
+                    label="royalty"
+                    name="sellerFeeBasisPoints"
+                    type="number"
+                    min={0}
+                    max={100}
+                    placeholder="e.g. 5%"
+                    description="the royalties received by creator(s) on secondary sales"
+                    onChange={(e) => {
+                      formik.handleChange(e);
+                      if (Number(e.target.value) > 100) {
+                        formik.setFieldValue("sellerFeeBasisPoints", 100);
+                      }
+                    }}
+                    value={formik.values.sellerFeeBasisPoints}
+                  />
+                  <div className="text-3xl text-gray-100 top-10 right-8 absolute mt-0.5">
+                    %
+                  </div>
                 </div>
-              </div>
-              <>
-                <FieldArray
-                  name="creators"
-                  render={(arrayHelpers) => (
-                    <div className="w-full">
-                      {formik.values.creators
-                        .sort((a, b) => a.sortOrder - b.sortOrder)
-                        .map((creator, index) => (
-                          <DndCard
-                            className="mb-4"
-                            key={creator.id}
-                            id={creator.id}
-                            index={index}
-                            moveCard={moveCard}
-                          >
-                            <div className="relative w-full flex">
-                              <div className="flex flex-1 mr-4">
-                                <FormInputWithLabel
-                                  label="creator address"
-                                  name={`creators.${index}.address`}
-                                  placeholder="creator address"
-                                  onChange={formik.handleChange}
-                                  value={creator.address}
-                                />
-                                {isValidPublicKey(creator.address) ? (
-                                  <CheckBadgeIcon className="h-6 w-6 text-green-500 self-end ml-2 mb-3" />
-                                ) : (
-                                  <XCircleIcon className="h-6 w-6 text-red-500 self-end ml-2 mb-3" />
+                <>
+                  <FieldArray
+                    name="creators"
+                    render={(arrayHelpers) => (
+                      <div className="w-full">
+                        {formik.values.creators
+                          .sort((a, b) => a.sortOrder - b.sortOrder)
+                          .map((creator, index) => (
+                            <DndCard
+                              className="mb-4"
+                              key={creator.id}
+                              id={creator.id}
+                              index={index}
+                              moveCard={moveCard}
+                            >
+                              <div className="relative w-full flex">
+                                <div className="flex flex-1 mr-4">
+                                  <FormInputWithLabel
+                                    label="creator address"
+                                    name={`creators.${index}.address`}
+                                    placeholder="creator address"
+                                    onChange={formik.handleChange}
+                                    value={creator.address}
+                                  />
+                                  {isValidPublicKey(creator.address) ? (
+                                    <CheckBadgeIcon className="h-6 w-6 text-green-500 self-end ml-2 mb-3" />
+                                  ) : (
+                                    <XCircleIcon className="h-6 w-6 text-red-500 self-end ml-2 mb-3" />
+                                  )}
+                                </div>
+                                <div className="w-24 mr-8">
+                                  <FormInputWithLabel
+                                    label="share"
+                                    name={`creators.${index}.share`}
+                                    placeholder="Share"
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    onChange={formik.handleChange}
+                                    value={creator.share}
+                                  />
+                                </div>
+                                {formik.values.creators.length > 1 && (
+                                  <button
+                                    className=" absolute -top-2 -right-2.5 cursor-pointer border border-cyan-400 rounded-full p-1 transition-all"
+                                    type="button"
+                                    onClick={async () => {
+                                      handleRemoveCreator(index);
+                                      // arrayHelpers.remove(index);
+                                    }}
+                                  >
+                                    <XMarkIcon className="h-6 w-6 text-cyan-400" />
+                                  </button>
                                 )}
                               </div>
-                              <div className="w-24 mr-8">
-                                <FormInputWithLabel
-                                  label="share"
-                                  name={`creators.${index}.share`}
-                                  placeholder="Share"
-                                  type="number"
-                                  min={0}
-                                  max={100}
-                                  onChange={formik.handleChange}
-                                  value={creator.share}
-                                />
-                              </div>
-                              {formik.values.creators.length > 1 && (
-                                <button
-                                  className=" absolute -top-2 -right-2.5 cursor-pointer border border-cyan-400 rounded-full p-1 transition-all"
-                                  type="button"
-                                  onClick={async () => {
-                                    handleRemoveCreator(index);
-                                    // arrayHelpers.remove(index);
-                                  }}
-                                >
-                                  <XMarkIcon className="h-6 w-6 text-cyan-400" />
-                                </button>
-                              )}
-                            </div>
-                          </DndCard>
-                        ))}
-                    </div>
-                  )}
+                            </DndCard>
+                          ))}
+                      </div>
+                    )}
+                  />
+                  <SecondaryButton
+                    className="mt-4 w-full"
+                    onClick={handleAddCreator}
+                    disabled={
+                      !(
+                        formik.values.creators.every(
+                          (c) => !!c.address && isValidPublicKey(c.address)
+                        ) && formik.values.creators.every((c) => c.share)
+                      )
+                    }
+                  >
+                    <PlusIcon className="h-6 w-6" />
+                    Add Creator
+                  </SecondaryButton>
+                  <p className="text-sm text-gray-400 mt-2 italic">
+                    the creators receive the royalties on secondary sales
+                  </p>
+                </>
+                <FormTextareaWithLabel
+                  className="text-2xl"
+                  label="description"
+                  name="description"
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
                 />
-                <SecondaryButton
-                  className="mt-4 w-full"
-                  onClick={handleAddCreator}
-                  disabled={
-                    !(
-                      formik.values.creators.every(
-                        (c) => !!c.address && isValidPublicKey(c.address)
-                      ) && formik.values.creators.every((c) => c.share)
-                    )
-                  }
-                >
-                  <PlusIcon className="h-6 w-6" />
-                  Add Creator
-                </SecondaryButton>
-                <p className="text-sm text-gray-400 mt-2 italic">
-                  the creators receive the royalties on secondary sales
-                </p>
-              </>
-              <FormTextareaWithLabel
-                className="text-2xl"
-                label="description"
-                name="description"
-                value={formik.values.description}
-                onChange={formik.handleChange}
-              />
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
+        )}
       </FormikProvider>
     </DndProvider>
   );

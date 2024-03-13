@@ -698,7 +698,7 @@ export const ReviewStep = () => {
             <>
               <SelectInputWithLabel
                 value={selectedTree?.id || ""}
-                label="Select tree"
+                label="select tree"
                 name="selectedTree"
                 options={[
                   ...(
@@ -720,7 +720,7 @@ export const ReviewStep = () => {
                   setSelectedTree(selectedTree);
                 }}
                 onBlur={() => {}}
-                placeholder="Select tree"
+                placeholder="select tree"
                 hideLabel={false}
               />
               {selectedTree && selectedTree.maxCapacity < totalTokenCount && (
