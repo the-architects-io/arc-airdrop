@@ -12,6 +12,7 @@ import { getMinimumMaxBufferSizeAndMaxDepthForCapacity } from "@/app/blueprint/u
 import { SOL_MINT_ADDRESS } from "@/app/blueprint/utils/payments";
 import { BASE_URL } from "@/constants/constants";
 import { MiniCnftCard } from "@/features/UI/cards/mini-cnft-card";
+import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
 import Spinner from "@/features/UI/spinner";
 import { StepHeading } from "@/features/UI/typography/step-heading";
@@ -28,7 +29,9 @@ import { useCluster } from "@/hooks/cluster";
 import { TreeOptions } from "@/types";
 import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
 import { getAbbreviatedAddress } from "@/utils/formatting";
+import { isValidPublicKey } from "@/utils/rpc";
 import { useQuery } from "@apollo/client";
+import { CheckBadgeIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { useUserData } from "@nhost/nextjs";
 import {
   ALL_DEPTH_SIZE_PAIRS,
@@ -83,7 +86,12 @@ export const ReviewStep = () => {
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [shouldUseExistingTree, setShouldUseExistingTree] =
     useState<boolean>(false);
+  const [shouldUseExistingDrive, setShouldUseExistingDrive] =
+    useState<boolean>(false);
   const [selectedTree, setSelectedTree] = useState<MerkleTree | null>(null);
+  const [existingDriveAddress, setExistingDriveAddress] = useState<
+    string | undefined
+  >(undefined);
 
   const { data: userMerleTreesData } = useQuery(GET_MERKLE_TREES_BY_USER_ID, {
     variables: {
@@ -575,9 +583,20 @@ export const ReviewStep = () => {
 
   useEffect(() => {
     let capacityCanHoldAllTokens = true;
+    let driveIsValid = true;
     if (shouldUseExistingTree) {
       capacityCanHoldAllTokens =
         (selectedTree?.maxCapacity || 0) >= totalTokenCount;
+    } else {
+      capacityCanHoldAllTokens = true;
+    }
+
+    if (shouldUseExistingDrive) {
+      driveIsValid = existingDriveAddress?.length
+        ? isValidPublicKey(existingDriveAddress)
+        : false;
+    } else {
+      driveIsValid = true;
     }
 
     setStepIsValid(
@@ -585,10 +604,21 @@ export const ReviewStep = () => {
       !!finalPrice &&
         !isCalculating &&
         !hasCalcError &&
-        capacityCanHoldAllTokens
+        capacityCanHoldAllTokens &&
+        driveIsValid
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finalPrice, hasCalcError, isCalculating, recipientCount]);
+  }, [
+    finalPrice,
+    hasCalcError,
+    isCalculating,
+    recipientCount,
+    shouldUseExistingDrive,
+    shouldUseExistingTree,
+    totalTokenCount,
+    selectedTree,
+    existingDriveAddress,
+  ]);
 
   useEffect(() => {
     const blueprint = createBlueprintClient({ cluster });
@@ -605,6 +635,26 @@ export const ReviewStep = () => {
     }
   }, [cluster, collectionId, selectedTree, shouldUseExistingTree]);
 
+  useEffect(() => {
+    const blueprint = createBlueprintClient({ cluster });
+    if (
+      shouldUseExistingDrive &&
+      existingDriveAddress?.length &&
+      isValidPublicKey(existingDriveAddress) &&
+      collectionId
+    ) {
+      blueprint.collections.updateCollection({
+        id: collectionId,
+        driveAddress: existingDriveAddress,
+      });
+    } else if (collectionId) {
+      blueprint.collections.updateCollection({
+        id: collectionId,
+        driveAddress: null,
+      });
+    }
+  }, [cluster, collectionId, existingDriveAddress, shouldUseExistingDrive]);
+
   return (
     <>
       <StepTitle>review</StepTitle>
@@ -619,7 +669,7 @@ export const ReviewStep = () => {
           )}
         </div>
         <div className="w-full md:w-1/3 flex flex-col px-4 ">
-          <div className="sticky top-40 space-y-8">
+          <div className="space-y-8 mt-8">
             <StepHeading>
               <span className="text-red-500">{totalTokenCount}</span> cnfts to
               be created
@@ -685,6 +735,38 @@ export const ReviewStep = () => {
               isCalculating={isCalculating}
               finalPrice={finalPrice}
             />
+          )}
+          <div className="flex items-center space-x-4 mb-4">
+            <input
+              type="checkbox"
+              id="shouldUseExistingDrive"
+              name="shouldUseExistingDrive"
+              className="w-12 h-12 rounded-md active:ring-2 active:ring-cyan-400"
+              checked={shouldUseExistingDrive}
+              onChange={() => {
+                setShouldUseExistingDrive(!shouldUseExistingDrive);
+              }}
+            />
+            <label htmlFor="shouldUseExistingTree">use existing drive</label>
+          </div>
+          {shouldUseExistingDrive && (
+            <div className="flex">
+              <FormInputWithLabel
+                label="drive address"
+                name="driveAddress"
+                value={existingDriveAddress}
+                onChange={(e) => {
+                  setExistingDriveAddress(e.target.value);
+                }}
+                description="the address of the drive to use"
+              />
+              {!!existingDriveAddress &&
+              isValidPublicKey(existingDriveAddress) ? (
+                <CheckBadgeIcon className="h-6 w-6 text-green-500 self-end ml-2 mb-10" />
+              ) : (
+                <XCircleIcon className="h-6 w-6 text-red-500 self-end ml-2 mb-10" />
+              )}
+            </div>
           )}
         </div>
       </div>

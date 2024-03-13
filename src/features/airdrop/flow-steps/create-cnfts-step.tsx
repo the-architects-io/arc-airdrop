@@ -10,6 +10,7 @@ import {
 } from "@/app/blueprint/types";
 import {
   ARCHITECTS_API_URL,
+  ASSET_SHDW_DRIVE_ADDRESS,
   EXECUTION_WALLET_ADDRESS,
 } from "@/constants/constants";
 import { CnftCard } from "@/features/UI/cards/cnft-card";
@@ -155,52 +156,6 @@ export const CreateCnftsStep = () => {
 
       let driveAddress: string | null = null;
 
-      const maxRetries = 2;
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          const { data, status } = await axios.post(
-            `${ARCHITECTS_API_URL}/create-drive`,
-            {
-              name: collectionId,
-              sizeInKb,
-              ownerAddress: EXECUTION_WALLET_ADDRESS,
-            }
-          );
-
-          if (status !== 200) {
-            throw new Error("failed to create drive");
-          }
-
-          const { address, txSig } = data;
-
-          console.log({ address, txSig });
-
-          setDriveAddress(address);
-          driveAddress = address;
-
-          break;
-        } catch (error) {
-          if (attempt === maxRetries) {
-            console.log({ error });
-            console.error(`failed to create drive: ${error}`);
-            throw error;
-          }
-          console.error(`attempt ${attempt} failed: ${error}`);
-        }
-      }
-
-      if (!driveAddress) {
-        setIsSaving(false);
-        console.error("Failed to create drive");
-        blueprint.jobs.updateUploadJob({
-          id: job.id,
-          statusId: StatusUUIDs.ERROR,
-          statusText: "failed to create drive.",
-          cluster,
-        });
-        return;
-      }
-
       if (!collection.imageUrl?.length) {
         blueprint.jobs.updateUploadJob({
           id: job.id,
@@ -249,7 +204,7 @@ export const CreateCnftsStep = () => {
         console.log({ file, driveAddress, token });
 
         const { success, url } = await blueprint.upload.uploadFile({
-          driveAddress,
+          driveAddress: ASSET_SHDW_DRIVE_ADDRESS,
           file,
           fileName: token.id,
         });

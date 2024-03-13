@@ -772,7 +772,7 @@ export type UpdateCollectionInput = {
   creators?: Creator[];
   isReadyToMint?: boolean;
   uploadJobId?: string;
-  driveAddress?: string;
+  driveAddress?: string | null;
   merkleTreeId?: string | null;
   collectionNftAddress?: string;
   nftId?: string;

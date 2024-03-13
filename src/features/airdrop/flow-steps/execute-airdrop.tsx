@@ -128,51 +128,53 @@ export const ExecuteAirdrop = ({
       tokenImagesSizeInBytes,
     });
 
-    let driveAddress: string | null = null;
-
-    const maxRetries = 2;
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const { data, status } = await axios.post(
-          `${ARCHITECTS_API_URL}/create-drive`,
-          {
-            name: collection.id,
-            sizeInKb,
-            ownerAddress: EXECUTION_WALLET_ADDRESS,
-          }
-        );
-
-        if (status !== 200) {
-          throw new Error("Failed to create drive");
-        }
-
-        const { address, txSig } = data;
-
-        console.log({ address, txSig });
-
-        setDriveAddress(address);
-        driveAddress = address;
-
-        break;
-      } catch (error) {
-        if (attempt === maxRetries) {
-          console.error("failed to create drive", error);
-          throw error;
-        }
-        console.error(`Attempt ${attempt} failed: ${error}`);
-      }
-    }
+    let driveAddress: string | null = collection.driveAddress;
 
     if (!driveAddress) {
-      setIsSaving(false);
-      console.error("failed to create drive");
-      blueprint.jobs.updateUploadJob({
-        id: uploadJob.id,
-        statusId: StatusUUIDs.ERROR,
-        statusText: "failed to create drive",
-        cluster,
-      });
-      return;
+      const maxRetries = 2;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const { data, status } = await axios.post(
+            `${ARCHITECTS_API_URL}/create-drive`,
+            {
+              name: collection.id,
+              sizeInKb,
+              ownerAddress: EXECUTION_WALLET_ADDRESS,
+            }
+          );
+
+          if (status !== 200) {
+            throw new Error("Failed to create drive");
+          }
+
+          const { address, txSig } = data;
+
+          console.log({ address, txSig });
+
+          setDriveAddress(address);
+          driveAddress = address;
+
+          break;
+        } catch (error) {
+          if (attempt === maxRetries) {
+            console.error("failed to create drive", error);
+            throw error;
+          }
+          console.error(`Attempt ${attempt} failed: ${error}`);
+        }
+      }
+
+      if (!driveAddress) {
+        setIsSaving(false);
+        console.error("failed to create drive");
+        blueprint.jobs.updateUploadJob({
+          id: uploadJob.id,
+          statusId: StatusUUIDs.ERROR,
+          statusText: "failed to create drive",
+          cluster,
+        });
+        return;
+      }
     }
 
     if (!collection.imageUrl?.length) {

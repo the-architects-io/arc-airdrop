@@ -160,10 +160,11 @@ export async function POST(req: NextRequest) {
           ...(description && { description }),
           ...(isValidSellerFeeBasisPoints && { sellerFeeBasisPoints }),
           ...(isReadyToMint && { isReadyToMint }),
-          ...(driveAddress && { driveAddress }),
+          ...(driveAddress === null && { driveAddress: null }),
+          ...(driveAddress !== null &&
+            driveAddress !== undefined && { driveAddress }),
           ...(uploadJobId && { uploadJobId }),
           ...(collectionNftAddress && { collectionNftAddress }),
-          // if merkleTreeId === null remove it from the collection
           ...(merkleTreeId === null && { merkleTreeId: null }),
           ...(merkleTreeId !== null &&
             merkleTreeId !== undefined && { merkleTreeId }),
