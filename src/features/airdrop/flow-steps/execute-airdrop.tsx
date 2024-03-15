@@ -467,6 +467,7 @@ export const ExecuteAirdrop = ({
     cluster,
     collection?.id,
     collection?.imageSizeInBytes,
+    collection?.driveAddress,
     collection?.imageUrl?.length,
     setIsSaving,
     setJobId,
