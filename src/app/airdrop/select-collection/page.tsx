@@ -2,21 +2,22 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
-import { BuildCnftStep } from "@/features/airdrop/flow-steps/build-cnft-step";
+import { SelectCollectionStep } from "@/features/airdrop/flow-steps/select-collection-step";
+import { SelectRecipientsStep } from "@/features/airdrop/flow-steps/select-recipients-step";
 import { LoadingPanel } from "@/features/loading-panel";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 
-export default function BuildCnftPage() {
+export default function SelectCollectionPage() {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
-  const [walletInitialized, setWalletInitialized] = useState(false);
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
+  const [walletInitialized, setWalletInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const contentWrapperRef = useRef<HTMLDivElement>(null);
@@ -41,7 +42,7 @@ export default function BuildCnftPage() {
     if (user?.id) localStorage.setItem("userId", user.id);
     if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
-    setCurrentStep(airdropFlowSteps.CreateNfts);
+    setCurrentStep(airdropFlowSteps.SelectCollection);
     setIsLoading(false);
   }, [
     user,
@@ -49,7 +50,7 @@ export default function BuildCnftPage() {
     walletInitialized,
     router,
     setCurrentStep,
-    airdropFlowSteps.CreateNfts,
+    airdropFlowSteps.SelectCollection,
   ]);
 
   useEffect(() => {
@@ -68,10 +69,10 @@ export default function BuildCnftPage() {
     <ContentWrapper
       className="panel-fade-in-out opacity-0"
       ref={contentWrapperRef}
-      id="build-cnft-panel"
+      id="select-collection-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        <BuildCnftStep />
+        <SelectCollectionStep />
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );

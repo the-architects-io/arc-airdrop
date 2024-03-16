@@ -40,12 +40,12 @@ export default function ConnectWalletPage() {
       setDidStartAnimation(true);
       fadeOut("#connect-wallet-panel");
       setTimeout(() => {
-        router.push("/airdrop/select-recipients");
+        router.push("/airdrop/select-collection");
       }, fadeOutTimeoutDuration);
       return;
     }
 
-    router.push("/airdrop/select-recipients");
+    router.push("/airdrop/select-collection");
   }, [wallet, router, user, isFirstLoad, didStartAnimation]);
 
   if (isLoading) {

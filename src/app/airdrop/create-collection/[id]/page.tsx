@@ -2,24 +2,37 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
-import { ReviewStep } from "@/features/airdrop/flow-steps/review-step";
+import { CreateCollectionStep } from "@/features/airdrop/flow-steps/create-collection-step";
 import { LoadingPanel } from "@/features/loading-panel";
+import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useQuery } from "@apollo/client";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-export default function ReviewPage() {
+export default function CreateCollectionPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const [walletInitialized, setWalletInitialized] = useState(false);
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
-  const [walletInitialized, setWalletInitialized] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { data } = useQuery(GET_AIRDROP_BY_ID, {
+    variables: {
+      id: params.id,
+    },
+    skip: !params.id,
+  });
 
   useEffect(() => {
     if (!user && !localStorage.getItem("userId")) {
@@ -41,7 +54,7 @@ export default function ReviewPage() {
     if (user?.id) localStorage.setItem("userId", user.id);
     if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
-    setCurrentStep(airdropFlowSteps.Review);
+    setCurrentStep(airdropFlowSteps.CreateCollection);
     setIsLoading(false);
   }, [
     user,
@@ -49,7 +62,7 @@ export default function ReviewPage() {
     walletInitialized,
     router,
     setCurrentStep,
-    airdropFlowSteps.Review,
+    airdropFlowSteps.CreateCollection,
   ]);
 
   useEffect(() => {
@@ -66,12 +79,12 @@ export default function ReviewPage() {
 
   return (
     <ContentWrapper
-      className="panel-fade-in-out opacity-0"
+      className="panel-fade-in-out opacity-0 justify-start"
       ref={contentWrapperRef}
-      id="review-panel"
+      id="create-collection-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        <ReviewStep />
+        <CreateCollectionStep airdrop={data?.airdrops_by_pk} />
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );

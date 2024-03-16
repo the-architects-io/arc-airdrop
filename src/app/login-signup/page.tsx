@@ -90,7 +90,7 @@ export default function LoginSignupPage() {
     fadeOut(`#${id}`);
     setDidStartAnimation(true);
     setTimeout(() => {
-      router.push("/airdrop/select-recipients");
+      router.push("/airdrop/select-collection");
     }, 600);
   }, [router, didStartAnimation]);
 
@@ -119,7 +119,7 @@ export default function LoginSignupPage() {
       return;
     }
 
-    router.push("/airdrop/select-recipients");
+    router.push("/airdrop/select-collection");
   }, [
     isAuthenticated,
     router,

@@ -15,7 +15,7 @@ export const StartOverButton = () => {
 
   const handleStartOver = () => {
     clearLocalStorage();
-    setCurrentStep(airdropFlowSteps.SelectRecipients);
+    setCurrentStep(airdropFlowSteps.SelectCollection);
     router.push("/connect-wallet");
   };
 
@@ -39,7 +39,6 @@ export const StartOverButton = () => {
     <>
       <div className="absolute top-4 left-4" onClick={handleConfirmStartOver}>
         <button className="rounded-full text-gray-400 px-4 py-2 text-sm shadow-deep hover:shadow-deep-float transition-all">
-          {/* // <ArrowUturnLeftIcon className="h-6 w-6 text-gray-400 group-hover:text-gray-600" /> */}
           reset
         </button>
       </div>

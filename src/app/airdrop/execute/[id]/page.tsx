@@ -20,7 +20,11 @@ import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { LoadingPanel } from "@/features/loading-panel";
 import { useCluster } from "@/hooks/cluster";
 
-export default function AirdropDetailsPage({ params }: { params: any }) {
+export default function AirdropDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();

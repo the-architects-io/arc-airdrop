@@ -29,6 +29,7 @@ import {
   AirdropFlowStepName,
   useAirdropFlowStep,
 } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { Airdrop } from "@/app/blueprint/types";
 
 type SnapshotOption = {
   updatedAt: string;
@@ -50,7 +51,7 @@ type HolderSnapshotResponse = {
   raw: any;
 };
 
-export const SelectRecipientsStep = () => {
+export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const { setStepIsValid } = useAirdropFlowStep();
   const user = useUserData();
   const { setIsSaving } = useSaving();
@@ -71,11 +72,6 @@ export const SelectRecipientsStep = () => {
   const blueprint = createBlueprintClient({ cluster });
   const [didStartUploadingJson, setDidStartUploadingJson] = useState(false);
   const [didStartUploadFlow, setDidStartUploadFlow] = useState(false);
-  const [isCreatingAirdrop, setIsCreatingAirdrop] = useState(false);
-  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
-
-  const airdropIdRef = useRef<string | null>(null);
-  const collectionIdRef = useRef<string | null>(null);
 
   const recipientCountRef = useRef(null);
 
@@ -122,29 +118,6 @@ export const SelectRecipientsStep = () => {
       setIsSaving(true);
       setIsFetchingSnapshot(true);
 
-      if (!collectionIdRef?.current) {
-        if (isCreatingCollection) return;
-        setIsCreatingCollection(true);
-        const { collection } = await blueprint.collections.createCollection({
-          ownerId: user.id,
-        });
-
-        collectionIdRef.current = collection.id;
-        setIsCreatingCollection(false);
-      }
-      if (!airdropIdRef?.current) {
-        if (isCreatingAirdrop) return;
-        setIsCreatingAirdrop(true);
-        const { airdrop } = await blueprint.airdrops.createAirdrop({
-          collectionId: collectionIdRef.current,
-        });
-        airdropIdRef.current = airdrop.id;
-        setIsCreatingAirdrop(false);
-      }
-      console.log({ airdropIdRef: airdropIdRef.current });
-
-      if (!airdropIdRef?.current) return;
-
       setSelectedSnapshotOptions(
         selectedSnapshotOptions
           ? [...selectedSnapshotOptions, snapshotOption]
@@ -165,7 +138,7 @@ export const SelectRecipientsStep = () => {
       );
       const { success: addRecipientsSuccess, addedReipientsCount } =
         await blueprint.airdrops.addAirdropRecipients({
-          airdropId: airdropIdRef.current,
+          airdropId: airdrop.id,
           recipients: JSON.stringify(hashlist),
         });
       setIsSaving(false);
@@ -174,8 +147,7 @@ export const SelectRecipientsStep = () => {
 
   const handleJsonUploadComplete = useCallback(
     async ({ url, success }: UploadJsonResponse) => {
-      const currentAirdropId = airdropIdRef.current;
-      if (!currentAirdropId) return;
+      if (!airdrop?.id) return;
       if (!success) {
         showToast({
           primaryMessage: "JSON Upload Failed",
@@ -198,13 +170,13 @@ export const SelectRecipientsStep = () => {
 
       const recipients = await data;
       console.log({
-        airdropId: currentAirdropId,
+        airdropId: airdrop.id,
         recipients,
       });
 
       const { success: addRecipientsSuccess, addedReipientsCount } =
         await blueprint.airdrops.addAirdropRecipients({
-          airdropId: currentAirdropId,
+          airdropId: airdrop.id,
           recipients: JSON.stringify(recipients),
         });
 
@@ -212,7 +184,7 @@ export const SelectRecipientsStep = () => {
       setCustomHashlist(data);
       setCustomHashlistCount(data.length);
     },
-    [setIsSaving, blueprint.airdrops, recipientCount]
+    [airdrop?.id, setIsSaving, blueprint.airdrops, recipientCount]
   );
 
   useEffect(() => {
@@ -277,38 +249,15 @@ export const SelectRecipientsStep = () => {
     if (!user?.id || !jsonUploadyInstance) return;
     setDidStartUploadFlow(true);
     setIsSaving(true);
-    if (!collectionIdRef.current) {
-      if (isCreatingCollection) return;
-      setIsCreatingCollection(true);
-      const { collection } = await blueprint.collections.createCollection({
-        ownerId: user.id,
-      });
-      collectionIdRef.current = collection.id;
-      setIsCreatingCollection(false);
-    }
-    if (collectionIdRef.current && !airdropIdRef.current) {
-      if (isCreatingAirdrop) return;
-      setIsCreatingAirdrop(true);
-      const { airdrop } = await blueprint.airdrops.createAirdrop({
-        collectionId: collectionIdRef.current,
-      });
-      airdropIdRef.current = airdrop.id;
-      setIsCreatingAirdrop(false);
-    }
 
-    if (
-      collectionIdRef.current &&
-      airdropIdRef.current &&
-      jsonFileBeingUploaded &&
-      !didStartUploadingJson
-    ) {
+    if (airdrop?.id && jsonFileBeingUploaded && !didStartUploadingJson) {
       setDidStartUploadingJson(true);
       try {
         await jsonUploadyInstance.processPending({
           params: {
             driveAddress: ASSET_SHDW_DRIVE_ADDRESS,
             action: BlueprintApiActions.UPLOAD_JSON,
-            fileName: `${airdropIdRef.current}-v${attemptNumber}-airdrop-custom-recipient-list.json`,
+            fileName: `${airdrop.id}-v${attemptNumber}-airdrop-custom-recipient-list.json`,
             overwrite: true,
           },
         });
@@ -328,12 +277,9 @@ export const SelectRecipientsStep = () => {
     user?.id,
     jsonUploadyInstance,
     setIsSaving,
+    airdrop?.id,
     jsonFileBeingUploaded,
     didStartUploadingJson,
-    isCreatingCollection,
-    blueprint.collections,
-    blueprint.airdrops,
-    isCreatingAirdrop,
     attemptNumber,
     handleClearFile,
   ]);
@@ -353,8 +299,6 @@ export const SelectRecipientsStep = () => {
   useEffect(() => {
     if (!window) return;
 
-    const localAirdropId = localStorage.getItem("airdropId");
-    const localCollectionId = localStorage.getItem("collectionId");
     const localCustomLocalHashlistCount = localStorage.getItem(
       "customHashlistCount"
     );
@@ -362,12 +306,7 @@ export const SelectRecipientsStep = () => {
       "selectedSnapshotOptions"
     );
     const localRecipientCount = localStorage.getItem("recipientCount");
-    if (localAirdropId) {
-      airdropIdRef.current = localAirdropId;
-    }
-    if (localCollectionId) {
-      collectionIdRef.current = localCollectionId;
-    }
+
     if (
       localSelectedSnapshotOptions &&
       Object.keys(JSON.parse(localSelectedSnapshotOptions)).length
@@ -390,12 +329,10 @@ export const SelectRecipientsStep = () => {
   useEffect(() => {
     if (!window) return;
 
-    if (airdropIdRef.current && collectionIdRef.current) {
+    if (airdrop?.id) {
       if (recipientCount > 0) {
         localStorage.setItem("recipientCount", String(recipientCount));
       }
-      localStorage.setItem("airdropId", airdropIdRef.current);
-      localStorage.setItem("collectionId", collectionIdRef.current);
       localStorage.setItem("customHashlistCount", String(customHashlistCount));
       localStorage.setItem(
         "selectedSnapshotOptions",
@@ -403,12 +340,11 @@ export const SelectRecipientsStep = () => {
       );
     }
   }, [
-    airdropIdRef,
-    collectionIdRef,
     selectedSnapshotOptions,
     recipientCount,
     customHashlist,
     customHashlistCount,
+    airdrop?.id,
   ]);
 
   if (!snapshotOptionsData) {

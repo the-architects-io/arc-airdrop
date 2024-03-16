@@ -46,13 +46,7 @@ export default function Page() {
 
   useEffect(() => {
     setCurrentStep(airdropFlowSteps.Welcome);
-  }, [
-    wallet?.publicKey,
-    setCurrentStep,
-    airdropFlowSteps.SelectRecipients,
-    router,
-    airdropFlowSteps.Welcome,
-  ]);
+  }, [wallet?.publicKey, setCurrentStep, router, airdropFlowSteps.Welcome]);
 
   return (
     <ContentWrapper className="cursor-pointer">

@@ -50,7 +50,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const SOLANA_TRANSACTION_FEE = 0.000005;
 
-export const ReviewStep = () => {
+export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const user = useUserData();
   const searchParams = useSearchParams();
   const { isSaving, setIsSaving } = useSaving();
@@ -60,11 +60,8 @@ export const ReviewStep = () => {
   const { connection } = useConnection();
   const { setStepIsValid } = useAirdropFlowStep();
 
-  const [collectionId, setCollectionId] = useState<string | null>(null);
-  const [airdropId, setAirdropId] = useState<string | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<number>(0);
   const [collection, setCollection] = useState<Collection | null>(null);
-  const [airdrop, setAirdrop] = useState<Airdrop | null>(null);
   const [recipientCount, setRecipientCount] = useState<number>(0);
   const [uniqueRecipientCount, setUniqueRecipientCount] = useState<number>(0);
   const [costInSol, setCostInSol] = useState<number>(0);
@@ -105,9 +102,9 @@ export const ReviewStep = () => {
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
     {
       variables: {
-        id: collectionId,
+        id: airdrop?.collection?.id,
       },
-      skip: !collectionId,
+      skip: !airdrop?.collection?.id,
       fetchPolicy: "network-only",
       onCompleted: ({ tokens }: { tokens: Token[] }) => {
         const amountToMint = tokens.reduce(
@@ -124,9 +121,9 @@ export const ReviewStep = () => {
     GET_COLLECTION_BY_ID,
     {
       variables: {
-        id: collectionId,
+        id: airdrop?.collection?.id,
       },
-      skip: !collectionId,
+      skip: !airdrop?.collection?.id,
       fetchPolicy: "network-only",
       onCompleted: ({
         collections_by_pk: collection,
@@ -135,29 +132,6 @@ export const ReviewStep = () => {
       }) => {
         console.log({ collection });
         setCollection(collection);
-      },
-    }
-  );
-
-  const { loading: loadingAirdrop, data: airdropData } = useQuery(
-    GET_AIRDROP_BY_ID,
-    {
-      variables: {
-        id: airdropId,
-      },
-      skip: !airdropId,
-      fetchPolicy: "network-only",
-      onCompleted: ({
-        airdrops_by_pk: airdrop,
-      }: {
-        airdrops_by_pk: Airdrop;
-      }) => {
-        console.log({ airdrop });
-        setAirdrop(airdrop);
-        const { uniqueRecipients, recipientCount } =
-          getRecipientCountsFromAirdrop(airdrop);
-        setUniqueRecipientCount(uniqueRecipients);
-        setRecipientCount(recipientCount);
       },
     }
   );
@@ -388,7 +362,7 @@ export const ReviewStep = () => {
 
   const handleSolPayment = useCallback(
     async (amountInSol: number) => {
-      if (!wallet || !airdropId) {
+      if (!wallet || !airdrop?.id) {
         console.error("Wallet or airdrop not found");
         return;
       }
@@ -407,7 +381,7 @@ export const ReviewStep = () => {
         });
         if (txId) {
           await blueprint.airdrops.updateAirdrop({
-            id: airdropId,
+            id: airdrop.id,
             hasBeenPaidFor: true,
           });
           showToast({
@@ -417,14 +391,14 @@ export const ReviewStep = () => {
               title: "View transaction",
             },
           });
-          router.push(`${BASE_URL}/airdrop/execute/${airdropId}`);
+          router.push(`${BASE_URL}/airdrop/execute/${airdrop.id}`); // remove query params
           return;
         } else {
           showToast({
             primaryMessage: "Payment failed",
             secondaryMessage: "Please try again",
           });
-          router.push(`${BASE_URL}/airdrop/review`); // remove query params
+          router.push(`${BASE_URL}/airdrop/review/${airdrop.id}`); // remove query params
         }
       } catch (error) {
         console.error(error);
@@ -432,12 +406,12 @@ export const ReviewStep = () => {
           primaryMessage: "Payment failed",
           secondaryMessage: "Please try again",
         });
-        router.push(`${BASE_URL}/airdrop/review`); // remove query params
+        router.push(`${BASE_URL}/airdrop/review/${airdrop.id}`); // remove query params
       } finally {
         setIsSaving(false);
       }
     },
-    [wallet, airdropId, setIsSaving, cluster, router]
+    [wallet, airdrop?.id, setIsSaving, cluster, router]
   );
 
   const updateCollectionWithTreeInfo = useCallback(async () => {
@@ -476,6 +450,13 @@ export const ReviewStep = () => {
     treeCanopyDepth,
     totalTokenCount,
   ]);
+
+  useEffect(() => {
+    const { uniqueRecipients, recipientCount } =
+      getRecipientCountsFromAirdrop(airdrop);
+    setUniqueRecipientCount(uniqueRecipients);
+    setRecipientCount(recipientCount);
+  }, [airdrop]);
 
   useEffect(() => {
     if (!finalPrice) return;
@@ -552,24 +533,6 @@ export const ReviewStep = () => {
   ]);
 
   useEffect(() => {
-    if (!window) return;
-
-    const localAirdropId = localStorage.getItem("airdropId");
-    const localCollectionId = localStorage.getItem("collectionId");
-    if (!localAirdropId || !localCollectionId) {
-      router.push("/");
-      return;
-    }
-    if (localAirdropId) {
-      setAirdropId(localAirdropId);
-    }
-    if (localCollectionId) {
-      setCollectionId(localCollectionId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     const hasFillToken = tokenData?.tokens?.some(
       (token: Token) => token?.shouldFillRemaining
     );
@@ -622,18 +585,18 @@ export const ReviewStep = () => {
 
   useEffect(() => {
     const blueprint = createBlueprintClient({ cluster });
-    if (shouldUseExistingTree && selectedTree && collectionId) {
+    if (shouldUseExistingTree && selectedTree && collection?.id) {
       blueprint.collections.updateCollection({
-        id: collectionId,
+        id: collection?.id,
         merkleTreeId: selectedTree.id,
       });
-    } else if (collectionId) {
+    } else if (collection?.id) {
       blueprint.collections.updateCollection({
-        id: collectionId,
+        id: collection?.id,
         merkleTreeId: null,
       });
     }
-  }, [cluster, collectionId, selectedTree, shouldUseExistingTree]);
+  }, [cluster, collection?.id, selectedTree, shouldUseExistingTree]);
 
   useEffect(() => {
     const blueprint = createBlueprintClient({ cluster });
@@ -641,19 +604,19 @@ export const ReviewStep = () => {
       shouldUseExistingDrive &&
       existingDriveAddress?.length &&
       isValidPublicKey(existingDriveAddress) &&
-      collectionId
+      collection?.id
     ) {
       blueprint.collections.updateCollection({
-        id: collectionId,
+        id: collection?.id,
         driveAddress: existingDriveAddress,
       });
-    } else if (collectionId) {
+    } else if (collection?.id) {
       blueprint.collections.updateCollection({
-        id: collectionId,
+        id: collection?.id,
         driveAddress: null,
       });
     }
-  }, [cluster, collectionId, existingDriveAddress, shouldUseExistingDrive]);
+  }, [cluster, collection?.id, existingDriveAddress, shouldUseExistingDrive]);
 
   return (
     <>

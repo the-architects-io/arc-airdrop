@@ -24,6 +24,7 @@ export enum AirdropFlowStepName {
   Welcome = "Welcome",
   LoginSignup = "LoginSignup",
   ConnectWallet = "ConnectWallet",
+  SelectCollection = "SelectCollection",
   SelectRecipients = "SelectRecipients",
   CreateCollection = "CreateCollection",
   CreateNfts = "CreateNfts",
@@ -56,6 +57,10 @@ export const AirdropFlowStepProvider = ({
     Welcome: { name: AirdropFlowStepName.Welcome, isValid: true },
     LoginSignup: { name: AirdropFlowStepName.LoginSignup, isValid: true },
     ConnectWallet: { name: AirdropFlowStepName.ConnectWallet, isValid: true },
+    SelectCollection: {
+      name: AirdropFlowStepName.SelectCollection,
+      isValid: false,
+    },
     SelectRecipients: {
       name: AirdropFlowStepName.SelectRecipients,
       isValid: false,
@@ -141,6 +146,13 @@ export function useAirdropFlowStep() {
       if (!currentStepIsValid) return;
 
       switch (currentStep) {
+        case airdropFlowSteps.SelectCollection:
+          fadeOut("#select-collection-panel");
+          setTimeout(() => {
+            router.push("/airdrop/select-recipients");
+            setCurrentStep(airdropFlowSteps.SelectRecipients);
+          }, fadeOutTimeoutDuration);
+          break;
         case airdropFlowSteps.SelectRecipients:
           fadeOut("#select-recipients-panel");
           setTimeout(() => {

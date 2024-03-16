@@ -2,24 +2,33 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
-import { SelectRecipientsStep } from "@/features/airdrop/flow-steps/select-recipients-step";
+import { ReviewStep } from "@/features/airdrop/flow-steps/review-step";
 import { LoadingPanel } from "@/features/loading-panel";
+import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useQuery } from "@apollo/client";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export default function SelectRecipientsPage() {
+export default function ReviewPage({ params }: { params: { id: string } }) {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
-
   const [walletInitialized, setWalletInitialized] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { data } = useQuery(GET_AIRDROP_BY_ID, {
+    variables: {
+      id: params.id,
+    },
+    skip: !params.id,
+  });
 
   useEffect(() => {
     if (!user && !localStorage.getItem("userId")) {
@@ -41,7 +50,7 @@ export default function SelectRecipientsPage() {
     if (user?.id) localStorage.setItem("userId", user.id);
     if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
-    setCurrentStep(airdropFlowSteps.SelectRecipients);
+    setCurrentStep(airdropFlowSteps.Review);
     setIsLoading(false);
   }, [
     user,
@@ -49,7 +58,7 @@ export default function SelectRecipientsPage() {
     walletInitialized,
     router,
     setCurrentStep,
-    airdropFlowSteps.SelectRecipients,
+    airdropFlowSteps.Review,
   ]);
 
   useEffect(() => {
@@ -68,10 +77,10 @@ export default function SelectRecipientsPage() {
     <ContentWrapper
       className="panel-fade-in-out opacity-0"
       ref={contentWrapperRef}
-      id="select-recipients-panel"
+      id="review-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        <SelectRecipientsStep />
+        <ReviewStep airdrop={data?.airdrops_by_pk} />
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );

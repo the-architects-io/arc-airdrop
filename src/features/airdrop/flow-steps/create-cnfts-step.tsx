@@ -33,7 +33,7 @@ import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const CreateCnftsStep = () => {
+export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const { isSaving, setIsSaving } = useSaving();
   const { setStepIsValid } = useAirdropFlowStep();
   const { cluster } = useCluster();
@@ -42,7 +42,6 @@ export const CreateCnftsStep = () => {
   const [driveAddress, setDriveAddress] = useState<string | null>(null);
   const [job, setJob] = useState<UploadJob | null>(null);
   const user = useUserData();
-  const [collectionId, setCollectionId] = useState<string | null>(null);
   const [airdropId, setAirdropId] = useState<string | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<number>(0);
   const [recipientCount, setRecipientCount] = useState<number>(0);
@@ -52,18 +51,18 @@ export const CreateCnftsStep = () => {
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
     {
       variables: {
-        id: collectionId,
+        id: airdrop?.collection?.id,
       },
-      skip: !collectionId,
+      skip: !airdrop?.collection?.id,
       fetchPolicy: "network-only",
     }
   );
 
   const { loading, data: collectionData } = useQuery(GET_COLLECTION_BY_ID, {
     variables: {
-      id: collectionId,
+      id: airdrop?.collection?.id,
     },
-    skip: !collectionId,
+    skip: !airdrop?.collection?.id,
     fetchPolicy: "no-cache",
     onCompleted: ({
       collections_by_pk: collection,
@@ -110,7 +109,7 @@ export const CreateCnftsStep = () => {
         ) || [],
     },
     onSubmit: async (values) => {
-      if (!user?.id || !collectionId) {
+      if (!user?.id || !airdrop?.collection?.id) {
         console.error("user or collection not found");
         setIsSaving(false);
         return;
@@ -224,7 +223,7 @@ export const CreateCnftsStep = () => {
 
       const { success: successOne } =
         await blueprint.collections.updateCollection({
-          id: collectionId,
+          id: airdrop?.collection?.id,
           driveAddress,
           tokenImagesSizeInBytes,
           tokenCount: values.tokens.reduce(
@@ -276,20 +275,6 @@ export const CreateCnftsStep = () => {
         ) || [],
     });
   }, [formik, tokenData, totalTokenCount]);
-
-  useEffect(() => {
-    if (!window) return;
-
-    const localAirdropId = localStorage.getItem("airdropId");
-    const localCollectionId = localStorage.getItem("collectionId");
-
-    if (localAirdropId) {
-      setAirdropId(localAirdropId);
-    }
-    if (localCollectionId) {
-      setCollectionId(localCollectionId);
-    }
-  }, []);
 
   useEffect(() => {
     setStepIsValid(

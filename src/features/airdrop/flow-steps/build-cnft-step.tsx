@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { fadeOut } from "@/animations";
 import {
+  Airdrop,
   Collection,
   MerkleTree,
   Token,
@@ -42,14 +43,12 @@ import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 
 type SortedTrait = Trait & { sortOrder: number };
 
-export const BuildCnftStep = () => {
+export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const router = useRouter();
   const user = useUserData();
   const { cluster } = useCluster();
   const [image, setImage] = useState<SingleImageUploadResponse | null>(null);
   const [tokenId, setTokenId] = useState<string | null>(null);
-  const [collectionId, setCollectionId] = useState<string | undefined>();
-  const [airdropId, setAirdropId] = useState<string | undefined>();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [hasFillerToken, setHasFillerToken] = useState(false);
 
@@ -57,18 +56,18 @@ export const BuildCnftStep = () => {
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
     {
       variables: {
-        id: collectionId,
+        id: airdrop.collection.id,
       },
-      skip: !collectionId,
+      skip: !airdrop?.collection?.id,
       fetchPolicy: "network-only",
     }
   );
 
   useQuery(GET_COLLECTION_BY_ID, {
     variables: {
-      id: collectionId,
+      id: airdrop.collection.id,
     },
-    skip: !collectionId,
+    skip: !airdrop?.collection?.id,
     fetchPolicy: "no-cache",
     onCompleted: ({
       collections_by_pk: collection,
@@ -129,7 +128,7 @@ export const BuildCnftStep = () => {
             isPremint: true,
             amountToMint: formik.values.quantity,
             shouldFillRemaining: formik.values.shouldFillRemaining,
-            collectionId,
+            collectionId: airdrop.collection.id,
             imageSizeInBytes: image.sizeInBytes,
           },
         ],
@@ -142,7 +141,7 @@ export const BuildCnftStep = () => {
 
       fadeOut("#build-cnft-panel");
       setTimeout(() => {
-        router.push("/airdrop/create-cnfts");
+        router.push(`/airdrop/create-cnfts/${airdrop.id}`);
       }, fadeOutTimeoutDuration);
     },
   });
@@ -195,46 +194,11 @@ export const BuildCnftStep = () => {
   }, [tokenId, tokenData]);
 
   useEffect(() => {
-    if (!window) return;
-
-    if (airdropId && collectionId) {
-      localStorage.setItem("airdropId", airdropId);
-      localStorage.setItem("collectionId", collectionId);
-    }
-  }, [
-    airdropId,
-    collectionId,
-    formik.values.name,
-    formik.values.description,
-    formik.values.traits,
-    formik.values.saveAction,
-    formik.values.externalUrl,
-  ]);
-
-  useEffect(() => {
     if (formik.values.shouldFillRemaining) {
       formik.setFieldValue("quantity", 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.shouldFillRemaining]);
-
-  useEffect(() => {
-    if (!window) return;
-
-    const localAirdropId = localStorage.getItem("airdropId");
-    const localCollectionId = localStorage.getItem("collectionId");
-    if (!localAirdropId || !localCollectionId) {
-      router.push("/");
-      return;
-    }
-    if (localAirdropId) {
-      setAirdropId(localAirdropId);
-    }
-    if (localCollectionId) {
-      setCollectionId(localCollectionId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>

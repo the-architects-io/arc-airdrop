@@ -2,24 +2,37 @@
 import { fadeIn } from "@/animations";
 import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrapper-y-axis-centered-content";
+import { SelectRecipientsStep } from "@/features/airdrop/flow-steps/select-recipients-step";
 import { LoadingPanel } from "@/features/loading-panel";
+import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useQuery } from "@apollo/client";
 import { useUserData } from "@nhost/nextjs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { CreateCnftsStep } from "@/features/airdrop/flow-steps/create-cnfts-step";
+import { use, useEffect, useRef, useState } from "react";
 
-export default function CreateCnftsPage() {
+export default function SelectRecipientsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const user = useUserData();
   const { publicKey } = useWallet();
   const router = useRouter();
-  const [walletInitialized, setWalletInitialized] = useState(false);
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
+  const [walletInitialized, setWalletInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { data } = useQuery(GET_AIRDROP_BY_ID, {
+    variables: {
+      id: params.id,
+    },
+    skip: !params.id,
+  });
 
   useEffect(() => {
     if (!user && !localStorage.getItem("userId")) {
@@ -41,7 +54,7 @@ export default function CreateCnftsPage() {
     if (user?.id) localStorage.setItem("userId", user.id);
     if (publicKey) localStorage.setItem("publicKey", publicKey.toString());
 
-    setCurrentStep(airdropFlowSteps.CreateNfts);
+    setCurrentStep(airdropFlowSteps.SelectRecipients);
     setIsLoading(false);
   }, [
     user,
@@ -49,7 +62,7 @@ export default function CreateCnftsPage() {
     walletInitialized,
     router,
     setCurrentStep,
-    airdropFlowSteps.CreateNfts,
+    airdropFlowSteps.SelectRecipients,
   ]);
 
   useEffect(() => {
@@ -68,10 +81,10 @@ export default function CreateCnftsPage() {
     <ContentWrapper
       className="panel-fade-in-out opacity-0"
       ref={contentWrapperRef}
-      id="create-cnfts-panel"
+      id="select-recipients-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        <CreateCnftsStep />
+        <SelectRecipientsStep airdrop={data?.airdrops_by_pk} />
       </ContentWrapperYAxisCenteredContent>
     </ContentWrapper>
   );
