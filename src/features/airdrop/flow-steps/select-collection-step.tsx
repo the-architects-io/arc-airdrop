@@ -150,29 +150,31 @@ export const SelectCollectionStep = () => {
         </div>
       </div>
       {shouldUseExistingCollection && (
-        <div className="max-w-lg">
-          <SelectInputWithLabel
-            value={selectedExistingCollection?.id || ""}
-            label="select collection"
-            name="selectedCollection"
-            options={[
-              ...existingCollectionsData?.collections
-                ?.filter((c: Collection) => c.name?.length)
-                ?.map((c: Collection) => ({
-                  label: c.name,
-                  value: c.id,
-                })),
-            ]}
-            onChange={(e) => {
-              const collection = existingCollectionsData?.collections.find(
-                (c: Collection) => c.id === e.target.value
-              );
-              setSelectedExistingCollection(collection);
-            }}
-            onBlur={() => {}}
-            placeholder="select collection"
-            hideLabel={false}
-          />
+        <div className="w-full flex justify-center">
+          <div className="max-w-lg">
+            <SelectInputWithLabel
+              value={selectedExistingCollection?.id || ""}
+              label="select collection"
+              name="selectedCollection"
+              options={[
+                ...existingCollectionsData?.collections
+                  ?.filter((c: Collection) => c.name?.length)
+                  ?.map((c: Collection) => ({
+                    label: c.name,
+                    value: c.id,
+                  })),
+              ]}
+              onChange={(e) => {
+                const collection = existingCollectionsData?.collections.find(
+                  (c: Collection) => c.id === e.target.value
+                );
+                setSelectedExistingCollection(collection);
+              }}
+              onBlur={() => {}}
+              placeholder="select collection"
+              hideLabel={false}
+            />
+          </div>
         </div>
       )}
       <div className="flex w-full justify-center mt-8">

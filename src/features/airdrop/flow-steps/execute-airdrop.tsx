@@ -110,7 +110,9 @@ export const ExecuteAirdrop = ({
     );
 
     const { job: uploadJob } = await blueprint.jobs.createUploadJob({
-      statusText: "creating shdw drive",
+      statusText: !!collection.driveAddress
+        ? "uploading files to shdw drive"
+        : "creating shdw drive",
       userId: user?.id,
       icon: JobIcons.CREATING_SHADOW_DRIVE,
       cluster,
@@ -326,91 +328,98 @@ export const ExecuteAirdrop = ({
       console.error("error uploading collection NFT metadata", error);
     }
 
-    await blueprint.jobs.updateJob({
-      id: job.id,
-      statusText: "minting collection nft",
-      icon: JobIcons.MINTING_NFTS,
-    });
-
     let collectionNftMintAddress;
 
-    try {
-      const { data, status } = await axios.post(
-        `${ARCHITECTS_API_URL}/mint-nft`,
-        {
-          name,
-          uri,
-          sellerFeeBasisPoints,
-          isCollection: true,
-          creatorAddress: EXECUTION_WALLET_ADDRESS,
-          cluster,
-        }
-      );
-
-      const { signature, result, mintAddress } = data;
-      collectionNftMintAddress = mintAddress;
-
-      console.log("minting collection nft", {
-        signature,
-        mintAddress,
-      });
-    } catch (error) {
-      blueprint.jobs.updateJob({
+    if (collection.collectionNftAddress) {
+      collectionNftMintAddress = collection.collectionNftAddress;
+    } else {
+      await blueprint.jobs.updateJob({
         id: job.id,
-        statusId: StatusUUIDs.ERROR,
-        statusText: "Failed to mint collection nft",
-        icon: JobIcons.ERROR,
+        statusText: "minting collection nft",
+        icon: JobIcons.MINTING_NFTS,
       });
-      console.error("Error minting collection nft", error);
-    }
 
-    await blueprint.jobs.updateJob({
-      id: job.id,
-      statusText: "creating merkle tree",
-      icon: JobIcons.CREATING_TREE,
-    });
-
-    let treeId;
-
-    console.log({
-      maxBufferSize,
-      maxDepth,
-      canopyDepth,
-      collectionId: airdrop.collection.id,
-      userId: SYSTEM_USER_ID,
-    });
-
-    if (!airdrop.collection.merkleTree?.id) {
       try {
         const { data, status } = await axios.post(
-          `${ARCHITECTS_API_URL}/create-tree`,
+          `${ARCHITECTS_API_URL}/mint-nft`,
           {
-            maxBufferSize: maxBufferSize,
-            maxDepth: maxDepth,
-            canopyDepth: canopyDepth,
-            collectionId: airdrop.collection.id,
-            userId: user.id,
+            name,
+            uri,
+            sellerFeeBasisPoints,
+            isCollection: true,
+            creatorAddress: EXECUTION_WALLET_ADDRESS,
             cluster,
           }
         );
 
-        treeId = data.id;
+        const { signature, result, mintAddress } = data;
+        collectionNftMintAddress = mintAddress;
 
-        console.log({
-          data,
-          status,
-          treeId,
+        console.log("minting collection nft", {
+          signature,
+          mintAddress,
         });
-
-        if (!success) throw new Error("error creating merkle tree");
       } catch (error) {
         blueprint.jobs.updateJob({
           id: job.id,
           statusId: StatusUUIDs.ERROR,
-          statusText: "failed to create merkle tree",
+          statusText: "Failed to mint collection nft",
           icon: JobIcons.ERROR,
         });
-        console.error("error creating merkle tree", error);
+        console.error("Error minting collection nft", error);
+      }
+    }
+
+    let treeId;
+    if (collection.merkleTree?.id) {
+      treeId = collection.merkleTree?.id;
+    } else {
+      await blueprint.jobs.updateJob({
+        id: job.id,
+        statusText: "creating merkle tree",
+        icon: JobIcons.CREATING_TREE,
+      });
+
+      console.log({
+        maxBufferSize,
+        maxDepth,
+        canopyDepth,
+        collectionId: airdrop.collection.id,
+        userId: SYSTEM_USER_ID,
+      });
+
+      if (!airdrop.collection.merkleTree?.id) {
+        try {
+          const { data, status } = await axios.post(
+            `${ARCHITECTS_API_URL}/create-tree`,
+            {
+              maxBufferSize: maxBufferSize,
+              maxDepth: maxDepth,
+              canopyDepth: canopyDepth,
+              collectionId: airdrop.collection.id,
+              userId: user.id,
+              cluster,
+            }
+          );
+
+          treeId = data.id;
+
+          console.log({
+            data,
+            status,
+            treeId,
+          });
+
+          if (!success) throw new Error("error creating merkle tree");
+        } catch (error) {
+          blueprint.jobs.updateJob({
+            id: job.id,
+            statusId: StatusUUIDs.ERROR,
+            statusText: "failed to create merkle tree",
+            icon: JobIcons.ERROR,
+          });
+          console.error("error creating merkle tree", error);
+        }
       }
     }
 
@@ -474,6 +483,8 @@ export const ExecuteAirdrop = ({
     setUploadJobId,
     tokenData?.tokens,
     user,
+    collection?.collectionNftAddress,
+    collection?.merkleTree?.id,
   ]);
 
   useEffect(() => {

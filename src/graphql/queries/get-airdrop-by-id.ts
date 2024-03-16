@@ -22,6 +22,7 @@ export const GET_AIRDROP_BY_ID = gql`
         statusText
       }
       collection {
+        collectionNftAddress
         merkleTree {
           id
           maxBufferSize
