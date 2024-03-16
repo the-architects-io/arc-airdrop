@@ -38,7 +38,6 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const { setStepIsValid } = useAirdropFlowStep();
   const { cluster } = useCluster();
   const router = useRouter();
-  const [collection, setCollection] = useState<Collection | null>(null);
   const [driveAddress, setDriveAddress] = useState<string | null>(null);
   const [job, setJob] = useState<UploadJob | null>(null);
   const user = useUserData();
@@ -64,14 +63,6 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
     },
     skip: !airdrop?.collection?.id,
     fetchPolicy: "no-cache",
-    onCompleted: ({
-      collections_by_pk: collection,
-    }: {
-      collections_by_pk: Collection;
-    }) => {
-      console.log({ collection });
-      setCollection(collection);
-    },
   });
 
   const formik = useFormik({
@@ -98,13 +89,14 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
         cluster,
       });
 
-      if (!collection?.id) {
+      if (!collectionData?.collections_by_pk?.id) {
         console.error("collection not found");
         setIsSaving(false);
         return;
       }
 
-      const collectionImageSizeInBytes = collection.imageSizeInBytes || 0;
+      const collectionImageSizeInBytes =
+        collectionData.collections_by_pk.imageSizeInBytes || 0;
       const tokenImagesSizeInBytes = tokenData.tokens.reduce(
         (acc: number, token: Token) =>
           acc + (Number(token?.imageSizeInBytes) || 0),
@@ -133,7 +125,7 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
 
       let driveAddress: string | null = null;
 
-      if (!collection.imageUrl?.length) {
+      if (!collectionData.collections_by_pk.imageUrl?.length) {
         blueprint.jobs.updateUploadJob({
           id: job.id,
           statusId: StatusUUIDs.ERROR,

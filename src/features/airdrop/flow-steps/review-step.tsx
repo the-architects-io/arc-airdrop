@@ -514,15 +514,22 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
     }
 
     if (treeCost && storageCost && totalTokenCount) {
-      setTotalCost(
-        totalTokenCount * SOLANA_TRANSACTION_FEE + treeCost + storageCost
-      );
+      let newTotalCost = 0;
+      if (!shouldUseExistingDrive) {
+        newTotalCost += storageCost;
+      }
+      if (!shouldUseExistingTree) {
+        newTotalCost += treeCost;
+      }
+      setTotalCost(totalTokenCount * SOLANA_TRANSACTION_FEE + newTotalCost);
     }
   }, [
     calculateStorageCost,
     calculateTreeCost,
     collection,
     connection,
+    shouldUseExistingDrive,
+    shouldUseExistingTree,
     storageCost,
     tokenData,
     tokenData?.tokens,
@@ -658,7 +665,7 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
             <label htmlFor="shouldUseExistingTree">use existing tree</label>
           </div>
           {shouldUseExistingTree ? (
-            <>
+            <div className="mb-8">
               <SelectInputWithLabel
                 value={selectedTree?.id || ""}
                 label="select tree"
@@ -691,7 +698,17 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
                   capacity is not large enough
                 </div>
               )}
-            </>
+              <div className="pt-8 flex flex-col space-y-2 text-black text-2xl">
+                <div>final price:</div>
+                <div className="flex items-center h-10">
+                  {isCalculating ? (
+                    <Spinner />
+                  ) : (
+                    <>{!!finalPrice && `${finalPrice} SOL`}</>
+                  )}
+                </div>
+              </div>
+            </div>
           ) : (
             <TreeCostOptionSelector
               setTreeCreationMethod={setTreeCreationMethod}
