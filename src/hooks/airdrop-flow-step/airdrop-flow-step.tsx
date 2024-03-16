@@ -1,6 +1,6 @@
 import { fadeOut } from "@/animations";
 import { fadeOutTimeoutDuration } from "@/constants/constants";
-import { useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   useContext,
   createContext,
@@ -137,6 +137,7 @@ export function useAirdropFlowStep() {
   const [_, forceUpdate] = useState({});
 
   const router = useRouter();
+  const params = useParams<{ id: string }>();
 
   return {
     currentStep,
@@ -149,33 +150,33 @@ export function useAirdropFlowStep() {
         case airdropFlowSteps.SelectCollection:
           fadeOut("#select-collection-panel");
           setTimeout(() => {
-            router.push("/airdrop/select-recipients");
+            router.push(`/airdrop/select-recipients/${params.id}`);
             setCurrentStep(airdropFlowSteps.SelectRecipients);
           }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.SelectRecipients:
           fadeOut("#select-recipients-panel");
           setTimeout(() => {
-            router.push("/airdrop/create-collection");
+            router.push(`/airdrop/create-collection/${params.id}`);
             setCurrentStep(airdropFlowSteps.CreateCollection);
           }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.CreateCollection:
           fadeOut("#create-collection-panel");
           setTimeout(() => {
-            router.push("/airdrop/create-cnfts");
+            router.push(`/airdrop/create-cnfts/${params.id}`);
             setCurrentStep(airdropFlowSteps.CreateNfts);
           }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.CreateNfts:
           fadeOut("#create-cnfts-panel");
           setTimeout(() => {
-            router.push("/airdrop/review");
+            router.push(`/airdrop/review/${params.id}`);
             setCurrentStep(airdropFlowSteps.Review);
           }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.Review:
-          router.push("/airdrop/review?step=payment");
+          router.push(`/airdrop/review/${params.id}?step=payment`);
       }
     },
     goToPreviousStep: () => {
@@ -183,7 +184,7 @@ export function useAirdropFlowStep() {
         case airdropFlowSteps.CreateCollection:
           fadeOut("#create-collection-panel");
           setTimeout(() => {
-            router.push("/airdrop/select-recipients");
+            router.push(`/airdrop/select-recipients/${params.id}`);
             setCurrentStep(airdropFlowSteps.SelectRecipients);
           }, fadeOutTimeoutDuration);
           break;
@@ -191,14 +192,14 @@ export function useAirdropFlowStep() {
           fadeOut("#create-cnfts-panel");
           fadeOut("#build-cnft-panel");
           setTimeout(() => {
-            router.push("/airdrop/create-collection");
+            router.push(`/airdrop/create-collection/${params.id}`);
             setCurrentStep(airdropFlowSteps.CreateCollection);
           }, fadeOutTimeoutDuration);
           break;
         case airdropFlowSteps.Review:
           fadeOut("#review-panel");
           setTimeout(() => {
-            router.push("/airdrop/create-cnfts");
+            router.push(`/airdrop/create-cnfts/${params.id}`);
             setCurrentStep(airdropFlowSteps.CreateNfts);
           }, fadeOutTimeoutDuration);
           break;

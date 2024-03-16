@@ -6,14 +6,14 @@ import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step"
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 
-export const CnftPlaceholderCard = () => {
+export const CnftPlaceholderCard = ({ airdropId }: { airdropId: string }) => {
   const router = useRouter();
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
 
   const handleAddNewCnft = () => {
     fadeOut("#create-cnfts-panel");
     setTimeout(() => {
-      router.push("/airdrop/create-cnfts/builder");
+      router.push(`/airdrop/create-cnfts/${airdropId}/builder`);
       setCurrentStep(airdropFlowSteps.CreateCollection);
     }, fadeOutTimeoutDuration);
   };

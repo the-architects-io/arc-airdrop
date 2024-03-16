@@ -74,28 +74,6 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
     },
   });
 
-  const { loading: loadingAirdrop, data: airdropData } = useQuery(
-    GET_AIRDROP_BY_ID,
-    {
-      variables: {
-        id: airdropId,
-      },
-      skip: !airdropId,
-      fetchPolicy: "network-only",
-      onCompleted: ({
-        airdrops_by_pk: airdrop,
-      }: {
-        airdrops_by_pk: Airdrop;
-      }) => {
-        console.log({ airdrop });
-
-        const { uniqueRecipients, recipientCount } =
-          getRecipientCountsFromAirdrop(airdrop);
-        setRecipientCount(recipientCount);
-      },
-    }
-  );
-
   const formik = useFormik({
     initialValues: {
       tokens:
@@ -249,6 +227,12 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
   });
 
   useEffect(() => {
+    const { uniqueRecipients, recipientCount } =
+      getRecipientCountsFromAirdrop(airdrop);
+    setRecipientCount(recipientCount);
+  }, [airdrop]);
+
+  useEffect(() => {
     if (!tokenData?.tokens?.length) return;
     if (formik.values.tokens.length) return;
 
@@ -300,7 +284,7 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
         cnfts created
       </StepSubtitle>
       <div className="flex flex-wrap w-full min-h-full pb-28">
-        <CnftPlaceholderCard />
+        <CnftPlaceholderCard airdropId={airdrop?.id} />
         <>
           {!!tokenData?.tokens?.length && !!formik.values.tokens.length && (
             <>
