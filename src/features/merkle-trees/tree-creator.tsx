@@ -62,8 +62,40 @@ export const TreeCreator = () => {
         throw new Error("Invalid tokenCount");
       }
 
-      const maxProofLength =
-        creatorsCount > 1 ? 5 : creatorsCount === 1 ? 8 : 12;
+      let maxProofLength = creatorsCount > 1 ? 5 : creatorsCount === 1 ? 8 : 12;
+
+      // const var1 = creatorsCount === 1 ? '1' : '0';
+
+      // switch (creatorsCount) {
+      //   case 1:
+      //     maxProofLength = 8;
+      //     break;
+      //   case 2:
+      //     maxProofLength = 7;
+      //     break;
+      //   case 3:
+      //     maxProofLength = 6;
+      //     break;
+      //   case 4:
+      //     maxProofLength = 5;
+      //     break;
+      //   case 5:
+      //     maxProofLength = 4;
+      //     break;
+      //   case 6:
+      //     maxProofLength = 3;
+      //     break;
+      //   case 7:
+      //     maxProofLength = 2;
+      //     break;
+      //   case 8:
+      //     maxProofLength = 1;
+      //     break;
+
+      //   default:
+      //     throw new Error("Invalid creatorsCount");
+      // }
+
       const maxCanopyDepth = 17;
 
       const { maxDepth: minDepth, maxBufferSize: minBufferSize } =
@@ -292,16 +324,22 @@ export const TreeCreator = () => {
       <div className="flex flex-col justify-center space-y-4">
         <SelectInputWithLabel
           value={formik.values.creatorCount}
-          label="Number of creators"
+          label="number of creators"
           name="creatorCount"
           options={[
             { value: "1", label: "1" },
             { value: "2", label: "2" },
             { value: "3", label: "3" },
+            { value: "4", label: "4" },
+            { value: "5", label: "5" },
+            { value: "6", label: "6" },
+            { value: "7", label: "7" },
+            { value: "8", label: "8" },
+            { value: "9", label: "9" },
           ]}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          placeholder="Select number of creators"
+          placeholder="select number of creators"
           hideLabel={false}
         />
         <SelectInputWithLabel

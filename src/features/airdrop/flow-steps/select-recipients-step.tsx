@@ -233,7 +233,14 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
       }
 
       if (json.some((address: any) => !isPublicKey(address))) {
-        console.error("json contains invalid addresses");
+        const invalidAddresses = json.filter(
+          (address: any) => !isPublicKey(address)
+        );
+
+        console.error(
+          "@bus: json contains invalid addresses",
+          invalidAddresses
+        );
         showToast({
           primaryMessage: "Json contains invalid addresses",
         });
