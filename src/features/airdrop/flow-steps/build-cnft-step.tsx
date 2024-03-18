@@ -56,7 +56,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
     {
       variables: {
-        id: airdrop.collection.id,
+        id: airdrop?.collection?.id,
       },
       skip: !airdrop?.collection?.id,
       fetchPolicy: "network-only",
@@ -65,7 +65,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
 
   useQuery(GET_COLLECTION_BY_ID, {
     variables: {
-      id: airdrop.collection.id,
+      id: airdrop?.collection?.id,
     },
     skip: !airdrop?.collection?.id,
     fetchPolicy: "no-cache",
