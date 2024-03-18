@@ -1,3 +1,3 @@
 ## Arc Airdrop
 
-A Solana airdrop tool.
+A Solana airdrop tool
