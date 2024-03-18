@@ -18,6 +18,8 @@ import { generateSigner, keypairIdentity } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   const {
     maxDepth,
