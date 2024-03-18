@@ -32,6 +32,7 @@ export default function CreateCollectionPage({
       id: params.id,
     },
     skip: !params.id,
+    fetchPolicy: "no-cache",
   });
 
   useEffect(() => {

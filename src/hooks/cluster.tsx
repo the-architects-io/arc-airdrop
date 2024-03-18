@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useContext, useState } from "react";
+import React, { ReactNode, useContext, useEffect, useState } from "react";
 
 type ClusterContext = {
   cluster: "devnet" | "mainnet-beta";
@@ -12,6 +12,26 @@ const { Provider } = ClusterContext;
 
 export const ClusterProvider = ({ children }: { children: ReactNode }) => {
   const [cluster, setCluster] = useState<"devnet" | "mainnet-beta">("devnet");
+  const [enableSaveToLocalStorage, setEnableSaveToLocalStorage] =
+    useState(false);
+
+  useEffect(() => {
+    if (!enableSaveToLocalStorage) {
+      return;
+    }
+    localStorage.setItem("cluster", cluster);
+  }, [cluster, enableSaveToLocalStorage]);
+
+  useEffect(() => {
+    const storedCluster = localStorage.getItem("cluster") as
+      | "devnet"
+      | "mainnet-beta";
+    if (storedCluster) {
+      setCluster(storedCluster);
+    }
+
+    setEnableSaveToLocalStorage(true);
+  }, []);
 
   return (
     <Provider

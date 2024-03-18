@@ -28,6 +28,7 @@ export default function ReviewPage({ params }: { params: { id: string } }) {
       id: params.id,
     },
     skip: !params.id,
+    fetchPolicy: "no-cache",
   });
 
   useEffect(() => {

@@ -45,6 +45,7 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const [totalTokenCount, setTotalTokenCount] = useState<number>(0);
   const [recipientCount, setRecipientCount] = useState<number>(0);
   const [hasFillerToken, setHasFillerToken] = useState<boolean>(false);
+  const [hasBeenRefetched, setHasBeenRefetched] = useState<boolean>(false);
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -53,7 +54,19 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
         id: airdrop?.collection?.id,
       },
       skip: !airdrop?.collection?.id,
-      fetchPolicy: "network-only",
+      fetchPolicy: "no-cache",
+      onCompleted: ({ tokens }) => {
+        setTotalTokenCount(
+          tokens.reduce(
+            (acc: number, token: Token) => acc + (token?.amountToMint || 0),
+            0
+          )
+        );
+        const { uniqueRecipients, recipientCount } =
+          getRecipientCountsFromAirdrop(airdrop);
+        setRecipientCount(recipientCount);
+        debugger;
+      },
     }
   );
 
@@ -222,7 +235,7 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
     const { uniqueRecipients, recipientCount } =
       getRecipientCountsFromAirdrop(airdrop);
     setRecipientCount(recipientCount);
-  }, [airdrop]);
+  }, [airdrop, tokenData?.tokens]);
 
   useEffect(() => {
     if (!tokenData?.tokens?.length) return;
@@ -250,7 +263,12 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
             } as Token)
         ) || [],
     });
-  }, [formik, tokenData, totalTokenCount]);
+  }, [formik, tokenData?.tokens, totalTokenCount]);
+
+  // useEffect(() => {
+  //   if (hasBeenRefetched) return;
+
+  // }, [hasBeenRefetched]);
 
   useEffect(() => {
     setStepIsValid(

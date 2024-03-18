@@ -32,6 +32,7 @@ export default function CreateCnftsPage({
       id: params.id,
     },
     skip: !params.id,
+    fetchPolicy: "no-cache",
   });
 
   useEffect(() => {

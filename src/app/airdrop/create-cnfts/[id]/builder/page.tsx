@@ -28,6 +28,7 @@ export default function BuildCnftPage({ params }: { params: { id: string } }) {
       id: params.id,
     },
     skip: !params.id,
+    fetchPolicy: "no-cache",
   });
 
   useEffect(() => {

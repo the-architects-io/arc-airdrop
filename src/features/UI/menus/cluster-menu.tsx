@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu, Transition } from "@headlessui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useCluster } from "@/hooks/cluster";
 import { useUserData } from "@nhost/nextjs";
