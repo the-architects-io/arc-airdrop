@@ -4,7 +4,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
 import { createBlueprintClient } from "@/app/blueprint/client";
 import { useFormik } from "formik";
-import { SYSTEM_USER_ID } from "@/constants/constants";
+import { ARCHITECTS_API_URL, SYSTEM_USER_ID } from "@/constants/constants";
 import { SubmitButton } from "@/features/UI/buttons/submit-button";
 import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
 import { formatNumberWithCommas } from "@/utils/formatting";
@@ -27,6 +27,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { TreeOptions } from "@/types";
 import { TreeCostOptionSelector } from "@/features/merkle-trees/tree-cost-option-selector";
 import { Collection, TreeCreationMethod } from "@/app/blueprint/types";
+import axios from "axios";
 
 export const TreeCreator = () => {
   const { cluster } = useCluster();
@@ -201,13 +202,42 @@ export const TreeCreator = () => {
         cluster,
       });
 
-      const { merkleTreeAddress } = await blueprint.tokens.createTree({
-        maxDepth,
-        maxBufferSize,
-        userId: user?.id as string,
-      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // const { merkleTreeAddress } = await blueprint.tokens.createTree({
+      //   maxDepth,
+      //   maxBufferSize,
+      //   userId: user?.id as string,
+      // });
+      let treeId: string;
+      let merkleTreeAddress: string;
+      try {
+        const { data, status } = await axios.post(
+          `${ARCHITECTS_API_URL}/create-tree`,
+          {
+            maxBufferSize: maxBufferSize,
+            maxDepth: maxDepth,
+            canopyDepth: treeCanopyDepth,
+            userId: user.id,
+            cluster,
+          }
+        );
+
+        treeId = data.id;
+        merkleTreeAddress = data.merkleTreeAddress;
+
+        console.log({
+          data,
+          status,
+          treeId,
+        });
+      } catch (error) {
+        console.error("error creating merkle tree", error);
+      }
     },
-    [cluster, user]
+    [cluster, treeCanopyDepth, user]
   );
 
   const formik = useFormik({
