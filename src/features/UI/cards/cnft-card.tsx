@@ -35,13 +35,12 @@ export const CnftCard = ({
     <div className="w-full sm:w-1/2 lg:w-1/3 flex flex-col mb-4" key={token.id}>
       <div className="mx-4 h-full min-h-full">
         <div className="shadow-deep rounded-md hover:rounded-md border border-gray-400 w-full flex flex-col flex-1 h-full min-h-full">
-          <Image
+          <img
             src={token.image}
             alt={token.name}
             height={800}
             width={800}
-            objectFit="cover"
-            className="w-full rounded-t-md aspect-square"
+            className="w-full rounded-t-md aspect-square object-cover"
           />
           <div className="flex flex-col flex-grow bg-gray-500 rounded-b-md">
             <div className="p-4 w-full space-y-2 flex-grow">
