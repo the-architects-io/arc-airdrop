@@ -141,7 +141,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
 
       fadeOut("#build-cnft-panel");
       setTimeout(() => {
-        router.push(`/airdrop/create-cnfts/${airdrop.id}`);
+        router.push(`/airdrop/create-cnfts/${airdrop?.id}`);
       }, fadeOutTimeoutDuration);
     },
   });
@@ -366,7 +366,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                       </div>
                     </>
                     <div className="w-full flex justify-center mt-16 space-x-8">
-                      <Link href="/airdrop/create-cnfts">
+                      <Link href={`/airdrop/create-cnfts/${airdrop?.id}`}>
                         <SecondaryButton
                           onClick={() => {
                             formik.resetForm();
