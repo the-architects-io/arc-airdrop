@@ -3,20 +3,16 @@ import { useSaving } from "@/app/blueprint/hooks/saving";
 import {
   Airdrop,
   Collection,
-  Job,
   JobIcons,
   JobTypeUUIDs,
   StatusUUIDs,
   Token,
-  UploadJob,
 } from "@/app/blueprint/types";
 import {
   ARCHITECTS_API_URL,
   EXECUTION_WALLET_ADDRESS,
   SYSTEM_USER_ID,
 } from "@/constants/constants";
-import { SubmitButton } from "@/features/UI/buttons/submit-button";
-import { ContentWrapper } from "@/features/UI/content-wrapper";
 import { LoadingPanel } from "@/features/loading-panel";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 

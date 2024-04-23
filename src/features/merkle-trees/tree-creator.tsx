@@ -4,7 +4,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
 import { createBlueprintClient } from "@/app/blueprint/client";
 import { useFormik } from "formik";
-import { ARCHITECTS_API_URL, SYSTEM_USER_ID } from "@/constants/constants";
+import { ARCHITECTS_API_URL } from "@/constants/constants";
 import { SubmitButton } from "@/features/UI/buttons/submit-button";
 import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
 import { formatNumberWithCommas } from "@/utils/formatting";

@@ -19,6 +19,9 @@ import { AirdropStatus } from "@/features/airdrop/flow-steps/airdrop-status";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { LoadingPanel } from "@/features/loading-panel";
 import { useCluster } from "@/hooks/cluster";
+import LogViewer from "@/features/logs/log-viewer";
+import { PrimaryButton } from "@/features/UI/buttons/primary-button";
+import classNames from "classnames";
 
 export default function AirdropDetailsPage({
   params,
@@ -36,6 +39,7 @@ export default function AirdropDetailsPage({
   const [jobId, setJobId] = useState<string | null>(null);
   const [uploadJobId, setUploadJobId] = useState<string | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
+  const [shouldShowLog, setShouldShowLog] = useState(false);
 
   const {
     loading,
@@ -145,50 +149,46 @@ export default function AirdropDetailsPage({
     );
 
   return (
-    <div className="w-full h-full min-h-screen text-gray-400">
-      {/* {collection?.id &&
-        uploadJobData?.uploadJobs_by_pk?.id &&
-        uploadJobData?.uploadJobs_by_pk?.status !== StatusUUIDs.COMPLETE && (
+    <>
+      <div
+        className={classNames([
+          "w-full h-full min-h-screen absolute bg-slate-200 bg-opacity-80 z-10 overflow-y-auto",
+          shouldShowLog ? "block" : "hidden",
+        ])}
+      >
+        <LogViewer close={() => setShouldShowLog(false)} />
+      </div>
+      <div className="w-full h-full min-h-screen text-gray-400">
+        {(jobData?.jobs_by_pk?.id || uploadJobData?.uploadJobs_by_pk?.id) &&
+        airdrop?.id &&
+        collection?.id ? (
           <ContentWrapper>
             <ContentWrapperYAxisCenteredContent>
-              <JobStatus
-                jobId={uploadJobData?.uploadJobs_by_pk?.id}
-                setJob={(job) => {
-                  if (!job) {
-                    setUploadJobId(null);
-                  }
-                }}
-                collectionId={collection?.id}
+              <AirdropStatus
+                refetch={handleRefetch}
+                airdrop={airdropData?.airdrops_by_pk}
+                collection={collectionData?.collections_by_pk}
+                jobId={jobData?.jobs_by_pk?.id}
+                uploadJobId={uploadJobData?.uploadJobs_by_pk?.id}
               />
+              <PrimaryButton onClick={() => setShouldShowLog(true)}>
+                show logs
+              </PrimaryButton>
             </ContentWrapperYAxisCenteredContent>
           </ContentWrapper>
-        )} */}
-      {(jobData?.jobs_by_pk?.id || uploadJobData?.uploadJobs_by_pk?.id) &&
-      airdrop?.id &&
-      collection?.id ? (
-        <ContentWrapper>
-          <ContentWrapperYAxisCenteredContent>
-            <AirdropStatus
-              refetch={handleRefetch}
-              airdrop={airdropData?.airdrops_by_pk}
-              collection={collectionData?.collections_by_pk}
-              jobId={jobData?.jobs_by_pk?.id}
-              uploadJobId={uploadJobData?.uploadJobs_by_pk?.id}
-            />
-          </ContentWrapperYAxisCenteredContent>
-        </ContentWrapper>
-      ) : (
-        <ContentWrapper className="text-center">
-          {!!airdrop?.recipients?.length && !!collection?.id && (
-            <ExecuteAirdrop
-              airdrop={airdrop}
-              collection={collection}
-              setJobId={setJobId}
-              setUploadJobId={setUploadJobId}
-            />
-          )}
-        </ContentWrapper>
-      )}
-    </div>
+        ) : (
+          <ContentWrapper className="text-center">
+            {!!airdrop?.recipients?.length && !!collection?.id && (
+              <ExecuteAirdrop
+                airdrop={airdrop}
+                collection={collection}
+                setJobId={setJobId}
+                setUploadJobId={setUploadJobId}
+              />
+            )}
+          </ContentWrapper>
+        )}
+      </div>
+    </>
   );
 }
