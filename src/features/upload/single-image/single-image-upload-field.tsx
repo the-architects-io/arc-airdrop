@@ -1,6 +1,7 @@
 import { useSaving } from "@/app/blueprint/hooks/saving";
 import Spinner from "@/features/UI/spinner";
 import { PreviewComponent } from "@/features/upload/single-image/preview-component";
+import { useLogs } from "@/hooks/logs";
 import {
   CheckBadgeIcon,
   XCircleIcon,
@@ -34,6 +35,7 @@ export const SingleImageUploadField = ({
   setIsInProgress: (isInProgress: boolean) => void;
 }) => {
   const uploady = useUploady();
+  const { addLog } = useLogs();
   const { isSaving, setIsSaving } = useSaving();
 
   const imagePreviewMethodsRef = useRef<PreviewMethods>(null);
@@ -60,6 +62,8 @@ export const SingleImageUploadField = ({
     setShouldShowChildren(false);
     setIsInProgress(true);
 
+    addLog(`Uploading ${fullFileName} to ${driveAddress}`);
+
     setTimeout(() => {
       uploady.processPending({
         params: {
@@ -76,6 +80,9 @@ export const SingleImageUploadField = ({
     setIsInProgress(false);
     setIsSaving(false);
     setIsSuccessful(batch.completed === 100);
+    if (batch.completed === 100) {
+      addLog(`File uploaded uccessfully`);
+    }
   });
 
   return (

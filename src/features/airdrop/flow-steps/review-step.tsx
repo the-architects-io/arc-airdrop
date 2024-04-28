@@ -11,6 +11,7 @@ import {
 import { getMinimumMaxBufferSizeAndMaxDepthForCapacity } from "@/app/blueprint/utils/merkle-trees";
 import { SOL_MINT_ADDRESS } from "@/app/blueprint/utils/payments";
 import { BASE_URL } from "@/constants/constants";
+import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 import { MiniCnftCard } from "@/features/UI/cards/mini-cnft-card";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
 import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
@@ -18,6 +19,7 @@ import Spinner from "@/features/UI/spinner";
 import { StepHeading } from "@/features/UI/typography/step-heading";
 import { StepTitle } from "@/features/UI/typography/step-title";
 import { TreeCostOptionSelector } from "@/features/merkle-trees/tree-cost-option-selector";
+import InDepthReviewModal from "@/features/review/in-depth-review-modal";
 import showToast from "@/features/toasts/show-toast";
 import { GET_AIRDROP_BY_ID } from "@/graphql/queries/get-airdrop-by-id";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
@@ -26,12 +28,17 @@ import {
   useAirdropFlowStep,
 } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useCluster } from "@/hooks/cluster";
+import { useLogs } from "@/hooks/logs";
 import { TreeOptions } from "@/types";
 import { getRecipientCountsFromAirdrop } from "@/utils/airdrop";
 import { getAbbreviatedAddress } from "@/utils/formatting";
 import { isValidPublicKey } from "@/utils/rpc";
 import { useQuery } from "@apollo/client";
-import { CheckBadgeIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import {
+  CheckBadgeIcon,
+  XCircleIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useUserData } from "@nhost/nextjs";
 import {
   ALL_DEPTH_SIZE_PAIRS,
@@ -44,7 +51,6 @@ import {
   GET_MERKLE_TREES_BY_USER_ID,
 } from "@the-architects/blueprint-graphql";
 import axios from "axios";
-import { useFormik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -89,6 +95,8 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const [existingDriveAddress, setExistingDriveAddress] = useState<
     string | undefined
   >(undefined);
+  const [showInDepthReview, setShowInDepthReview] = useState<boolean>(false);
+  const { addLog } = useLogs();
 
   const { data: userMerleTreesData } = useQuery(GET_MERKLE_TREES_BY_USER_ID, {
     variables: {
@@ -597,37 +605,52 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
         id: collection?.id,
         merkleTreeId: selectedTree.id,
       });
+      addLog("Updated collection with tree info");
     } else if (collection?.id) {
       blueprint.collections.updateCollection({
         id: collection?.id,
         merkleTreeId: null,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cluster, collection?.id, selectedTree, shouldUseExistingTree]);
 
   useEffect(() => {
     const blueprint = createBlueprintClient({ cluster });
+    if (!collection?.id) return;
+
     if (
       shouldUseExistingDrive &&
       existingDriveAddress?.length &&
-      isValidPublicKey(existingDriveAddress) &&
-      collection?.id
+      isValidPublicKey(existingDriveAddress)
     ) {
       blueprint.collections.updateCollection({
         id: collection?.id,
         driveAddress: existingDriveAddress,
       });
-    } else if (collection?.id) {
+      addLog("Updated collection with drive info");
+    } else {
       blueprint.collections.updateCollection({
         id: collection?.id,
         driveAddress: null,
       });
+      addLog("Updated collection with drive info");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cluster, collection?.id, existingDriveAddress, shouldUseExistingDrive]);
 
   return (
     <>
       <StepTitle>review</StepTitle>
+      {showInDepthReview && collection && (
+        <InDepthReviewModal
+          close={() => setShowInDepthReview(false)}
+          airdrop={airdrop}
+          collection={collection}
+          merkleTree={!!shouldUseExistingTree ? selectedTree : null}
+          driveAddress={existingDriveAddress}
+        />
+      )}
       <div className="flex flex-wrap w-full mb-28 relative">
         <div className="flex flex-wrap gap-y-4 w-full md:w-2/3 px-4">
           {!!tokenData?.tokens?.length && (
@@ -650,6 +673,11 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
               {tokenData?.tokens?.length} cnft variation
               {tokenData?.tokens?.length > 1 ? "s" : ""}
             </StepHeading>
+            {!!user?.roles?.includes("admin") && (
+              <SecondaryButton onClick={() => setShowInDepthReview(true)}>
+                in-depth review
+              </SecondaryButton>
+            )}
           </div>
           <div className="flex items-center space-x-4 my-8">
             <input

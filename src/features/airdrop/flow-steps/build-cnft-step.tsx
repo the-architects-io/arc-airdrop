@@ -40,6 +40,7 @@ import Link from "next/link";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 import { useQuery } from "@apollo/client";
 import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
+import { useLogs } from "@/hooks/logs";
 
 type SortedTrait = Trait & { sortOrder: number };
 
@@ -51,6 +52,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const [tokenId, setTokenId] = useState<string | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
   const [hasFillerToken, setHasFillerToken] = useState(false);
+  const { addLog } = useLogs();
 
   const { data: tokenData, refetch } = useQuery(
     GET_PREMINT_TOKENS_BY_COLLECTION_ID,
@@ -135,9 +137,11 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       });
 
       if (!success) {
-        console.error("Failed to create token");
+        addLog("Failed to add token in db");
         return;
       }
+
+      addLog("Successfully added token in db");
 
       fadeOut("#build-cnft-panel");
       setTimeout(() => {

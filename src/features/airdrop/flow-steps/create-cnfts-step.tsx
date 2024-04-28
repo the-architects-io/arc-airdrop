@@ -65,7 +65,6 @@ export const CreateCnftsStep = ({ airdrop }: { airdrop: Airdrop }) => {
         const { uniqueRecipients, recipientCount } =
           getRecipientCountsFromAirdrop(airdrop);
         setRecipientCount(recipientCount);
-        debugger;
       },
     }
   );

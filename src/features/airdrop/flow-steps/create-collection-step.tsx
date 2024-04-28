@@ -21,6 +21,7 @@ import {
   useAirdropFlowStep,
 } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useCluster } from "@/hooks/cluster";
+import { useLogs } from "@/hooks/logs";
 import { debounce } from "@/utils/debounce";
 import { isValidPublicKey } from "@/utils/rpc";
 import { useLazyQuery, useQuery } from "@apollo/client";
@@ -60,6 +61,7 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const [collectionImageUrl, setCollectionImageUrl] = useState<string | null>(
     null
   );
+  const { logs, addLog } = useLogs();
 
   const [getCollection, { loading }] = useLazyQuery(GET_COLLECTION_BY_ID, {
     fetchPolicy: "network-only",
@@ -162,16 +164,13 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
       setIsSaving(false);
 
       if (!success) {
-        console.error("Failed to save collection");
+        addLog("Failed to save collection");
         return;
       }
+
+      addLog("Collection updated successfully");
     },
   });
-
-  const debouncedHandleChange = useDebouncedFormikField(
-    formik,
-    "collectionName"
-  );
 
   useEffect(() => {
     if (!airdrop?.collection?.id || !collectionImage) return;
