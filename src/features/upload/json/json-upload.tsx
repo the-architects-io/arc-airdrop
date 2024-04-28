@@ -7,7 +7,6 @@ import { BASE_URL } from "@/constants/constants";
 import Spinner from "@/features/UI/spinner";
 import { JsonUploadField } from "@/features/upload/json/json-upload-field";
 import { CheckBadgeIcon } from "@heroicons/react/20/solid";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import Uploady, { UploadyContextType } from "@rpldy/uploady";
 import { useState } from "react";
 

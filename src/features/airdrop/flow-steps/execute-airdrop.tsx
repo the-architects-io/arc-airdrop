@@ -17,10 +17,10 @@ import { LoadingPanel } from "@/features/loading-panel";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
 
 import { useCluster } from "@/hooks/cluster";
+import { useLogs } from "@/hooks/logs";
 import { useQuery } from "@apollo/client";
 
 import { useUserData } from "@nhost/nextjs";
-import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import axios from "axios";
 
 import { useCallback, useEffect, useState } from "react";
@@ -37,10 +37,10 @@ export const ExecuteAirdrop = ({
   setUploadJobId: (jobId: string) => void;
 }) => {
   const user = useUserData();
-  const [isDisabled, setIsDisabled] = useState(false);
   const { cluster } = useCluster();
   const { isSaving, setIsSaving } = useSaving();
   const [driveAddress, setDriveAddress] = useState<string | null>(null);
+  const { addLog } = useLogs();
 
   const { data: tokenData } = useQuery(GET_PREMINT_TOKENS_BY_COLLECTION_ID, {
     variables: {
@@ -366,59 +366,6 @@ export const ExecuteAirdrop = ({
       }
     }
 
-    let treeId;
-    if (collection.merkleTree?.id) {
-      treeId = collection.merkleTree?.id;
-    } else {
-      await blueprint.jobs.updateJob({
-        id: job.id,
-        statusText: "creating merkle tree",
-        icon: JobIcons.CREATING_TREE,
-      });
-
-      console.log({
-        maxBufferSize,
-        maxDepth,
-        canopyDepth,
-        collectionId: airdrop.collection.id,
-        userId: SYSTEM_USER_ID,
-      });
-
-      if (!airdrop.collection.merkleTree?.id) {
-        try {
-          const { data, status } = await axios.post(
-            `${ARCHITECTS_API_URL}/create-tree`,
-            {
-              maxBufferSize: maxBufferSize,
-              maxDepth: maxDepth,
-              canopyDepth: canopyDepth,
-              collectionId: airdrop.collection.id,
-              userId: user.id,
-              cluster,
-            }
-          );
-
-          treeId = data.id;
-
-          console.log({
-            data,
-            status,
-            treeId,
-          });
-
-          if (!success) throw new Error("error creating merkle tree");
-        } catch (error) {
-          blueprint.jobs.updateJob({
-            id: job.id,
-            statusId: StatusUUIDs.ERROR,
-            statusText: "failed to create merkle tree",
-            icon: JobIcons.ERROR,
-          });
-          console.error("error creating merkle tree", error);
-        }
-      }
-    }
-
     if (!collectionNftMintAddress) {
       blueprint.jobs.updateJob({
         id: job.id,
@@ -434,7 +381,6 @@ export const ExecuteAirdrop = ({
         id,
         collectionNftAddress: collectionNftMintAddress,
         uploadJobId: uploadJob.id,
-        merkleTreeId: treeId,
       });
     } catch (error) {
       blueprint.jobs.updateJob({
@@ -467,20 +413,19 @@ export const ExecuteAirdrop = ({
       console.error("Error airdropping collection nfts", error);
     }
   }, [
-    airdrop?.collection,
-    airdrop?.id,
+    airdrop.collection,
+    airdrop.id,
     cluster,
-    collection?.id,
-    collection?.imageSizeInBytes,
-    collection?.driveAddress,
-    collection?.imageUrl?.length,
+    collection.id,
+    collection.imageSizeInBytes,
+    collection.driveAddress,
+    collection.imageUrl?.length,
     setIsSaving,
     setJobId,
     setUploadJobId,
-    tokenData?.tokens,
+    tokenData.tokens,
     user,
-    collection?.collectionNftAddress,
-    collection?.merkleTree?.id,
+    collection.collectionNftAddress,
   ]);
 
   useEffect(() => {

@@ -7,30 +7,28 @@ import { ContentWrapperYAxisCenteredContent } from "@/features/UI/content-wrappe
 import { SelectInputWithLabel } from "@/features/UI/forms/select-input-with-label";
 import { StepSubtitle } from "@/features/UI/typography/step-subtitle";
 import { StepTitle } from "@/features/UI/typography/step-title";
-import {
-  AirdropFlowStepName,
-  useAirdropFlowStep,
-} from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { useCluster } from "@/hooks/cluster";
+import { useLogs } from "@/hooks/logs";
 import { useQuery } from "@apollo/client";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { useUserData } from "@nhost/nextjs";
 import { GET_COLLECTIONS_BY_OWNER_ID } from "@the-architects/blueprint-graphql";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export const SelectCollectionStep = () => {
   const user = useUserData();
   const router = useRouter();
   const { cluster } = useCluster();
   const { setIsSaving } = useSaving();
-  const { setStepIsValid } = useAirdropFlowStep();
   const [shouldUseExistingCollection, setShouldUseExistingCollection] =
     useState<boolean>(false);
   const [selectedExistingCollection, setSelectedExistingCollection] =
     useState<Collection | null>(null);
   const [airdropId, setAirdropId] = useState<string | null>(null);
+  const { addLog, logs } = useLogs();
 
   const { data: existingCollectionsData } = useQuery(
     GET_COLLECTIONS_BY_OWNER_ID,
@@ -62,16 +60,22 @@ export const SelectCollectionStep = () => {
       setIsSaving(true);
 
       if (!shouldUseExistingCollection) {
+        localStorage.setItem("recipientCount", "0");
+        localStorage.setItem("customHashlistCount", "0");
+        localStorage.setItem("selectedSnapshotOptions", JSON.stringify([]));
+        addLog("Creating airdrop from new collection");
         try {
           const { collection } = await blueprint.collections.createCollection({
             ownerId: user.id,
           });
           collectionId = collection.id;
+          addLog(`Created collection in db with id: ${collectionId}`);
         } catch (e) {
           console.error(e);
           setIsSaving(false);
         }
       } else {
+        addLog("Using existing collection");
         collectionId = selectedExistingCollection?.id;
       }
 
@@ -82,9 +86,11 @@ export const SelectCollectionStep = () => {
       }
 
       try {
+        addLog("Creating airdrop in db");
         const { airdrop } = await blueprint.airdrops.createAirdrop({
           collectionId,
         });
+        addLog(`Created airdrop in db with id: ${airdrop.id}`);
         setAirdropId(airdrop.id);
       } catch (e) {
         console.error(e);

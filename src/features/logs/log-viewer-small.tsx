@@ -2,7 +2,7 @@ import { useLogs } from "@/hooks/logs";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef } from "react";
 
-const LogViewer = ({ close }: { close: () => void }) => {
+const LogViewerSmall = ({ close }: { close: () => void }) => {
   const { logs } = useLogs();
 
   const logViewerElRef = useRef<HTMLDivElement>(null);
@@ -15,19 +15,20 @@ const LogViewer = ({ close }: { close: () => void }) => {
 
   return (
     <>
-      <div className="fixed z-10 top-4 right-4">
+      <div className="fixed top-6 right-6">
         <button onClick={close}>
-          <XMarkIcon className="cursor-pointer w-8 h-8" />
+          <XMarkIcon className="cursor-pointer w-6 h-6" />
         </button>
       </div>
-      <div className="h-full w-full p-16 px-24">
+      <div className="overflow-auto" ref={logViewerElRef}>
         {logs.map((log, index) => (
-          <div key={index}>{log}</div>
+          <div className="py-2" key={index}>
+            {log}
+          </div>
         ))}
-        <div className="py-8"></div>
       </div>
     </>
   );
 };
 
-export default LogViewer;
+export default LogViewerSmall;

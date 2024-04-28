@@ -30,6 +30,7 @@ import {
   useAirdropFlowStep,
 } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
 import { Airdrop } from "@/app/blueprint/types";
+import { useLogs } from "@/hooks/logs";
 
 type SnapshotOption = {
   updatedAt: string;
@@ -83,13 +84,21 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
     data: { snapshotOptions: SnapshotOption[] } | undefined;
   } = useQuery(GET_SNAPSHOT_OPTIONS);
 
+  const { addLog } = useLogs();
+
   const fetchHolderSnapshot = async (snapshotOption: SnapshotOption) => {
+    addLog(`
+      Fetching snapshot for collection ${snapshotOption.name}
+    `);
     const { data }: { data: HolderSnapshotResponse } = await axios.post(
       `${ARCHITECTS_API_URL}/snapshot/holders`,
       {
         collectionAddress: snapshotOption.collectionAddress,
       }
     );
+    addLog(`
+      Snapshot for collection ${snapshotOption.name} fetched successfully.
+    `);
     setIsFetchingSnapshot(false);
     return data;
   };
@@ -114,6 +123,9 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
       );
       if (!option?.count) return;
       setRecipientCount(recipientCount - option.count);
+      addLog(
+        `Updating recipients. New count at ${recipientCount - option.count}.`
+      );
     } else {
       setIsSaving(true);
       setIsFetchingSnapshot(true);
@@ -126,6 +138,7 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
       if (!snapshotOption?.collectionAddress) return;
       const { count, hashlist } = await fetchHolderSnapshot(snapshotOption);
       setRecipientCount(count + recipientCount);
+      addLog(`Adding ${count} recipients`);
       const snapshotOptionWithHashlist = {
         ...snapshotOption,
         count,
@@ -181,10 +194,11 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
         });
 
       setRecipientCount(data.length + recipientCount);
+      addLog(`Adding ${data.length} recipients`);
       setCustomHashlist(data);
       setCustomHashlistCount(data.length);
     },
-    [airdrop?.id, setIsSaving, blueprint.airdrops, recipientCount]
+    [airdrop?.id, setIsSaving, blueprint.airdrops, recipientCount, addLog]
   );
 
   useEffect(() => {
@@ -257,6 +271,8 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
     setDidStartUploadFlow(true);
     setIsSaving(true);
 
+    addLog(`Uploading JSON file`);
+
     if (airdrop?.id && jsonFileBeingUploaded && !didStartUploadingJson) {
       setDidStartUploadingJson(true);
       try {
@@ -284,6 +300,7 @@ export const SelectRecipientsStep = ({ airdrop }: { airdrop: Airdrop }) => {
     user?.id,
     jsonUploadyInstance,
     setIsSaving,
+    addLog,
     airdrop?.id,
     jsonFileBeingUploaded,
     didStartUploadingJson,

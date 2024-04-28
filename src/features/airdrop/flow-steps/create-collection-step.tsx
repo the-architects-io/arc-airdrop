@@ -75,7 +75,7 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
       description: "",
       sellerFeeBasisPoints: 0,
       image: "",
-      creators: [{ address: "", share: 0, sortOrder: 0, id: 0 }] as Creator[],
+      creators: [{ address: "", share: 100, sortOrder: 0, id: 0 }] as Creator[],
     },
     onSubmit: async ({
       collectionName,
@@ -279,7 +279,7 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
               sortOrder: creator.sortOrder,
               id: creator.id,
             }))
-          : ([{ address: "", share: 0, sortOrder: 0, id: 0 }] as Creator[]),
+          : ([{ address: "", share: 100, sortOrder: 0, id: 0 }] as Creator[]),
       });
     };
 
@@ -450,7 +450,7 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
                                   <XCircleIcon className="h-6 w-6 text-red-500 self-end ml-2 mb-3" />
                                 )}
                               </div>
-                              <div className="w-24 mr-8">
+                              <div className="w-32 relative">
                                 <FormInputWithLabel
                                   label="share"
                                   name={`creators.${index}.share`}
@@ -461,6 +461,9 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
                                   onChange={formik.handleChange}
                                   value={creator.share}
                                 />
+                                <div className="text-3xl text-gray-100 top-10 right-8 absolute mt-0.5">
+                                  %
+                                </div>
                               </div>
                               {formik.values.creators.length > 1 && (
                                 <button

@@ -1,8 +1,10 @@
 "use client";
 
 import { useSaving } from "@/app/blueprint/hooks/saving";
+import { FabButton } from "@/features/UI/buttons/fab-button";
 import Spinner from "@/features/UI/spinner";
 import { useAirdropFlowStep } from "@/hooks/airdrop-flow-step/airdrop-flow-step";
+import { useLogs } from "@/hooks/logs";
 import { clearLocalStorage } from "@/utils/local-storage";
 import { useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
@@ -12,10 +14,12 @@ export const StartOverButton = () => {
   const { setCurrentStep, airdropFlowSteps } = useAirdropFlowStep();
   const user = useUserData();
   const router = useRouter();
+  const { addLog } = useLogs();
 
   const handleStartOver = () => {
     clearLocalStorage();
     setCurrentStep(airdropFlowSteps.SelectCollection);
+    addLog("Airdrop flow reset");
     router.push("/connect-wallet");
   };
 
@@ -38,9 +42,7 @@ export const StartOverButton = () => {
   return (
     <>
       <div className="absolute top-4 left-4" onClick={handleConfirmStartOver}>
-        <button className="rounded-full text-gray-400 px-4 py-2 text-sm shadow-deep hover:shadow-deep-float transition-all">
-          reset
-        </button>
+        <FabButton>reset</FabButton>
       </div>
     </>
   );

@@ -12,6 +12,7 @@ import { FlowProgressIndicatorWrapper } from "@/features/flow-progress-indicator
 import { StartOverButton } from "@/features/UI/buttons/start-over-button";
 import { SavingProvider } from "@/app/blueprint/hooks/saving/provider";
 import ClusterMenu from "@/features/UI/menus/cluster-menu";
+import AdminWidget from "@/features/admin/admin-widget";
 
 const font = IBM_Plex_Mono({
   weight: "400",
@@ -55,6 +56,7 @@ export default function RootLayout({
               <StartOverButton />
               <ClusterMenu />
               <UserMenu />
+              <AdminWidget />
               <FlowProgressIndicatorWrapper />
             </SavingProvider>
           </ContextProvider>
