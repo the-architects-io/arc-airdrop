@@ -171,7 +171,10 @@ export default function AirdropDetailsPage({
                 jobId={jobData?.jobs_by_pk?.id}
                 uploadJobId={uploadJobData?.uploadJobs_by_pk?.id}
               />
-              <PrimaryButton onClick={() => setShouldShowLog(true)}>
+              <PrimaryButton
+                onClick={() => setShouldShowLog(true)}
+                className="mt-8"
+              >
                 show logs
               </PrimaryButton>
             </ContentWrapperYAxisCenteredContent>

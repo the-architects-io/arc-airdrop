@@ -423,7 +423,7 @@ export const ExecuteAirdrop = ({
     setIsSaving,
     setJobId,
     setUploadJobId,
-    tokenData.tokens,
+    tokenData?.tokens,
     user,
     collection.collectionNftAddress,
   ]);
