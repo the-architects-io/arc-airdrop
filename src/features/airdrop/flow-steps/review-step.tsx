@@ -619,22 +619,24 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
     const blueprint = createBlueprintClient({ cluster });
     if (!collection?.id) return;
 
+    const updateCollectonWithDriveInfo = async (
+      driveAddress: string | null
+    ) => {
+      blueprint.collections.updateCollection({
+        id: collection?.id,
+        driveAddress,
+      });
+      addLog("Updated collection with drive info");
+    };
+
     if (
       shouldUseExistingDrive &&
       existingDriveAddress?.length &&
       isValidPublicKey(existingDriveAddress)
     ) {
-      blueprint.collections.updateCollection({
-        id: collection?.id,
-        driveAddress: existingDriveAddress,
-      });
-      addLog("Updated collection with drive info");
+      updateCollectonWithDriveInfo(existingDriveAddress);
     } else {
-      blueprint.collections.updateCollection({
-        id: collection?.id,
-        driveAddress: null,
-      });
-      addLog("Updated collection with drive info");
+      updateCollectonWithDriveInfo(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cluster, collection?.id, existingDriveAddress, shouldUseExistingDrive]);
@@ -647,7 +649,7 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
           close={() => setShowInDepthReview(false)}
           airdrop={airdrop}
           collection={collection}
-          merkleTree={!!shouldUseExistingTree ? selectedTree : null}
+          merkleTree={selectedTree}
           driveAddress={existingDriveAddress}
         />
       )}
