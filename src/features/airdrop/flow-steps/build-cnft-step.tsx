@@ -3,6 +3,7 @@ import { fadeOut } from "@/animations";
 import {
   Airdrop,
   Collection,
+  Creator,
   MerkleTree,
   Token,
   TokenMetadata,
@@ -20,9 +21,12 @@ import { StepTitle } from "@/features/UI/typography/step-title";
 import { SingleImageUploadResponse } from "@/features/upload/single-image/single-image-upload-field-wrapper";
 import { useCluster } from "@/hooks/cluster";
 import {
+  CheckBadgeIcon,
   InformationCircleIcon,
   PlusCircleIcon,
+  PlusIcon,
   XCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useUserData } from "@nhost/nextjs";
 import { FieldArray, FormikProvider, useFormik } from "formik";
@@ -41,6 +45,8 @@ import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premi
 import { useQuery } from "@apollo/client";
 import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import { useLogs } from "@/hooks/logs";
+import { isValidPublicKey } from "@/utils/rpc";
+import axios from "axios";
 
 type SortedTrait = Trait & { sortOrder: number };
 
@@ -52,6 +58,9 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const [tokenId, setTokenId] = useState<string | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
   const [hasFillerToken, setHasFillerToken] = useState(false);
+  const [shouldOverrideCreators, setShouldOverrideCreators] = useState(false);
+  const [creators, setCreators] = useState<Creator[] | null>(null);
+
   const { addLog } = useLogs();
 
   const { data: tokenData, refetch } = useQuery(
@@ -92,6 +101,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       externalUrl: "",
       quantity: 1,
       shouldFillRemaining: false,
+      creators: [{ address: "", share: 100, sortOrder: 0, id: 0 }] as Creator[],
     },
     onSubmit: async ({
       name,
@@ -99,6 +109,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       symbol,
       saveAction,
       externalUrl,
+      creators,
     }) => {
       if (!user?.id || !image || !collection?.id) {
         console.error("Missing user or image");
@@ -122,6 +133,27 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
         cluster,
       });
 
+      let formattedCreators = creators;
+      if (shouldOverrideCreators) {
+        formattedCreators = creators
+          .map((creator) => ({
+            address: creator.address,
+            share: creator.share,
+            sortOrder: creator.sortOrder,
+            tokenId,
+          }))
+          // remove duplicates
+          .filter(
+            (creator, index, self) =>
+              index === self.findIndex((c) => c.address === creator.address)
+          )
+          // remove empty creators
+          .filter(
+            (creator) =>
+              creator.address?.length && isValidPublicKey(creator.address)
+          );
+      }
+
       const { success, tokens } = await blueprint.tokens.createTokens({
         tokens: [
           {
@@ -132,6 +164,14 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
             shouldFillRemaining: formik.values.shouldFillRemaining,
             collectionId: airdrop.collection.id,
             imageSizeInBytes: image.sizeInBytes,
+            //  only add creators if shouldOverrideCreators is true
+            ...(shouldOverrideCreators && {
+              creators: formattedCreators.map((c, i) => ({
+                address: c.address,
+                share: c.share,
+                sortOrder: i,
+              })),
+            }),
           },
         ],
       });
@@ -168,6 +208,24 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
     [formik]
   );
 
+  const moveCard = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      formik.setFieldValue(
+        "creators",
+        formik.values.creators.map((creator, index) => {
+          if (index === dragIndex) {
+            return { ...creator, sortOrder: hoverIndex };
+          }
+          if (index === hoverIndex) {
+            return { ...creator, sortOrder: dragIndex };
+          }
+          return creator;
+        })
+      );
+    },
+    [formik]
+  );
+
   const handleAddTrait = useCallback(() => {
     formik.setFieldValue("traits", [
       ...formik.values.traits,
@@ -179,6 +237,35 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       },
     ]);
   }, [formik]);
+
+  const handleAddCreator = useCallback(() => {
+    debugger;
+    formik.setFieldValue("creators", [
+      ...formik.values.creators,
+      {
+        address: "",
+        share: 0,
+        sortOrder: formik.values.creators.length,
+        id: formik.values.creators.length,
+      },
+    ]);
+  }, [formik]);
+
+  const handleRemoveCreator = useCallback(
+    async (index: string | number) => {
+      formik.setFieldValue(
+        "creators",
+        formik.values.creators.filter((_, i) => i !== index)
+      );
+
+      if (typeof index !== "number") return;
+
+      const { data } = await axios.post("/api/remove-creator", {
+        id: formik.values.creators[index].id,
+      });
+    },
+    [formik]
+  );
 
   const isUniqueName = (name: string) =>
     formik.values.traits.filter((trait) => trait.name === name).length === 1;
@@ -369,6 +456,104 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                         traits for your cnft, e.g. name: hat, value: sombrero
                       </div>
                     </>
+
+                    <div className="mt-8">
+                      <FormCheckboxWithLabel
+                        label="override creators"
+                        name="overrideCreators"
+                        value={shouldOverrideCreators}
+                        onChange={(e: any) => {
+                          setShouldOverrideCreators(e.target.checked);
+                        }}
+                      />
+                    </div>
+                    {!!shouldOverrideCreators && (
+                      <>
+                        <FieldArray
+                          name="creators"
+                          render={(arrayHelpers) => (
+                            <div className="w-full">
+                              {formik.values.creators
+                                .sort((a, b) => a.sortOrder - b.sortOrder)
+                                .map((creator, index) => (
+                                  <DndCard
+                                    className="mb-4"
+                                    key={creator.id}
+                                    id={creator.id}
+                                    index={index}
+                                    moveCard={moveCard}
+                                  >
+                                    <div className="relative w-full flex">
+                                      <div className="flex flex-1 mr-4">
+                                        <FormInputWithLabel
+                                          label="creator address"
+                                          name={`creators.${index}.address`}
+                                          placeholder="creator address"
+                                          onChange={formik.handleChange}
+                                          value={creator.address}
+                                        />
+                                        {isValidPublicKey(creator.address) ? (
+                                          <CheckBadgeIcon className="h-6 w-6 text-green-500 self-end ml-2 mb-3" />
+                                        ) : (
+                                          <XCircleIcon className="h-6 w-6 text-red-500 self-end ml-2 mb-3" />
+                                        )}
+                                      </div>
+                                      <div className="w-32 relative">
+                                        <FormInputWithLabel
+                                          label="share"
+                                          name={`creators.${index}.share`}
+                                          placeholder="Share"
+                                          type="number"
+                                          min={0}
+                                          max={100}
+                                          onChange={formik.handleChange}
+                                          value={creator.share}
+                                        />
+                                        <div className="text-3xl text-gray-100 top-10 right-8 absolute mt-0.5">
+                                          %
+                                        </div>
+                                      </div>
+                                      {formik.values.creators.length > 1 && (
+                                        <button
+                                          className=" absolute -top-2 -right-2.5 cursor-pointer border border-cyan-400 rounded-full p-1 transition-all"
+                                          type="button"
+                                          onClick={async () => {
+                                            handleRemoveCreator(
+                                              `creators.${index}.id`
+                                            );
+                                            // arrayHelpers.remove(index);
+                                          }}
+                                        >
+                                          <XMarkIcon className="h-6 w-6 text-cyan-400" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </DndCard>
+                                ))}
+                            </div>
+                          )}
+                        />
+                        <SecondaryButton
+                          className="mt-4 w-full"
+                          onClick={handleAddCreator}
+                          disabled={
+                            !(
+                              formik.values.creators.every(
+                                (c) =>
+                                  !!c.address && isValidPublicKey(c.address)
+                              ) && formik.values.creators.every((c) => c.share)
+                            )
+                          }
+                        >
+                          <PlusIcon className="h-6 w-6" />
+                          Add Creator
+                        </SecondaryButton>
+                        <p className="text-sm text-gray-400 mt-2 italic">
+                          the creators receive the royalties on secondary sales
+                        </p>
+                      </>
+                    )}
+
                     <div className="w-full flex justify-center mt-16 space-x-8">
                       <Link href={`/airdrop/create-cnfts/${airdrop?.id}`}>
                         <SecondaryButton
@@ -390,7 +575,14 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                           !image ||
                           !formik.values.name?.length ||
                           (Number(formik.values.quantity) < 1 &&
-                            !formik.values.shouldFillRemaining)
+                            !formik.values.shouldFillRemaining) ||
+                          (shouldOverrideCreators &&
+                            !(
+                              formik.values.creators.every(
+                                (c) =>
+                                  !!c.address && isValidPublicKey(c.address)
+                              ) && formik.values.creators.every((c) => c.share)
+                            ))
                         }
                       >
                         done

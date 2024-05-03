@@ -61,12 +61,19 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
   const [collectionImageUrl, setCollectionImageUrl] = useState<string | null>(
     null
   );
+  const [creators, setCreators] = useState<Creator[] | null>(null);
+
   const { logs, addLog } = useLogs();
 
   const [getCollection, { loading }] = useLazyQuery(GET_COLLECTION_BY_ID, {
     fetchPolicy: "network-only",
-    onCompleted: (data) => {
-      console.log({ data });
+    onCompleted: ({
+      collections_by_pk: collection,
+    }: {
+      collections_by_pk: Collection;
+    }) => {
+      setCreators(collection?.creators);
+      console.log(collection);
     },
   });
 
@@ -77,7 +84,7 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
       description: "",
       sellerFeeBasisPoints: 0,
       image: "",
-      creators: [{ address: "", share: 100, sortOrder: 0, id: 0 }] as Creator[],
+      creators: [{ address: "", share: 0, sortOrder: 0, id: 0 }] as Creator[],
     },
     onSubmit: async ({
       collectionName,
@@ -173,6 +180,15 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
   });
 
   useEffect(() => {
+    if (creators?.length && formik.values.creators.length === 0) {
+      formik.setFieldValue(
+        "creators",
+        creators.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      );
+    }
+  }, [creators, formik, formik.values.creators.length]);
+
+  useEffect(() => {
     if (!airdrop?.collection?.id || !collectionImage) return;
     const blueprint = createBlueprintClient({
       cluster,
@@ -206,6 +222,7 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
   );
 
   const handleAddCreator = useCallback(() => {
+    debugger;
     formik.setFieldValue("creators", [
       ...formik.values.creators,
       {
@@ -226,11 +243,14 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
   );
 
   const handleRemoveCreator = useCallback(
-    async (index: number) => {
+    async (index: string | number) => {
       formik.setFieldValue(
         "creators",
         formik.values.creators.filter((_, i) => i !== index)
       );
+
+      if (typeof index !== "number") return;
+
       const { data } = await axios.post("/api/remove-creator", {
         id: formik.values.creators[index].id,
       });
@@ -425,7 +445,10 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
                   render={(arrayHelpers) => (
                     <div className="w-full">
                       {formik.values.creators
-                        .sort((a, b) => a.sortOrder - b.sortOrder)
+                        .sort((a, b) => {
+                          if (!a.sortOrder || !b.sortOrder) return -1;
+                          return a.sortOrder - b.sortOrder;
+                        })
                         .map((creator, index) => (
                           <DndCard
                             className="mb-4"

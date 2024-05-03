@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   }: { collections_by_pk: Collection; creators: Creator[] } =
     await client.request(GET_COLLECTION_BY_ID, { id });
 
-  const newCreators = creators?.filter(
+  const newCreators: Creator[] = creators?.filter(
     (creator: Creator) =>
       !existingCreators.find(
         (existingCreator: Collection["creators"][0]) =>
@@ -69,9 +69,9 @@ export async function POST(req: NextRequest) {
       });
 
       // add wallets that don't exist
-      const walletsToAdd = newCreators.filter(
-        (creator: Creator, i: number) => !wallets[i]
-      );
+      const walletsToAdd = newCreators
+        .filter((_, i: number) => !wallets[i])
+        .map((creator: Creator) => ({ address: creator.address }));
 
       if (walletsToAdd.length) {
         const { insert_wallets }: { insert_wallets: { returning: Wallet[] } } =

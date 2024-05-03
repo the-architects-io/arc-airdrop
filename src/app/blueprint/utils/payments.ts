@@ -44,6 +44,7 @@ const handleSolPayment = async ({
 
   const connection = new Connection(getRpcEndpoint(cluster));
 
+  debugger;
   const latestBlockhash = await connection.getLatestBlockhash();
   const tx = new Transaction({ ...latestBlockhash });
 

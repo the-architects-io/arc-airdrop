@@ -193,7 +193,7 @@ export type NoopResponse = {
 
 export type Wallet = {
   address: string;
-  id: string;
+  id?: string;
   user?: User;
 };
 
@@ -674,6 +674,7 @@ export type Token = {
   amountToMint?: number;
   imageSizeInBytes?: number;
   shouldFillRemaining?: boolean;
+  creators?: Creator[];
 } & TokenMetadata;
 
 export type TokensInput = {
@@ -806,10 +807,7 @@ export type TokenMetadata = {
     trait_type: string;
     value: string;
   }[];
-  creators?: {
-    address: string;
-    share: number;
-  }[];
+  creators?: Creator[];
   properties?: {
     files: {
       uri: string;

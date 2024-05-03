@@ -1,4 +1,7 @@
-import { CollectionStatsFromCollectionMetadatas } from "@/app/blueprint/types";
+import {
+  CollectionStatsFromCollectionMetadatas,
+  Creator,
+} from "@/app/blueprint/types";
 import { ShadowFile } from "@shadow-drive/sdk";
 import { NextRequest } from "next/server";
 import { v4 as uuidv4 } from "uuid";
@@ -45,7 +48,7 @@ export type NftMetadata = {
   properties: {
     files: { uri: string; type: string }[];
     category: string;
-    creators: { address: string; share: number }[];
+    creators: Creator[];
   };
 };
 

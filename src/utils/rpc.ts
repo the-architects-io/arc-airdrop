@@ -6,6 +6,7 @@ export const getRpcEndpoint = (
 ) => {
   switch (cluster) {
     case "devnet":
+      debugger;
       return RPC_ENDPOINT_DEVNET;
     case "mainnet-beta":
       return RPC_ENDPOINT;
