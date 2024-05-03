@@ -239,7 +239,6 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
   }, [formik]);
 
   const handleAddCreator = useCallback(() => {
-    debugger;
     formik.setFieldValue("creators", [
       ...formik.values.creators,
       {

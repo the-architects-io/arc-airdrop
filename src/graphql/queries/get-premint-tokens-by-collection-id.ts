@@ -12,18 +12,44 @@ export const GET_PREMINT_TOKENS_BY_COLLECTION_ID = gql`
         id
       }
       createdAt
-      creators
+      creators_deprecated
       description
       external_url
       id
       image
       isPremint
+      merkleTree {
+        address
+        canopyDepth
+        capacity
+        cluster
+        id
+        maxBufferSize
+        maxCapacity
+        maxDepth
+        updatedAt
+      }
       name
       properties
       seller_fee_basis_points
       symbol
       updatedAt
-      imageSizeInBytes
+      merkleTreeId
+      user {
+        id
+      }
+      creators {
+        id
+        share
+        sortOrder
+        token {
+          id
+        }
+        createdAt
+        wallet {
+          address
+        }
+      }
     }
   }
 `;

@@ -222,7 +222,6 @@ export const CreateCollectionStep = ({ airdrop }: { airdrop: Airdrop }) => {
   );
 
   const handleAddCreator = useCallback(() => {
-    debugger;
     formik.setFieldValue("creators", [
       ...formik.values.creators,
       {
