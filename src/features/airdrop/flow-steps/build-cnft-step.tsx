@@ -11,7 +11,6 @@ import {
 } from "@/app/blueprint/types";
 import {
   ASSET_SHDW_DRIVE_ADDRESS,
-  BASE_URL,
   fadeOutTimeoutDuration,
 } from "@/constants/constants";
 import { FormInputWithLabel } from "@/features/UI/forms/form-input-with-label";
@@ -99,6 +98,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       traits: [] as SortedTrait[],
       saveAction: "mint",
       externalUrl: "",
+      animationUrl: "",
       quantity: 1,
       shouldFillRemaining: false,
       creators: [{ address: "", share: 100, sortOrder: 0, id: 0 }] as Creator[],
@@ -109,6 +109,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       symbol,
       saveAction,
       externalUrl,
+      animationUrl,
       creators,
     }) => {
       if (!user?.id || !image || !collection?.id) {
@@ -122,6 +123,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
         description,
         seller_fee_basis_points: collection.sellerFeeBasisPoints,
         external_url: externalUrl,
+        animation_url: animationUrl,
         image: image.url,
         attributes: formik.values.traits.map((trait) => ({
           trait_type: trait.name,
@@ -375,10 +377,18 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                 <FormInputWithLabel
                   label="link"
                   name="externalUrl"
-                  placeholder="e.g. my nft"
+                  placeholder="e.g. mywebsite.com"
                   value={formik.values.externalUrl}
                   onChange={formik.handleChange}
                   description="the url for your website, e.g. the-architects.io"
+                />
+                <FormInputWithLabel
+                  label="animation url"
+                  name="animationUrl"
+                  placeholder="e.g. mywebsite.com/animation.mp4"
+                  value={formik.values.name}
+                  onChange={formik.handleChange}
+                  description="the url for your animation"
                 />
                 <div className="flex flex-col w-full pt-8">
                   <>

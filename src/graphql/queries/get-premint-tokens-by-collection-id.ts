@@ -15,6 +15,7 @@ export const GET_PREMINT_TOKENS_BY_COLLECTION_ID = gql`
       creators_deprecated
       description
       external_url
+      animation_url
       id
       image
       isPremint
