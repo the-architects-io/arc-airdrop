@@ -386,7 +386,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                   label="animation url"
                   name="animationUrl"
                   placeholder="e.g. mywebsite.com/animation.mp4"
-                  value={formik.values.name}
+                  value={formik.values.animationUrl}
                   onChange={formik.handleChange}
                   description="the url for your animation"
                 />
