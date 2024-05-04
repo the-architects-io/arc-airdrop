@@ -510,8 +510,6 @@ export const ReviewStep = ({ airdrop }: { airdrop: Airdrop }) => {
       0
     );
 
-    console.log({ tokenImagesSizeInBytes });
-
     if (
       collection &&
       !storageCost &&

@@ -10,12 +10,12 @@ export const GET_PREMINT_TOKENS_BY_COLLECTION_ID = gql`
       cluster
       collection {
         id
+        imageSizeInBytes
       }
       createdAt
       creators_deprecated
       description
       external_url
-      animation_url
       id
       image
       isPremint
@@ -45,12 +45,14 @@ export const GET_PREMINT_TOKENS_BY_COLLECTION_ID = gql`
         sortOrder
         token {
           id
+          imageSizeInBytes
         }
         createdAt
         wallet {
           address
         }
       }
+      imageSizeInBytes
     }
   }
 `;
