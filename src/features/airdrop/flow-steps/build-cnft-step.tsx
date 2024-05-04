@@ -98,7 +98,6 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       traits: [] as SortedTrait[],
       saveAction: "mint",
       externalUrl: "",
-      animationUrl: "",
       quantity: 1,
       shouldFillRemaining: false,
       creators: [{ address: "", share: 100, sortOrder: 0, id: 0 }] as Creator[],
@@ -109,7 +108,6 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
       symbol,
       saveAction,
       externalUrl,
-      animationUrl,
       creators,
     }) => {
       if (!user?.id || !image || !collection?.id) {
@@ -123,7 +121,6 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
         description,
         seller_fee_basis_points: collection.sellerFeeBasisPoints,
         external_url: externalUrl,
-        animation_url: animationUrl,
         image: image.url,
         attributes: formik.values.traits.map((trait) => ({
           trait_type: trait.name,
@@ -382,14 +379,14 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                   onChange={formik.handleChange}
                   description="the url for your website, e.g. the-architects.io"
                 />
-                <FormInputWithLabel
+                {/* <FormInputWithLabel
                   label="animation url"
                   name="animationUrl"
                   placeholder="e.g. mywebsite.com/animation.mp4"
                   value={formik.values.animationUrl}
                   onChange={formik.handleChange}
                   description="the url for your animation"
-                />
+                /> */}
                 <div className="flex flex-col w-full pt-8">
                   <>
                     <StepHeading>traits</StepHeading>
