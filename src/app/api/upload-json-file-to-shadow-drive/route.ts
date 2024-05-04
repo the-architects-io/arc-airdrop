@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     if (overwrite) {
       const { keys } = await drive.listObjects(new PublicKey(driveAddress));
 
-      const fileExists = keys.some((key) => key === fileName);
+      const fileExists = keys?.some((key) => key === fileName);
 
       console.log("fileExists", fileExists);
 

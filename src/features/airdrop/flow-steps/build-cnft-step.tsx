@@ -165,7 +165,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
             imageSizeInBytes: image.sizeInBytes,
             //  only add creators if shouldOverrideCreators is true
             ...(shouldOverrideCreators && {
-              creators: formattedCreators.map((c, i) => ({
+              creators_deprecated: formattedCreators.map((c, i) => ({
                 address: c.address,
                 share: c.share,
                 sortOrder: i,
