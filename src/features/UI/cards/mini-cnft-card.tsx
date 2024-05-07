@@ -14,11 +14,10 @@ export const MiniCnftCard = ({
       <div className="flex flex-col h-full max-h-[450px] rounded-md bg-gray-500">
         <div className="shadow-deep rounded-b-md flex flex-col h-full">
           <div className="bg-gray-500 rounded-t-md">
-            <Image
+            <img
               className="rounded-t-md object-cover w-full"
               src={token?.image}
               alt={"Token image"}
-              layout="responsive"
               width={500}
               height={500}
             />

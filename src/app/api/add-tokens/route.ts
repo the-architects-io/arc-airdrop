@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   for (const token of tokensWithIds) {
     let addedCreators: { id: string }[] = [];
-    const newCreators = token?.creators;
+    const newCreators = token?.creators_deprecated;
 
     if (newCreators?.length) {
       try {

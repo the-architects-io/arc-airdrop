@@ -675,6 +675,7 @@ export type Token = {
   imageSizeInBytes?: number;
   shouldFillRemaining?: boolean;
   creators?: Creator[];
+  creators_deprecated?: Creator[];
 } & TokenMetadata;
 
 export type TokensInput = {
