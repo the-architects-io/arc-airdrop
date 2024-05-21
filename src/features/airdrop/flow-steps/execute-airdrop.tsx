@@ -11,7 +11,6 @@ import {
 import {
   ARCHITECTS_API_URL,
   EXECUTION_WALLET_ADDRESS,
-  SYSTEM_USER_ID,
 } from "@/constants/constants";
 import { LoadingPanel } from "@/features/loading-panel";
 import { GET_PREMINT_TOKENS_BY_COLLECTION_ID } from "@/graphql/queries/get-premint-tokens-by-collection-id";
@@ -53,7 +52,7 @@ export const ExecuteAirdrop = ({
     },
   });
 
-  const mintCollectionNft = useCallback(async () => {
+  const handleExecuteAirdrop = useCallback(async () => {
     const {
       name,
       symbol,
@@ -120,12 +119,6 @@ export const ExecuteAirdrop = ({
       Math.ceil((collectionImageSizeInBytes + tokenImagesSizeInBytes) / 1024) +
       1000;
 
-    console.log({
-      sizeInKb,
-      collectionImageSizeInBytes,
-      tokenImagesSizeInBytes,
-    });
-
     let driveAddress: string | null = collection.driveAddress;
 
     if (!driveAddress) {
@@ -146,8 +139,6 @@ export const ExecuteAirdrop = ({
           }
 
           const { address, txSig } = data;
-
-          console.log({ address, txSig });
 
           setDriveAddress(address);
           driveAddress = address;
@@ -259,11 +250,9 @@ export const ExecuteAirdrop = ({
       cluster,
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     const { success, job } = await blueprint.jobs.createJob({
       statusId: StatusUUIDs.IN_PROGRESS,
-      statusText: "minting collection nft",
+      statusText: "starting airdrop",
       userId: user.id,
       jobTypeId: JobTypeUUIDs.AIRDROP,
       icon: JobIcons.COLLECTION_IMAGE,
@@ -278,11 +267,14 @@ export const ExecuteAirdrop = ({
       });
 
     if (!success || !job?.id) {
-      console.log("failed to create job");
+      setIsSaving(false);
+      console.error("failed to create airdrop job");
       return;
     }
 
     setJobId(job.id);
+
+    // files are uploaded, create collection NFT
 
     await blueprint.jobs.updateJob({
       id: job.id,
@@ -314,6 +306,22 @@ export const ExecuteAirdrop = ({
       });
 
       uri = url;
+
+      try {
+        const { success } = await blueprint.collections.updateCollection({
+          id,
+          uploadJobId: uploadJob.id,
+          collectionNftMetadataUrl: url,
+        });
+      } catch (error) {
+        blueprint.jobs.updateJob({
+          id: job.id,
+          statusId: StatusUUIDs.ERROR,
+          statusText: "failed to update collection nft address",
+          icon: JobIcons.ERROR,
+        });
+        console.error("Error updating collection nft address", error);
+      }
     } catch (error) {
       blueprint.jobs.updateJob({
         id: job.id,
@@ -324,115 +332,114 @@ export const ExecuteAirdrop = ({
       console.error("error uploading collection NFT metadata", error);
     }
 
-    let collectionNftMintAddress;
+    // let collectionNftMintAddress;
 
-    if (collection.collectionNftAddress) {
-      collectionNftMintAddress = collection.collectionNftAddress;
-    } else {
-      await blueprint.jobs.updateJob({
-        id: job.id,
-        statusText: "minting collection nft",
-        icon: JobIcons.MINTING_NFTS,
-      });
+    // if (collection.collectionNftAddress) {
+    //   collectionNftMintAddress = collection.collectionNftAddress;
+    // } else {
+    //   await blueprint.jobs.updateJob({
+    //     id: job.id,
+    //     statusText: "minting collection nft",
+    //     icon: JobIcons.MINTING_NFTS,
+    //   });
 
-      try {
-        const { data, status } = await axios.post(
-          `${ARCHITECTS_API_URL}/mint-nft`,
-          {
-            name,
-            uri,
-            sellerFeeBasisPoints,
-            isCollection: true,
-            creatorAddress: EXECUTION_WALLET_ADDRESS,
-            cluster,
-          }
-        );
+    //   try {
+    //     const { data, status } = await axios.post(
+    //       `${ARCHITECTS_API_URL}/mint-nft`,
+    //       {
+    //         name,
+    //         uri,
+    //         sellerFeeBasisPoints,
+    //         isCollection: true,
+    //         creatorAddress: EXECUTION_WALLET_ADDRESS,
+    //         cluster,
+    //       }
+    //     );
 
-        const { signature, result, mintAddress } = data;
-        collectionNftMintAddress = mintAddress;
+    //     const { signature, result, mintAddress } = data;
+    //     collectionNftMintAddress = mintAddress;
 
-        console.log("minting collection nft", {
-          signature,
-          mintAddress,
-        });
-      } catch (error) {
-        blueprint.jobs.updateJob({
-          id: job.id,
-          statusId: StatusUUIDs.ERROR,
-          statusText: "Failed to mint collection nft",
-          icon: JobIcons.ERROR,
-        });
-        console.error("Error minting collection nft", error);
+    //     console.log("minting collection nft", {
+    //       signature,
+    //       mintAddress,
+    //     });
+    //   } catch (error) {
+    //     blueprint.jobs.updateJob({
+    //       id: job.id,
+    //       statusId: StatusUUIDs.ERROR,
+    //       statusText: "Failed to mint collection nft",
+    //       icon: JobIcons.ERROR,
+    //     });
+    //     console.error("Error minting collection nft", error);
+    //   }
+    // }
+
+    // if (!collectionNftMintAddress) {
+    //   blueprint.jobs.updateJob({
+    //     id: job.id,
+    //     statusId: StatusUUIDs.ERROR,
+    //     statusText: "failed to mint collection nft",
+    //     icon: JobIcons.ERROR,
+    //   });
+    //   return;
+    // }
+
+    // try {
+    //   const { success } = await blueprint.collections.updateCollection({
+    //     id,
+    //     collectionNftAddress: collectionNftMintAddress,
+    //     uploadJobId: uploadJob.id,
+    //   });
+    // } catch (error) {
+    //   blueprint.jobs.updateJob({
+    //     id: job.id,
+    //     statusId: StatusUUIDs.ERROR,
+    //     statusText: "failed to update collection nft address",
+    //     icon: JobIcons.ERROR,
+    //   });
+    //   console.error("Error updating collection nft address", error);
+    // }
+
+    const { data, status } = await axios.post(
+      `${ARCHITECTS_API_URL}/airdrop-cnfts`,
+      {
+        airdropId: airdrop.id,
+        jobId: job.id,
+        cluster,
       }
-    }
+    );
 
-    if (!collectionNftMintAddress) {
-      blueprint.jobs.updateJob({
-        id: job.id,
-        statusId: StatusUUIDs.ERROR,
-        statusText: "failed to mint collection nft",
-        icon: JobIcons.ERROR,
-      });
-      return;
-    }
-
-    try {
-      const { success } = await blueprint.collections.updateCollection({
-        id,
-        collectionNftAddress: collectionNftMintAddress,
-        uploadJobId: uploadJob.id,
-      });
-    } catch (error) {
-      blueprint.jobs.updateJob({
-        id: job.id,
-        statusId: StatusUUIDs.ERROR,
-        statusText: "failed to update collection nft address",
-        icon: JobIcons.ERROR,
-      });
-      console.error("Error updating collection nft address", error);
-    }
-
-    try {
-      const { data, status } = await axios.post(
-        `${ARCHITECTS_API_URL}/airdrop-cnfts`,
-        {
-          airdropId: airdrop.id,
-          jobId: job.id,
-          cluster,
-        }
-      );
-
-      console.log({ data, status });
-    } catch (error) {
-      blueprint.jobs.updateJob({
-        id: job.id,
-        statusId: StatusUUIDs.ERROR,
-        statusText: "failed to airdrop collection nfts",
-        icon: JobIcons.ERROR,
-      });
-      console.error("Error airdropping collection nfts", error);
-    }
+    // try {
+    //   console.log({ data, status });
+    // } catch (error) {
+    //   blueprint.jobs.updateJob({
+    //     id: job.id,
+    //     statusId: StatusUUIDs.ERROR,
+    //     statusText: "failed to airdrop collection nfts",
+    //     icon: JobIcons.ERROR,
+    //   });
+    //   console.error("Error airdropping collection nfts", error);
+    // }
   }, [
     airdrop.collection,
     airdrop.id,
+    user,
+    tokenData.tokens,
+    setIsSaving,
     cluster,
-    collection.id,
     collection.imageSizeInBytes,
     collection.driveAddress,
     collection.imageUrl?.length,
-    setIsSaving,
-    setJobId,
+    collection.id,
     setUploadJobId,
-    tokenData?.tokens,
-    user,
-    collection.collectionNftAddress,
+    setJobId,
   ]);
 
   useEffect(() => {
     if (airdrop?.id && collection?.id) {
-      mintCollectionNft();
+      handleExecuteAirdrop();
     }
-  }, [airdrop?.id, collection?.id, mintCollectionNft]);
+  }, [airdrop?.id, collection?.id, handleExecuteAirdrop]);
 
   if (!airdrop || !collection) {
     return <LoadingPanel />;

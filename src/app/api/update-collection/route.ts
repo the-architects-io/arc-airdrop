@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
     canopyDepth,
     collectionBuildSourceId,
     tokenImagesSizeInBytes,
+    collectionNftMetadataUrl,
   } = await req.json();
 
   if (!id) {
@@ -175,6 +176,7 @@ export async function POST(req: NextRequest) {
           ...(canopyDepth !== undefined && { canopyDepth: canopyDepth }),
           ...(collectionBuildSourceId && { collectionBuildSourceId }),
           ...(tokenImagesSizeInBytes && { tokenImagesSizeInBytes }),
+          ...(collectionNftMetadataUrl && { collectionNftMetadataUrl }),
         },
       }
     );

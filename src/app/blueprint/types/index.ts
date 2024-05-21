@@ -785,6 +785,7 @@ export type UpdateCollectionInput = {
   canopyDepth?: number;
   collectionBuildSourceId?: string;
   tokenImagesSizeInBytes?: number;
+  collectionNftMetadataUrl?: string;
 };
 
 export type UpdateCollectionResponse = BaseBlueprintResponse & {
