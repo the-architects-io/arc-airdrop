@@ -421,16 +421,16 @@ export const ExecuteAirdrop = ({
     //   console.error("Error airdropping collection nfts", error);
     // }
   }, [
-    airdrop.collection,
-    airdrop.id,
+    airdrop?.collection,
+    airdrop?.id,
     user,
-    tokenData.tokens,
+    tokenData?.tokens,
     setIsSaving,
     cluster,
-    collection.imageSizeInBytes,
-    collection.driveAddress,
-    collection.imageUrl?.length,
-    collection.id,
+    collection?.imageSizeInBytes,
+    collection?.driveAddress,
+    collection?.imageUrl?.length,
+    collection?.id,
     setUploadJobId,
     setJobId,
   ]);
