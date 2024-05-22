@@ -5,6 +5,9 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {}
 export const FormInput = ({ children, onChange, value, ...props }: Props) => {
   return (
     <input
+      onWheel={(e) =>
+        props.type === "number" && (e.target as HTMLElement).blur()
+      }
       type={props.type || "text"}
       name={props.name}
       placeholder={props.placeholder}

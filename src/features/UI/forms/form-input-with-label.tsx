@@ -25,8 +25,11 @@ export const FormInputWithLabel = ({
 
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
-      if (inputRef.current && document.activeElement === inputRef.current) {
+      if (inputRef.current && props.type === "number") {
         inputRef.current.blur();
+        // dusable scroll
+        event.preventDefault();
+        event.stopPropagation();
       }
     };
 
@@ -35,7 +38,7 @@ export const FormInputWithLabel = ({
     return () => {
       document.removeEventListener("wheel", handleWheel);
     };
-  }, []);
+  }, [inputRef, props.type]);
 
   return (
     <label

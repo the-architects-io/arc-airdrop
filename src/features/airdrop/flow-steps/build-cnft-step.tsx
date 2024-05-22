@@ -593,7 +593,7 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                           !image ||
                           // if creators share total is not 100
                           (shouldOverrideCreators &&
-                            creators?.reduce(
+                            formik.values.creators?.reduce(
                               (acc, creator) => acc + creator.share,
                               0
                             ) !== 100) ||
