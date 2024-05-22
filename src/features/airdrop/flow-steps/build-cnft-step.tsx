@@ -46,6 +46,7 @@ import { GET_COLLECTION_BY_ID } from "@the-architects/blueprint-graphql";
 import { useLogs } from "@/hooks/logs";
 import { isValidPublicKey } from "@/utils/rpc";
 import axios from "axios";
+import showToast from "@/features/toasts/show-toast";
 
 type SortedTrait = Trait & { sortOrder: number };
 
@@ -137,6 +138,14 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
 
       let formattedCreators = creators;
       if (shouldOverrideCreators) {
+        if (creators.reduce((acc, creator) => acc + creator.share, 0) !== 100) {
+          addLog("Creators share total is not 100");
+          showToast({
+            primaryMessage: "Creators share total is not 100",
+          });
+          return;
+        }
+
         formattedCreators = creators
           .map((creator) => ({
             address: creator.address,
@@ -582,6 +591,12 @@ export const BuildCnftStep = ({ airdrop }: { airdrop: Airdrop }) => {
                           formik.isSubmitting ||
                           !formik.isValid ||
                           !image ||
+                          // if creators share total is not 100
+                          (shouldOverrideCreators &&
+                            creators?.reduce(
+                              (acc, creator) => acc + creator.share,
+                              0
+                            ) !== 100) ||
                           !formik.values.name?.length ||
                           (Number(formik.values.quantity) < 1 &&
                             !formik.values.shouldFillRemaining) ||

@@ -1,5 +1,6 @@
 import { FormInput } from "@/features/UI/forms/form-input";
 import classNames from "classnames";
+import { useEffect, useRef } from "react";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -20,6 +21,22 @@ export const FormInputWithLabel = ({
   disabled,
   ...props
 }: Props) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      if (inputRef.current && document.activeElement === inputRef.current) {
+        inputRef.current.blur();
+      }
+    };
+
+    document.addEventListener("wheel", handleWheel);
+
+    return () => {
+      document.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
   return (
     <label
       htmlFor={props.name}
