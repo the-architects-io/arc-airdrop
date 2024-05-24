@@ -165,6 +165,7 @@ export const SelectCollectionStep = () => {
               options={[
                 ...existingCollectionsData?.collections
                   ?.filter((c: Collection) => c.name?.length)
+                  ?.filter((c: Collection) => c.collectionNftAddress?.length)
                   ?.map((c: Collection) => ({
                     label: c.name,
                     value: c.id,
