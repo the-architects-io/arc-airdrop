@@ -22,7 +22,9 @@ const LogViewer = ({ close }: { close: () => void }) => {
       </div>
       <div className="h-full w-full p-16 px-24">
         {logs.map((log, index) => (
-          <div key={index}>{log}</div>
+          <div key={index} className="whitespace-break-spaces">
+            {log}
+          </div>
         ))}
         <div className="py-8"></div>
       </div>

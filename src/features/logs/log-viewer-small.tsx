@@ -20,9 +20,9 @@ const LogViewerSmall = ({ close }: { close: () => void }) => {
           <XMarkIcon className="cursor-pointer w-6 h-6" />
         </button>
       </div>
-      <div className="overflow-auto" ref={logViewerElRef}>
+      <div className="overflow-y-auto" ref={logViewerElRef}>
         {logs.map((log, index) => (
-          <div className="py-2" key={index}>
+          <div className="py-2 whitespace-break-spaces" key={index}>
             {log}
           </div>
         ))}

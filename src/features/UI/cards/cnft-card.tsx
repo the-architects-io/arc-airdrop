@@ -22,6 +22,14 @@ export const CnftCard = ({
     if (!id) return;
     setIsSaving(true);
     try {
+      if (token?.creators && token.creators.length > 0) {
+        for (let creator of token.creators) {
+          await axios.post(`${BASE_URL}/api/remove-creator`, {
+            id: creator.id,
+          });
+        }
+      }
+
       const res = await axios.post(`${BASE_URL}/api/remove-token`, { id });
     } catch (error) {
       console.error(error);
