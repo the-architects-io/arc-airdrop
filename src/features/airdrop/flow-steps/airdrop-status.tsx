@@ -21,6 +21,7 @@ import { useLogs } from "@/hooks/logs";
 import axios from "axios";
 import { ARCHITECTS_API_URL } from "@/constants/constants";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
+import Link from "next/link";
 
 export type QueueInfo = {
   counts: {
@@ -338,6 +339,12 @@ export const AirdropStatus = ({
           >
             view collection nft
           </a>
+          <Link
+            href={`/admin/airdrop/${airdrop.id}`}
+            className="text-cyan-400 underline text-lg"
+          >
+            airdrop details
+          </Link>
         </div>
       )}
 
