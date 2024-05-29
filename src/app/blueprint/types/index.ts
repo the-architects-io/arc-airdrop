@@ -529,6 +529,7 @@ export type Recipient = {
 export type Airdrop = {
   name: string;
   id: string;
+  queueName?: string;
   hasBeenPaidFor: boolean;
   job?: {
     id: string;

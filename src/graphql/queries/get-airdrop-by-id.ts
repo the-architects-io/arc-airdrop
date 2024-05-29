@@ -7,6 +7,7 @@ export const GET_AIRDROP_BY_ID = gql`
       name
       cluster
       hasBeenPaidFor
+      queueName
       collectionNft {
         id
         mintAddress

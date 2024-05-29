@@ -30,10 +30,8 @@ export const LogsProvider = ({ children }: { children: ReactNode }) => {
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
 
-      // Check if the message is a log message
       if (message.type === "LOG_MESSAGE") {
         const log = message.payload.message;
-        // Update the component state to include the new log
         setLogs((prevLogs) => [...prevLogs, log]);
       }
     };
