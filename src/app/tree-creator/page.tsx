@@ -72,7 +72,7 @@ export default function TreeCreatorPage() {
       id="review-panel"
     >
       <ContentWrapperYAxisCenteredContent>
-        <TreeCreator />
+        <TreeCreator refetch={refetch} />
         <div className="text-2xl mt-12 mb-4">my trees</div>
         <UserTreeList refetch={refetch} trees={data?.merkleTrees} />
       </ContentWrapperYAxisCenteredContent>

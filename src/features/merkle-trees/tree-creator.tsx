@@ -28,8 +28,11 @@ import { TreeOptions } from "@/types";
 import { TreeCostOptionSelector } from "@/features/merkle-trees/tree-cost-option-selector";
 import { Collection, TreeCreationMethod } from "@/app/blueprint/types";
 import axios from "axios";
+import { PrimaryButton } from "@/features/UI/buttons/primary-button";
+import showToast from "@/features/toasts/show-toast";
+import Spinner from "@/features/UI/spinner";
 
-export const TreeCreator = () => {
+export const TreeCreator = ({ refetch }: { refetch: () => void }) => {
   const { cluster } = useCluster();
   const user = useUserData();
   const { connection } = useConnection();
@@ -48,6 +51,7 @@ export const TreeCreator = () => {
   const [hasCalcError, setHasCalcError] = useState(false);
   const [costInSol, setCostInSol] = useState<number | null>(null);
   const [treeCost, setTreeCost] = useState<number | null>(null);
+  const [isCreatingBusTree, setIsCreatingBusTree] = useState(false);
 
   const findBestTreeCost = useCallback(
     async (
@@ -326,6 +330,50 @@ export const TreeCreator = () => {
     setCostInSol(costInSol + arcFee);
   }, [connection, treeCanopyDepth, treeMaxBufferSize, treeMaxDepth]);
 
+  const handleMakeBusTree = async () => {
+    let treeId: string;
+    let merkleTreeAddress: string;
+
+    setIsCreatingBusTree(true);
+
+    try {
+      const { data, status } = await axios.post(
+        `${ARCHITECTS_API_URL}/create-tree`,
+        {
+          maxDepth: 20,
+          maxBufferSize: 64,
+          canopyDepth: 13,
+          userId: user?.id,
+          cluster,
+        }
+      );
+
+      treeId = data.id;
+      merkleTreeAddress = data.merkleTreeAddress;
+
+      console.log({
+        data,
+        status,
+        treeId,
+        merkleTreeAddress,
+      });
+
+      showToast({
+        primaryMessage: "tree created",
+        secondaryMessage: `just for bus`,
+      });
+
+      refetch();
+    } catch (error) {
+      console.error("error creating merkle tree", error);
+      showToast({
+        primaryMessage: "error creating tree",
+      });
+    } finally {
+      setIsCreatingBusTree(false);
+    }
+  };
+
   useEffect(() => {
     calculateCost();
   }, [
@@ -399,6 +447,16 @@ export const TreeCreator = () => {
           <PlusCircleIcon className="w-6 h-6 mr-2" />
           Create Merkle Tree
         </SubmitButton>
+        <PrimaryButton onClick={handleMakeBusTree}>
+          {isCreatingBusTree ? (
+            <Spinner />
+          ) : (
+            <>
+              <PlusCircleIcon className="w-6 h-6 mr-2" />
+              Create Bus Tree 20 / 64 / 13
+            </>
+          )}
+        </PrimaryButton>
       </div>
       <div className="flex flex-col justify-center space-y-4">
         <TreeCostOptionSelector
