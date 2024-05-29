@@ -20,10 +20,9 @@ import { useCluster } from "@/hooks/cluster";
 import { useLogs } from "@/hooks/logs";
 import axios from "axios";
 import { ARCHITECTS_API_URL } from "@/constants/constants";
-import { PrimaryButton } from "@/features/UI/buttons/primary-button";
 import { SecondaryButton } from "@/features/UI/buttons/secondary-button";
 
-type QueueInfo = {
+export type QueueInfo = {
   counts: {
     wait: number;
     active: number;
@@ -32,7 +31,23 @@ type QueueInfo = {
     delayed: number;
     paused: number;
   };
-  metrics: {
+  signatures?: {
+    completed: {
+      name: string;
+      count: number;
+      duplicatesCount: number;
+      duplicates: string[];
+      signatures: string[];
+    };
+    failed: {
+      name: string;
+      count: number;
+      duplicatesCount: number;
+      duplicates?: string[];
+      signatures: string[];
+    };
+  };
+  metrics?: {
     completed: {
       meta: {
         count: number;
